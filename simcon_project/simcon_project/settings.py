@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Third-party apps
-
+    'django_tables2'
     # Our apps
     'users',
     'conversation_templates',
