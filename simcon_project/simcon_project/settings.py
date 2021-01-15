@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.admindocs',
 
     # Third-party apps
-    'bootstrap4',
     'bootstrap_modal_forms',
     'django_tables2',
     'embed_video',
