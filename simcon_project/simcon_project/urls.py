@@ -15,8 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from users.views import RedirectFromLogin, StudentView, ResearcherView, ViewResponse, 
-  UpdateOverallResponseFeedback, UpdateNodeResponseFeedback, SettingsView, TemplateStartView
+from users.views import RedirectFromLogin, StudentView, ResearcherView, ViewResponse, UpdateOverallResponseFeedback, UpdateNodeResponseFeedback, SettingsView, TemplateStartView
 from django.conf.urls import include
 from django.contrib.auth import views
 

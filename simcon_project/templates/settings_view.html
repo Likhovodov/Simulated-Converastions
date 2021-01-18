@@ -24,6 +24,12 @@
     <div class="container">
       <h1> This is the Settings Page</h1>
         {% block content %}
+          <h1> CHANGE PASSWORD</h1>
+          <form method="post">
+            {% csrf_token %}
+            {{ form }}
+            <button type="submit">Save changes</button>
+          </form>
         {% endblock %}
     </div> <!-- /container -->
 
