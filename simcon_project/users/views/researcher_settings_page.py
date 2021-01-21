@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect
 
 
 @login_required
-def SettingsView(request):
+def ResearcherSettingsView(request):
     if request.method == 'POST':
         form = PasswordChangeForm(request.user, request.POST)
         if form.is_valid():
@@ -18,6 +18,6 @@ def SettingsView(request):
             messages.error(request, 'Please correct the error below.')
     else:
         form = PasswordChangeForm(request.user)
-    return render(request, 'settings_view.html', {
+    return render(request, 'researcher_settings_view.html', {
         'form': form
     })
