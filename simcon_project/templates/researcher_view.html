@@ -31,7 +31,9 @@
     <form method="POST">
         {% csrf_token %}
         <br>
+        <a class="button" href="{% url 'view-response' obj.pk %}">View</button>
         <button type="submit" name="delete_items" value="{{ obj.pk }}">Delete</button>
+        <br>
         <p></p>
         <!-- The paragraph gave the perfect spacing -->
     </form>

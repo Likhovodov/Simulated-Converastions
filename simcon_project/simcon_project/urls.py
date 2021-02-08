@@ -44,7 +44,7 @@ urlpatterns = [
     path('researcher/view-all-responses/<uuid:pk>/', TemplateResponsesView.as_view(), name="view-all-responses"),
     path('researcher/students/<str:name>/', student_management, name="student-management"),
     path('researcher/students/', student_management, name="student-management"),
-    path('researcher/response/', view_response, name="view-response"),
+    path('researcher/response/<uuid:pk>', view_response, name="view-response"),
     path('researcher/response/update/<uuid:pk>/', update_overall_response_feedback, name='update-overall-response-feedback'),
     path('researcher/response/updatenode/<uuid:pk>/', update_node_response_feedback, name='update-node-response-feedback'),
 ]

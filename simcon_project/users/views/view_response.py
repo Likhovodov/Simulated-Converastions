@@ -12,9 +12,14 @@ from users.views.researcher_home import is_researcher
 @user_passes_test(is_authenticated)
 def view_response(request, pk):
     response = get_object_or_404(TemplateResponse, pk=pk)
-
+    if request.method == "POST":
+        response_table = TemplateResponse.objects.all()
+        items_to_delete = request.POST.getlist('delete_items')
+        response_table.filter(pk__in=items_to_delete).delete()
+        return HttpResponseRedirect(reverse('researcher-view'))
     nodes = []
-    num_nodes = TemplateNodeResponse.objects.filter(parent_template_response=response).count()
+    num_nodes = TemplateNodeResponse.objects.filter(
+        parent_template_response=response).count()
     for i in range(1, num_nodes+1):
         if TemplateNodeResponse.objects.get(parent_template_response=response, position_in_sequence=i):
             nodes.append(TemplateNodeResponse.objects.get(parent_template_response=response,
@@ -47,7 +52,7 @@ def update_overall_response_feedback(request, pk):
             feedback_instance.save()
 
         # redirect to a new URL:
-        return HttpResponseRedirect(reverse('view-response'))
+        return HttpResponseRedirect(reverse('view-response', kwargs={'pk': pk}))
 
     # If this is a GET (or any other method) create the default form.
     else:
@@ -80,12 +85,12 @@ def update_node_response_feedback(request, pk):
             feedback_instance.save()
 
         # redirect to a new URL:
-        return HttpResponseRedirect(reverse('view-response'))
+        return HttpResponseRedirect(reverse('view-response', kwargs={'pk': pk}))
 
     # If this is a GET (or any other method) create the default form.
     else:
         default_feedback = feedback_instance.feedback
-        form = UpdateFeedback(initial={'feedback': default_feedback,})
+        form = UpdateFeedback(initial={'feedback': default_feedback, })
 
     context = {
         'form': form,

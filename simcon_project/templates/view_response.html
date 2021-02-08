@@ -1,4 +1,6 @@
+{% extends "researcher_base.html" %}
 {% load static %}
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,8 +11,6 @@
     <meta name="description" content="Created for Simulated Conversations Senior Capstone Project">
 
     <!-- prevent line breaks when using form fields -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <style type="text/css">
     form {display:inline; margin:0px; padding:0px;}
 
@@ -26,11 +26,18 @@
 
 <body>
 <div class="container">
+    <div class="col-sm-4" style=" float: right;">
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit" name="delete_items" value="{{ response.pk }}">Delete Response</button>
+        </form>
+    </div>
+    <br>
     <h2> Response for: {{response.template.name}} </h2>
-    Student: {{response.student}}
-
+    <h4> {{response.student}} </h4> 
+    <br> 
     <div class="container">
-        {% block content %}
+        {% block content-2 %}
         <div class="row">
             <h2>Overall feedback:</h2>
         </div>
@@ -69,3 +76,4 @@
 <!-- Placed at the end of the document so the pages load faster -->
 </body>
 </html>
+{% endblock %}
