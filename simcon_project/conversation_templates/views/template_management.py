@@ -18,14 +18,9 @@ class FolderTemplateTable(tables.Table):
     The "delete" button has been replaced with a "remove button to
     remove a template from the folder.
     """
-    def __init__(self, *args, **kwargs):
-        name = kwargs.pop('archive_col_name')
-        super().__init__(*args, **kwargs)
-        if name:
-            self.base_columns['archive_button'].verbose_name = name
-
-    archive_button = TemplateColumn(template_name='template_management/archive_button.html', order_by="archived",
-                                    verbose_name='')
+    archive_button = TemplateColumn(template_name='template_management/archive_button.html', order_by='archived'
+                                    , verbose_name='Archived')
+    edit_button = TemplateColumn(verbose_name='', template_name='template_management/edit_button.html')
     remove_buttons = TemplateColumn(template_name='template_management/delete_or_remove_template_button.html',
                                     extra_context={"in_folder": True}, verbose_name='')
     name = tables.columns.LinkColumn('view-all-responses', args=[A('pk')])
@@ -41,17 +36,12 @@ class AllTemplateTable(tables.Table):
     Table for showing the templates for a specific folder.
     Only used when all templates are displayed.
     """
-    archive_button = TemplateColumn(template_name='template_management/archive_button.html', order_by='archived',
-                                    verbose_name='')
+    archive_button = TemplateColumn(template_name='template_management/archive_button.html', order_by='archived'
+                                    , verbose_name = 'Archived')
+    edit_button = TemplateColumn(verbose_name='', template_name='template_management/edit_button.html')
     remove_buttons = TemplateColumn(template_name='template_management/delete_or_remove_template_button.html',
                                     verbose_name='')
     name = tables.columns.LinkColumn('view-all-responses', args=[A('pk')])
-
-    def __init__(self, *args, **kwargs):
-        name = kwargs.pop('archive_col_name')
-        super().__init__(*args, **kwargs)
-        if name:
-            self.base_columns['archive_button'].verbose_name = name
 
     class Meta:
         attrs = {'class': 'table table-sm', 'id': 'template-table'}
@@ -120,14 +110,11 @@ def main_view_helper(request, all_templates, pk):
     templates = filter_templates(request, all_templates)
 
     if templates:
-        name = ''
-        if request.COOKIES.get('show_archived') != "True":
-            name = 'Archived'
-
+        templates = templates.order_by('-creation_date')
         if pk:
-            template_table = FolderTemplateTable(templates, prefix="1-", archive_col_name=name)
+            template_table = FolderTemplateTable(templates, prefix="1-")
         else:
-            template_table = AllTemplateTable(templates, prefix="1-", archive_col_name=name)
+            template_table = AllTemplateTable(templates, prefix="1-")
 
         RequestConfig(request, paginate={"per_page": 8}).configure(template_table)
     else:
@@ -135,6 +122,7 @@ def main_view_helper(request, all_templates, pk):
 
     folders = filter_folder(request)
     if folders:
+        folders.order_by('name')
         folder_table = FolderTable(folders, prefix="2-")
         RequestConfig(request, paginate={"per_page": 8}).configure(folder_table)
     else:

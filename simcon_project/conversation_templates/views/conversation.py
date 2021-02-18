@@ -5,7 +5,6 @@ from django.core.files.storage import default_storage
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.http import HttpResponseNotFound, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
 from conversation_templates.models import ConversationTemplate, TemplateNode, TemplateNodeResponse, TemplateResponse
 from conversation_templates.forms import TemplateNodeChoiceForm
 from users.models import Student, Assignment
@@ -66,7 +65,6 @@ def flush_session_data(request):
     request.session.modified = True
 
 
-# Views
 @user_passes_test(is_student)
 def conversation_start(request, ct_id, assign_id):
     """
@@ -87,7 +85,9 @@ def conversation_start(request, ct_id, assign_id):
     ct_node = TemplateNode.objects.get(parent_template=ct, start=True)
 
     # Clear existing session data leftover from incomplete response
+    print(request.session.get('ct_response_id'))
     flush_session_data(request)
+    print(request.session.get('ct_response_id'))
     request.session['assign_id'] = assign_id
     request.session['page_dict'] = {}
     request.session['validation_key'] = secrets.token_hex(8)
@@ -179,6 +179,7 @@ def conversation_step(request, ct_node_id):
             assignment=Assignment.objects.get(id=request.session.get('assign_id')),
         )
         request.session['ct_response_id'] = str(ct_response.id)  # persist the template response in the session
+        print("Create response %s" % request.session.get('ct_response_id'))
         request.session.modified = True
     # Check if audio already exists
     if ct_node_response_id:
@@ -196,7 +197,6 @@ def conversation_step(request, ct_node_id):
     return render(request, t, ctx)
 
 
-@csrf_exempt
 def save_audio(request):
     # Check if node response already exists
     if request.session.get('ct_node_response_id') is None:
@@ -206,7 +206,9 @@ def save_audio(request):
         file_handle = file_handle.replace(':', '-') + '.wav'
         file_handle = os.path.join('audio', str(request.user), file_handle)  # Create full file handle
         audio_path = default_storage.save(file_handle, data)  # Store audio in media root
+        # print(request.session.get('ct_response_id'))
         ct_response = TemplateResponse.objects.get(id=request.session.get('ct_response_id'))
+        # print("ct_response %s" % ct_response.id)
         ct_node_response = TemplateNodeResponse.objects.create(
             template_node=None,
             parent_template_response=ct_response,
