@@ -60,8 +60,8 @@ def flush_session_data(request):
         del request.session['allow_typed_response']
     if 'allow_self_rating' in request.session:
         del request.session['allow_self_rating']
-    if 'recorded_response_attempts' in request.session:
-        del request.session['recorded_response_attempts']
+    if 'recording_attempts' in request.session:
+        del request.session['recording_attempts']
     request.session.modified = True
 
 
@@ -75,7 +75,7 @@ def conversation_start(request, ct_id, assign_id):
     ct = ConversationTemplate.objects.get(id=ct_id)
     student = Student.objects.get(email=request.user)
     student_attempts = TemplateResponse.objects.filter(student=student, template=ct).count()
-    if student_attempts >= assignment.attempts:
+    if student_attempts >= assignment.response_attempts:
         return HttpResponseNotFound('<h1>Sorry, maximum number of attempts reached for this conversation.</h1>')
 
     # Else, set up conversation
@@ -93,7 +93,7 @@ def conversation_start(request, ct_id, assign_id):
     request.session['validation_key'] = secrets.token_hex(8)
     request.session['allow_typed_response'] = assignment.allow_typed_response
     request.session['allow_self_rating'] = assignment.allow_self_rating
-    request.session['recorded_response_attempts'] = assignment.recorded_response_attempts
+    request.session['recording_attempts'] = assignment.recording_attempts
     ctx.update({
         'ct': ct,
         'ct_node': ct_node,
@@ -117,7 +117,7 @@ def conversation_step(request, ct_node_id):
     ct_node = TemplateNode.objects.get(id=ct_node_id)
     ct_node_response_id = request.session.get('ct_node_response_id')
     allow_typed_response = request.session['allow_typed_response']
-    recorded_response_attempts = request.session['recorded_response_attempts']
+    recording_attempts = request.session['recording_attempts']
     audio_response = None
 
     # POST request
@@ -192,7 +192,7 @@ def conversation_step(request, ct_node_id):
         'choice_form': choice_form,
         'audio_response': audio_response,
         'allow_typed_response': allow_typed_response,
-        'recorded_response_attempts': recorded_response_attempts,
+        'recording_attempts': recording_attempts,
     })
     return render(request, t, ctx)
 
