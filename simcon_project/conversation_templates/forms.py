@@ -2,6 +2,7 @@ from django import forms
 from django.db.models.functions import Lower
 from .models import TemplateFolder, TemplateNodeChoice, ConversationTemplate
 from bootstrap_modal_forms.forms import BSModalModelForm
+from django.contrib.auth.forms import PasswordChangeForm
 
 
 class SelectTemplates(forms.SelectMultiple):

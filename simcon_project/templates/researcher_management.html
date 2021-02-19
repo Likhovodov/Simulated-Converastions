@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+{% extends "researcher_base.html" %}
+{% block nav-researcherManagementView %}<strong class="nav_bar_selected"> Researcher Management </strong>{% endblock %}
+{% load static %}
+{% load render_table from django_tables2 %}
+{% block content %}
+    <html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Created for Simulated Conversations Senior Capstone Project">
+        <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
+
+        <title>
+            {% block title %}Researcher Management{% endblock %}
+        </title>
+    </head>
+    <body>
+    <div class="container-fluid mt-3" style="width: 80%">
+
+        {% if add_researcher_form %}
+            <form id="add_researcher_form" method="post">
+                {% csrf_token %}
+                {{ add_researcher_form.email }}
+                <button type="submit" class="btn btn-outline-secondary" form="add_researcher_form" name="add_researcher">Send Registration Email</button>
+            </form>
+        {% endif %}
+
+        <br>
+
+        {% if researchers_table %}
+            {% render_table researchers_table %}
+        {% endif %}
+
+        <br>
+
+        {% for message in messages %}
+            <div class="alert alert-warning">
+                <a class="close" href="#" data-dismiss="alert">×</a>
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="create_modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content"></div>
+        </div>
+    </div>
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content"></div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $(".bs-modal").each(function () {
+                $(this).modalForm({
+                    formURL: $(this).data('form-url')
+                });
+            });
+        });
+    </script>
+    </body>
+    </html>
+{% endblock %}

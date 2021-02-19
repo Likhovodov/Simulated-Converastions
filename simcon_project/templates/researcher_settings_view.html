@@ -1,65 +1,29 @@
-<!DOCTYPE html>
 {% extends "researcher_base.html" %}
 {% block nav-settingsView %}<strong class="nav_bar_selected"> Settings </strong>{% endblock %}
 {% load static %}
 {% load render_table from django_tables2 %}
 {% block content %}
+    <!DOCTYPE html>
     <html lang="en">
     <head>
-
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="Created for Simulated Conversations Senior Capstone Project">
-
-        <!-- prevent line breaks when using form fields -->
-        <style type="text/css">
-            form {display:inline; margin:0px; padding:0px;}
-        </style>
-
-        <title>
-            {% block title %}Simulated Conversations | Settings{% endblock %}
-        </title>
+        <title>{% block title %}Simulated Conversations | Settings{% endblock %}</title>
         <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
-
-        {% block extrahead %} {% endblock %}
     </head>
     <body>
     <div class="container-fluid mt-3" style="width: 80%">
-        {% if researchers_table %}
-            <h3>Researchers</h3>
-            {% render_table researchers_table %}
-        {% else %}
-            <div class="row justify-content-center">
-                <div class="col-4">
-                    <br>
-                    <p>There are no researchers to display.</p>
-                    <br>
-                </div>
-            </div>
-        {% endif %}
-        {% if add_researcher_form %}
-            <div class="row justify-content-center">
-                <div class="col-4">
-                    <p style="text-align:left">Add New Researcher:</p>
-                    <form id="add_researcher_form" method="post">
-                        {% csrf_token %}
-                        {{ add_researcher_form }}
-                        <br>
-                        <button type="submit" class="btn btn-outline-secondary" form="add_researcher_form" name="add_researcher">Send Registration Email</button>
-                    </form>
-                    <br><br><br>
-                </div>
-            </div>
-        {% endif %}
         <div class="row justify-content-center">
-            <div class="col-4">
-                <form id="change_password_form" method="post">
+            <div class="col-4 m-3 p-3" style="background-color: white;   border-radius: 5px;">
+                <form id="form" method="post">
                     {% csrf_token %}
-                    {% for field in change_password_form %}
+                    {% for field in form %}
                         <div class="form-group">
-                            <label for="{{ field.attrs.id  }}">{{ field.label }}: </label>
-                            <br>
+                            <div class="mb-3">
+                                {{ field.label }}:
+                            </div>
                             {{ field }}
                         </div>
                     {% endfor %}
@@ -72,40 +36,13 @@
                         <br>
                         - Your password can’t be entirely numeric.
                     </p>
-                    <button type="submit" class="btn btn-outline-secondary" form="change_password_form" name="change_password">Save changes</button>
+                    <button type="submit" class="btn btn-outline-secondary" form="form" name="change_password">Save changes</button>
                 </form>
                 <br>
             </div>
         </div>
-    </div> <!-- /container -->
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <!-- Code needed for the modal to work properly.
-         Content in folder_creation_modal.html is rendered between "#modal-content" div
-    -->
-    <div class="modal fade" tabindex="-1" role="dialog" id="create_modal">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content"></div>
-        </div>
     </div>
 
-    <div class="modal fade" tabindex="-1" role="dialog" id="modal">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content"></div>
-        </div>
-    </div>
-
-    <script type="text/javascript">
-        $(document).ready(function() {
-            $(".bs-modal").each(function () {
-                $(this).modalForm({
-                    formURL: $(this).data('form-url')
-                });
-            });
-        });
-    </script>
     </body>
     </html>
 {% endblock %}

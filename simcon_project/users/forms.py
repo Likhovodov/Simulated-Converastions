@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import CustomUser, Student, SubjectLabel, Researcher
 import django_tables2 as tables
-from django.forms import ModelForm
+from django.forms import ModelForm, EmailInput
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -67,3 +67,7 @@ class AddResearcherForm(ModelForm):
     class Meta:
         model = Researcher
         fields = ('email',)
+        
+        widgets = {
+            'email': EmailInput(attrs={'placeholder': 'Researcher Email'}),
+        }

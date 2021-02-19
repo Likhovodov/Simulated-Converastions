@@ -1,6 +1,7 @@
 from .redirect_from_login import redirect_from_login
 from .researcher_home import researcher_view
-from .researcher_settings_page import researcher_settings_view, ResearcherDeleteView
+from .researcher_settings_page import researcher_settings_view
+from .researcher_management import researcher_management, ResearcherDeleteView
 from .researcher_registration import researcher_registration
 from .student_settings_page import student_settings_view
 from .student_home import student_view

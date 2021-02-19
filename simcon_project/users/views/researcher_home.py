@@ -27,6 +27,8 @@ class ResponseTable(tables.Table):
 def is_researcher(user):
     return user.is_authenticated and user.get_is_researcher()
 
+def is_admin(user):
+    return user.is_authenticated and user.get_is_staff()
 
 @ user_passes_test(is_researcher)
 def researcher_view(request):
