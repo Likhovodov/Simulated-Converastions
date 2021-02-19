@@ -4,7 +4,7 @@ URL = window.URL || window.webkitURL;
 let gumStream; 						//stream from getUserMedia()
 let rec; 							//Recorder.js object
 let input; 							//MediaStreamAudioSourceNode we'll be recording
-let recordAttempts = 0;				//Count of record response attempts
+let recordAttempts;				//Count of record response attempts
 let blob;							//Audio blob
 
 // shim for AudioContext when it's not avb.
@@ -67,6 +67,7 @@ function startRecording() {
 }
 
 function stopRecording() {
+	recordAttempts = JSON.parse(sessionStorage.getItem('recordAttempts'));
 	recordAttempts++;
 	let attemptsLeft = hasAttempts();
 	if (attemptsLeft > 1) {
@@ -79,6 +80,7 @@ function stopRecording() {
 		toggleAudioControls(true, true, false);
 		info.innerText = "No attempts left to record";
 	}
+	sessionStorage.setItem('recordAttempts', JSON.stringify(recordAttempts));
 	rec.stop();
 
 	// stop microphone access

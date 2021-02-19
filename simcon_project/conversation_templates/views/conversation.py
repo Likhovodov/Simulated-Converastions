@@ -118,6 +118,7 @@ def conversation_step(request, ct_node_id):
     ct_node_response_id = request.session.get('ct_node_response_id')
     allow_typed_response = request.session['allow_typed_response']
     recording_attempts = request.session['recording_attempts']
+    visited = if_visited(request, ct_node_id)
     audio_response = None
 
     # POST request
@@ -130,7 +131,7 @@ def conversation_step(request, ct_node_id):
         ct_response = TemplateResponse.objects.get(id=ct_response_id)
 
         # check if node response has already been made - User attempting to resubmit POST
-        if if_visited(request, ct_node_id):
+        if visited:
             node_response = get_node_response(request, ct_node_id)
             choice = node_response.selected_choice
         else:
@@ -193,6 +194,7 @@ def conversation_step(request, ct_node_id):
         'audio_response': audio_response,
         'allow_typed_response': allow_typed_response,
         'recording_attempts': recording_attempts,
+        'visited': visited,
     })
     return render(request, t, ctx)
 

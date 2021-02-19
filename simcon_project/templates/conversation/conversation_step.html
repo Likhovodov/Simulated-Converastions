@@ -73,6 +73,22 @@
         <script src="{% static 'conversation_templates/recorder.js' %}"></script>
         <script>
             $(document).ready(function() {
+                {% if visited %}
+                    recordAttempts = sessionStorage.getItem('recordAttempts');
+                {% else %}
+                    recordAttempts = null;
+                {% endif %}
+                // Accessing very first page
+                if (recordAttempts === null) {
+                    recordAttempts = 0;
+                    sessionStorage.setItem('recordAttempts', JSON.stringify(recordAttempts))
+                } else {
+                    recordAttempts = JSON.parse(recordAttempts);
+                }
+                if (hasAttempts() === 0) {
+                    toggleAudioControls(true, true, false);
+                }
+
                 // Modal for exit button
                 $(".bs-modal").each(function () {
                     $(this).modalForm({
