@@ -4,8 +4,7 @@ URL = window.URL || window.webkitURL;
 let gumStream; 						//stream from getUserMedia()
 let rec; 							//Recorder.js object
 let input; 							//MediaStreamAudioSourceNode we'll be recording
-let recordAttempts;				//Count of record response attempts
-let blob;							//Audio blob
+let recordAttempts;					//Count of record response attempts
 
 // shim for AudioContext when it's not avb.
 let AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -19,7 +18,6 @@ let recording = document.getElementById("recording");
 
 recordButton.addEventListener("click", startRecording);
 stopButton.addEventListener("click", stopRecording);
-nextButton.addEventListener("click", acceptRecording);
 
 function startRecording() {
 	/*
@@ -88,15 +86,7 @@ function stopRecording() {
 	rec.exportWAV(createDownloadLink);
 }
 
-function acceptRecording() {
-	toggleAudioControls(true, true, true);
-	info.innerText = "";
-	toggleElementDisplay();
-	saveRecording();
-}
-
-function createDownloadLink(audioBlob) {
-    blob = audioBlob;
+function createDownloadLink(blob) {
 	let url = URL.createObjectURL(blob);
 	let au = document.createElement('audio');
 	let p = document.createElement('p');
@@ -115,14 +105,7 @@ function createDownloadLink(audioBlob) {
 	}
 	p.appendChild(au);
 	recording.appendChild(p);
-}
-
-function toggleElementDisplay() {
-	document.getElementById("choice-form").style.display = "block";
-	document.getElementById("embedded-video").style.display = "none";
-	recordButton.style.display = "none";
-	stopButton.style.display = "none";
-	nextButton.style.display = "none";
+	saveRecording(blob);
 }
 
 function toggleAudioControls(record, stop, next) {

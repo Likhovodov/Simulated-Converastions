@@ -6,7 +6,7 @@
         <meta name="description" content="Created for Simulated Conversations Senior Capstone Project">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
         <title>
-            {% block title %}Simulated Conversations | Conversation Start{% endblock %}
+            {% block title %}SimCon | Conversation Start{% endblock %}
         </title>
 
         <!-- prevent line breaks when using form fields -->
@@ -25,7 +25,7 @@
         <form action="{% url "student-view" %}" method="GET">
             <button type="submit" class="btn btn-primary btn-sm">Cancel</button>
         </form>
-        <form action="{{ ct_node.get_absolute_url }}" method="GET">
+        <form action="{% url 'conversation-video' ct_start_node.id %}" method="GET">
             <button type="submit" class="btn btn-primary btn-sm">Start</button>
         </form>
         <br><br>

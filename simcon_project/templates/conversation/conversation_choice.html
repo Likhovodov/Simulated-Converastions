@@ -12,7 +12,7 @@
         <script src="{% static 'conversation_templates/disable_back_button.js' %}"></script>
         <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
         <title>
-            {% block title %}Simulated Conversations | Conversation Step{% endblock %}
+            {% block title %}SimCon | Conversation Choice{% endblock %}
         </title>
 
         <!-- prevent line breaks when using form fields -->
@@ -33,25 +33,14 @@
             <h3 style="float:right"><small>{{ request.user }}</small></h3>
         </div>
         <br><br>
-        <div id="embedded-video">
-            {% video ct_node.video_url 'small' %}
-            <p>{{ ct_node.description }}</p>
-        </div>
-        <div id="controls">
-            <button id="recordButton" class="btn btn-primary btn-sm">Record</button>
-            <button id="stopButton" class="btn btn-primary btn-sm" disabled>Stop</button>
-            <button id="nextButton" class="btn btn-primary btn-sm" disabled>Next</button>
-        </div>
         <p id="recording"></p>
-        {% if audio_response %}
             <audio controls>
-                <source src="{{ audio_response.url }}">
+                <source src="{{ ct_node_response.audio_response.url }}">
             </audio>
-        {% endif %}
         <div id="info"></div>
-        <form action="{{ ct_node.get_absolute_url }}" method="POST" id="choice-form" name="choice-form">
+        <form action="{% url 'conversation-choice' ct_node.id %}" method="POST" id="choice-form" name="choice-form">
             {% csrf_token %}
-            {{  choice_form.choices }}
+            {{ choice_form.choices }}
             {% if ct_node.terminal %}
                 <button type="submit" class="btn btn-primary btn-sm">End Conversation</button>
             {% else %}
@@ -69,26 +58,8 @@
             </div>
         </div>
         <!-- inserting these scripts at the end to be able to use all the elements in the DOM -->
-        <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
-        <script src="{% static 'conversation_templates/recorder.js' %}"></script>
         <script>
             $(document).ready(function() {
-                {% if visited %}
-                    recordAttempts = sessionStorage.getItem('recordAttempts');
-                {% else %}
-                    recordAttempts = null;
-                {% endif %}
-                // Accessing very first page
-                if (recordAttempts === null) {
-                    recordAttempts = 0;
-                    sessionStorage.setItem('recordAttempts', JSON.stringify(recordAttempts))
-                } else {
-                    recordAttempts = JSON.parse(recordAttempts);
-                }
-                if (hasAttempts() === 0) {
-                    toggleAudioControls(true, true, false);
-                }
-
                 // Modal for exit button
                 $(".bs-modal").each(function () {
                     $(this).modalForm({
@@ -113,31 +84,6 @@
                     };
                 {% endif %}
             });
-
-            {% if not audio_response %}
-                document.getElementById("choice-form").style.display = "none";
-            {% else %}
-                toggleElementDisplay();
-            {% endif %}
-
-            function saveRecording() {
-                let token = '{{ csrf_token }}';
-                let formData = new FormData();
-                formData.append('data', blob);
-                $.ajax({
-                    headers: { "X-CSRFToken": token },
-                    type: 'POST',
-                    url: '{% url 'save-audio' %}',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    cache: false,
-                });
-            }
-
-            function hasAttempts() {
-               return {{ recording_attempts }} - recordAttempts;
-            }
         </script>
         <!-- Optional JavaScript -->
         <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -145,6 +91,5 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
     </body>
     {% block extrahead %} {% endblock %}
-
 </html>
 {% endblock %}
