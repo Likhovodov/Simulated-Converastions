@@ -5,6 +5,8 @@ from users.models import *
 from conversation_templates.models import *
 import django_tables2 as tables
 from django_tables2 import RequestConfig
+import datetime
+from tzlocal import get_localzone
 
 
 def is_student(user):
@@ -72,10 +74,11 @@ def student_view(request):
     # get the Student object matching logged in student
     student = Student.objects.filter(id=request.user.id)
     # get the assignments for that student
-    assignments = Assignment.objects.filter(students=student.first())
+    now = datetime.datetime.now(get_localzone())
+    assignments = Assignment.objects.filter(students=student.first()).filter(date_assigned__lte=now)
     # for each assignment, get all templates contained. Get most recent response by the student for each template
     for assignment in assignments:
-        templates_in_assignment = ConversationTemplate.objects.filter(assignments=assignment)
+        templates_in_assignment = ConversationTemplate.objects.filter(assignments=assignment, archived=False)
         for template in templates_in_assignment:
             responses = TemplateResponse.objects.filter(assignment=assignment, template=template,
                                                             student=student.first())
