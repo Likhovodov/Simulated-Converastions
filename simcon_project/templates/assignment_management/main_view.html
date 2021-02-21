@@ -19,13 +19,13 @@
 
 
     <title>
-    {% block title %}Simulated Conversations | Assignment Management{% endblock %}
+    {% block title %}SimCon | Assignment Management{% endblock %}
     </title>
 
     {% block extrahead %} {% endblock %}
   </head>
   <body>
-    <div class="container">
+    <div class="container-fluid">
       <h1>Assignment Management</h1>
         {% if table %}
             {% render_table table %}

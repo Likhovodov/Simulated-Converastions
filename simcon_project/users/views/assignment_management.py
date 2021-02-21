@@ -15,17 +15,28 @@ class AssignmentsTable(tables.Table):
     """
     name = tables.Column(verbose_name='Name', accessor='name')
     date_assigned = tables.Column(verbose_name='Date Assigned', accessor='date_assigned')
-    # attempts blank until updated model merged into main
-    attempts = tables.Column(verbose_name='Attempts',
-                             accessor='attempts',
-                             attrs={'td': {'class': 'centered'}, 'th': {'class': 'centered'}})
+    attempts = tables.TemplateColumn(verbose_name='',
+                                     template_name='assignment_management/view_settings_button.html')
     view_templates = tables.TemplateColumn(verbose_name='',
                                            template_name='assignment_management/view_templates_button.html')
     view_students = tables.TemplateColumn(verbose_name='',
                                           template_name='assignment_management/view_students_button.html')
-    # completion = tables.Column(verbose_name='% Students Completed', accessor='completion')
     delete = tables.TemplateColumn(verbose_name='',
                                    template_name='assignment_management/delete_ass_button.html')
+
+
+class AssignmentDetailsTable(tables.Table):
+    """
+    Table for assignment details modal.
+    """
+    response_attempts = tables.Column(verbose_name='Response Attempts',
+                                      accessor='response_attempts')
+    recording_attempts = tables.Column(verbose_name='Recording Attempts',
+                                      accessor='recording_attempts')
+    allow_typed_response = tables.Column(verbose_name='Allow Typed Response',
+                                      accessor='allow_typed_response')
+    allow_self_rating = tables.Column(verbose_name='Allow Self Rating',
+                                      accessor='allow_self_rating')
 
 
 class TemplatesContainedTable(tables.Table):
@@ -120,6 +131,31 @@ def assignment_management_view(request):
     assignments_table = AssignmentsTable(assignment_rows)
     RequestConfig(request, paginate={"per_page": 10}).configure(assignments_table)
     return render(request, 'assignment_management/main_view.html', {'table': assignments_table})
+
+
+@user_passes_test(is_researcher)
+def view_details(request, pk):
+    """
+    View for assignments details modal. Shows the settings for an assignment.
+    :param request:
+    :param pk:
+    :return:
+    """
+    assignment = Assignment.objects.get(pk=pk)
+    if assignment.allow_typed_response is True:
+        typed_response = "Yes"
+    else:
+        typed_response = "No"
+    if assignment.allow_self_rating is True:
+        self_rating = "Yes"
+    else:
+        self_rating = "Yes"
+    assignment_details = {"response_attempts": assignment.response_attempts,
+                          "recording_attempts": assignment.recording_attempts,
+                          "allow_typed_response": typed_response,
+                          "allow_self_rating": self_rating}
+    assignment_details_table = AssignmentDetailsTable(assignment_details)
+    return render(request, 'assignment_management/view_settings_modal.html', {'table': assignment_details_table})
 
 
 @user_passes_test(is_researcher)
