@@ -79,6 +79,9 @@ TEMPLATES = [
     },
 ]
 
+# Tell select2 which cache configuration to use:
+SELECT2_CACHE_BACKEND = "default"
+
 WSGI_APPLICATION = 'simcon_project.wsgi.application'
 
 # Database
