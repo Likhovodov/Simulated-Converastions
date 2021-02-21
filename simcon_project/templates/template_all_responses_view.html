@@ -3,19 +3,34 @@
 {% load export_url from django_tables2 %}
 {% block content %}
 <head>
-    <title>SimCon | Template Response View</title>
+    <title>SimCon | All Response View</title>
 </head>
 <body>
+<div class="container-fluid mt-4">
     {% if not table %}
         <p>Looks like there are no responses at the moment</p>
     {% else %}
-        <form method="post">
-            {% csrf_token %}
-            {{ form }}
-            <input type="submit" value="Go">
-        </form>
-        <a href="{% export_url 'xlsx' %}">Download as .xls</a>
-        {% render_table table %}
-    {% endif %}
+    <div class="justify-content-center">
+        <div class="row" style="padding-left:9%; white-space: nowrap;">
+            <div class="col-6" >
+                <form method="post" id="formname" action="action.php">
+                    {% csrf_token %}
+                    {{ form }}
+                    <button class="btn btn-sm btn-outline-secondary" type="submit"> Go</button>
+                </form> 
+    
+            </div>
+            <div class="col-4" style="padding-left: 30%; white-space: nowrap;" >
+                <a href="{% export_url 'xlsx' %}">Download Excel</a> 
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="table-container" style="text-align: center; width: 80%;">
+                {% render_table table %}
+                </div> 
+        </div>
+    </div>
+    {% endif %} 
+</div>
 </body>
 {% endblock %}

@@ -69,7 +69,7 @@ class SelectTemplateForm(forms.Form):
             template_list = [(ConversationTemplate.objects.get(name=initial).id, initial)]
             for template in templates:
                 template_list.append((template.id, template.name))
-            self.fields['templates'] = forms.ChoiceField(choices=template_list)
+            self.fields['templates'] = forms.ChoiceField(choices=template_list, label='')
 
 
 class CustomChoiceRadioSelectWidget(forms.RadioSelect):

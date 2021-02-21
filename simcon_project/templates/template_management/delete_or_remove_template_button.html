@@ -2,15 +2,16 @@
     Delete or remove button TemplateColumn template used in
     FolderTemplateTable and AllTemplateTable
  -->
+
 {% block content %}
-{% if in_folder %}
+    {% if in_folder %}
     <form action="{% url 'management:remove-template' record.id %}" method="post">
         {% csrf_token %}
         <input type="hidden" name="back" value="{{ request.path }}">
         <button id="remove-template" class="btn btn-sm btn-outline-secondary" type="submit">Remove</button>
     </form>
 {% else %}
-    <button id="delete-template" class="bs-modal btn btn-sm btn-outline-secondary" type="button" name="button"
+    <button id="delete-template" class="bs-modal btn btn-sm btn-outline-secondary pr-3 pl-3" type="button" name="button"
             data-form-url="{% url 'management:delete-template' record.id %}">Delete</button>
-{% endif %}
+{% endif %} 
 {% endblock %}

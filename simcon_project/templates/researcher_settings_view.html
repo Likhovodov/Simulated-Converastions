@@ -15,6 +15,25 @@
     </head>
     <body>
     <div class="container-fluid mt-3" style="width: 80%">
+        {% if researchers_table %}
+            <h3>Researchers</h3>
+            {% render_table researchers_table %}
+
+        {% endif %}
+        {% if add_researcher_form %}
+            <div class="row justify-content-center">
+                <div class="col-4">
+                    <p style="text-align:left">Add New Researcher:</p>
+                    <form id="add_researcher_form" method="post">
+                        {% csrf_token %}
+                        {{ add_researcher_form }}
+                        <br>
+                        <button type="submit" class="btn btn-outline-secondary" form="add_researcher_form" name="add_researcher">Send Registration Email</button>
+                    </form>
+                    <br><br><br>
+                </div>
+            </div>
+        {% endif %}
         <div class="row justify-content-center">
             <div class="col-4 m-3 p-3" style="background-color: white;   border-radius: 5px;">
                 <form id="form" method="post">
