@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -6,9 +7,9 @@
         <meta name="description" content="Created for Simulated Conversations Senior Capstone Project">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
         <title>
-            {% block title %}Simulated Conversations | Conversation Start{% endblock %}
+            SimCon | Conversation
         </title>
-
+        <link rel="shortcut icon" href="{% static './title_image/favicon.ico' %}" type="image/x-icon">
         <!-- prevent line breaks when using form fields -->
         <style type="text/css">
             form {display:inline; margin:0px; padding:0px;}

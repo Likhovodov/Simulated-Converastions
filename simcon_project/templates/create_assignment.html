@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+{% extends "researcher_base.html" %}
+{% load static %}
+{% block content %}
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Create Assignment</title>
+        <!-- Font Awesome -->
+        <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+        <!-- Moment.js -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.23.0/moment.min.js" integrity="sha256-VBLiveTKyUZMEzJd6z2mhfxIqz3ZATCuVMawPZGzIfA=" crossorigin="anonymous"></script>
+        <!-- Tempus Dominus -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/css/tempusdominus-bootstrap-4.min.css" integrity="sha256-XPTBwC3SBoWHSmKasAk01c08M6sIA5gF5+sRxqak2Qs=" crossorigin="anonymous" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/js/tempusdominus-bootstrap-4.min.js" integrity="sha256-z0oKYg6xiLq3yJGsp/LsY9XykbweQlHl42jHv2XTBz4=" crossorigin="anonymous"></script>
+    </head>
+    <body>
+
+    <div class="dim" id="dim-dialog" title="Event"></div>
+
+    <form class="bg-light border rounded mx-auto mt-5 p-3 " style="min-height: 100vh;">
+        <h2>Simulated Conversations</h2>
+        <!--left part -->
+        <div class="left" style="width:45%; float:left; margin-left:2%; margin-top:20px;">
+            <input type="button" class="btn btn-outline-secondary" onclick="sub()" value="Submit"/>
+            <div class="form-group">
+                <label for="assign_name">Assignment name</label>
+                <input type="text" class="form-control col-lg-10" id="assign_name" required>
+            </div>
+            <div class="form-group">
+                <label for="assign_now">Assign Now?</label>
+                <input type="checkbox" id="assign_now" onchange="checkbox()" checked>
+                <div id="datetime_fields" style="display: none">
+                    <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#datetimepicker1"
+                               id="assign_datetime" placeholder="Please select an assignment start date."/>
+                        <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <label for="response_attempts">Response Attempts Per Template</label>
+                <input type="number" id="response_attempts" name="response_attempts" value="1" required><br>
+                <label for="record_attempts">Recording Attempts Per Step</label>
+                <input type="number" id="record_attempts" name="record_attempts" value=1 required><br>
+                <label for="allow_typed_response">Allow Typed Response?</label>
+                <input type="checkbox" id="allow_typed_response" name="allow_typed_response"><br>
+                <label for="allow_self_rating">Allow Self Rating?</label>
+                <input type="checkbox" id="allow_self_rating" name="allow_self_rating"><br>
+            </div>
+
+            <!--add student -->
+            <br>
+            <div class="add" style="display: flex;">
+                <select id="stu_list"></select>
+                <input type="button" class="btn btn-outline-secondary ml-3" value="Add student" onclick="add_student(stu_list.value)">
+            </div>
+            <br>
+            <table class="table table-bordered table-hover col-lg-10" style="background-color: white;">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Delete</th>
+                </tr>
+                </thead>
+                <tbody id="student-table-body"></tbody>
+            </table>
+        </div>
+
+        <!--right part -->
+        <div class="right" style="width:47%; float: right; margin-right:2%; margin-top:20px;">
+
+            <!--add template -->
+            <div class="add" style="display: flex;">
+                <select id="temp_list"></select>
+                <input type="button" class="btn btn-outline-secondary ml-3" value="Add template" onclick="add_template(temp_list.value)">
+            </div>
+            <br>
+            <table class="table table-bordered table-hover col-lg-10" style="background-color: white;">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Delete</th>
+                </tr>
+                </thead>
+                <tbody id="template-table-body"></tbody>
+            </table>
+            <br>
+
+            <!--add label -->
+            <div class="add" style="display: flex;">
+                <select id="label_list"></select>
+                <input type="button" class="btn btn-outline-secondary ml-3" value="Add label" onclick="add_label(label_list.value)">
+            </div>
+            <br>
+            <table class="table table-bordered table-hover col-lg-10" style="background-color: white;">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Number of students</th>
+                    <th>Delete</th>
+                </tr>
+                </thead>
+                <tbody id="label-table-body"></tbody>
+            </table>
+        </div>
+    </form>
+    </body>
+
+    <script>
+        $(function () {
+            $("#datetimepicker1").datetimepicker();
+        });
+
+        function checkbox() {
+            if (document.getElementById('assign_now').checked == true) {
+                document.getElementById('assign_datetime').value = "";
+                document.getElementById('datetime_fields').style.display = "none";
+            }
+            else {
+                document.getElementById('assign_datetime').value = "";
+                document.getElementById('datetime_fields').style.display = "block";
+            }
+        }
+
+        var students = {{ students|safe }};
+        var templates = {{ templates|safe }};
+        var subjectLabels = {{ subjectLabels|safe }};
+        var addedStudents = [];
+        var addedTemplates = [];
+        var addedLabels = [];
+
+        //add dropbox of every input box which has button.
+        function init(){
+            var stu_list=document.getElementById("stu_list");
+            var temp_list=document.getElementById("temp_list");
+            var label_list=document.getElementById("label_list");
+
+            // Add student options
+            stu_list.insertAdjacentHTML('afterbegin',
+                `<option value="student-select-default"> Select a student to be added </option>`);
+            for(const student of students) {
+                const studentOption = `<option value='${student.email}'> ${student.email} </option>`;
+                stu_list.insertAdjacentHTML('beforeend', studentOption);
+            }
+
+            // Add template options
+            temp_list.insertAdjacentHTML('afterbegin',
+                `<option value="template-select-default"> Select a template to be added </option>`);
+            for(const template of templates) {
+                const templateOption =
+                    `<option value='${template.pk}'>
+                        ${template.fields.name} ${template.fields.creation_date.split('T')[0]}
+                    </option>`;
+                temp_list.insertAdjacentHTML('beforeend', templateOption);
+            }
+
+            // Add label options
+            label_list.insertAdjacentHTML('afterbegin',
+                `<option value="label-select-default"> Select a label to be added </option>`);
+            for(const label of subjectLabels) {
+                const labelOption = `<option value='${label.fields.label_name}'> ${label.fields.label_name} </option>`;
+                label_list.insertAdjacentHTML('beforeend', labelOption);
+            }
+        }
+
+        window.onload = function(){
+            init();
+        }
+
+        function add_student(studentEmail) {
+            if (studentEmail != "student-select-default" && !addedStudents.includes(studentEmail)) {
+                addedStudents.push(studentEmail);
+
+                const student = students.find(student => student.email == studentEmail)
+                let rowToAdd = `
+                <tr id="${studentEmail}">
+                      <td>${student.first_name} ${student.first_name}</td>
+                      <td>${studentEmail}</td>
+                      <td><a href="javascript:remove_student('${studentEmail}')">Delete</a></td>
+                </tr>`
+                document.getElementById("student-table-body").insertAdjacentHTML('beforeend', rowToAdd)
+                document.getElementById("stu_list").value = "student-select-default";
+            }
+        }
+
+        function remove_student(studentEmail) {
+            const rowToRemove = document.getElementById(studentEmail)
+            rowToRemove.parentNode.removeChild(rowToRemove)
+            addedStudents.splice(addedStudents.indexOf(studentEmail), 1)
+        }
+
+        function add_template(uid){
+            if (uid != "template-select-default" && !addedTemplates.includes(uid)) {
+                addedTemplates.push(uid);
+
+                const template = templates.find(template => template.pk == uid)
+                let rowToAdd = `
+                    <tr id="${uid}">
+                          <td>${template.fields.name}</td>
+                          <td>${template.fields.creation_date.split('T')[0]}</td>
+                          <td><a href="javascript:remove_template('${uid}')">Delete</a></td>
+                    </tr>`
+
+                document.getElementById('template-table-body').insertAdjacentHTML('beforeend', rowToAdd)
+                document.getElementById("temp_list").value = "template-select-default";
+            }
+        }
+
+        function remove_template(uid) {
+            const rowToRemove = document.getElementById(uid)
+            rowToRemove.parentNode.removeChild(rowToRemove)
+            addedTemplates.splice(addedTemplates.indexOf(uid), 1)
+        }
+
+        function add_label(name) {
+            if(name != "label-select-default" && !addedLabels.includes(name)) {
+                addedLabels.push(name);
+                const labelFields = subjectLabels.find(label => label.fields.label_name == name).fields;
+
+                let rowToAdd = `
+                    <tr id="label-${name}">
+                          <td>${name}</td>
+                          <td>${labelFields.students.length}</td>
+                          <td><a href="javascript:remove_label('${name}')">Delete</a></td>
+                    </tr>`
+
+                document.getElementById('label-table-body').insertAdjacentHTML('beforeend', rowToAdd)
+                document.getElementById("label_list").value = "label-select-default";
+            }
+        }
+
+        function remove_label(name) {
+            const rowToRemove = document.getElementById("label-" + name)
+            rowToRemove.parentNode.removeChild(rowToRemove)
+            addedLabels.splice(addedLabels.indexOf(name), 1)
+        }
+
+
+        //Pass the client data to django through ajax.
+        function sub(){
+            //set token
+            $.ajaxSetup({
+                data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
+            });
+            //get data
+            assign_name=document.getElementById("assign_name").value;
+            assign_now=document.getElementById("assign_now").checked;
+            assign_datetime=document.getElementById("assign_datetime").value;
+            stuJSON=JSON.stringify(addedStudents);
+            tempJSON=JSON.stringify(addedTemplates);
+            labelJSON=JSON.stringify(addedLabels);
+            response_attempts=document.getElementById("response_attempts").value;
+            record_attempts=document.getElementById("record_attempts").value;
+            allow_typed_response=document.getElementById("allow_typed_response").checked;
+            allow_self_rating=document.getElementById("allow_self_rating").checked;
+
+            //verify name
+            if(typeof assign_name == "undefined" || assign_name == null || assign_name == ""){
+                window.alert("You must provide a name for the assignment.");
+                return;
+            }
+            //check that either assign now or assign_datetime is set and both aren't set
+            if((assign_now == false && assign_datetime == "") || (assign_now == true && assign_datetime != "")) {
+                window.alert("You must assign now or pick a date on the calendar.");
+                return;
+            }
+
+            //verify datetime is valid
+            var timestamp = Date.parse(assign_datetime)
+            if(assign_now == false && isNaN(timestamp)){
+                window.alert("The chosen assignment date/time is not valid.");
+                return;
+            }
+
+            //verification for response attempts field
+            if(response_attempts < 1){
+                window.alert("Response attempts per template cannot be less than 1.")
+                return;
+            }
+            //verification for recorded response attempts field
+            if(record_attempts < 1){
+                window.alert("Recording attempts per step cannot be less than 1.")
+                return;
+            }
+
+            document.getElementById('dim-dialog').style.display = 'block'
+
+            //post data to server
+            $.ajax({
+                url:"{% url 'assignments:add-assignment' %}",
+                type:'POST',
+                data: {
+                    'name': assign_name,
+                    'assign_now' : assign_now,
+                    'date': assign_datetime,
+                    'stuData': stuJSON,
+                    'tempData': tempJSON,
+                    'labelData': labelJSON,
+                    'response_attempts': response_attempts,
+                    'record_attempts': record_attempts,
+                    'allow_typed_response': allow_typed_response,
+                    'allow_self_rating': allow_self_rating
+                },
+                dataType:'json',
+                success: function(data){
+                    if(data.success==0){
+                        document.getElementById('dim-dialog').style.display = 'none'
+                        window.alert("Submitted successfully!");
+                        location.reload();
+                    }
+                    else{
+                        document.getElementById('dim-dialog').style.display = 'none'
+                        var msgTmp=data.msg;
+                        window.alert(msgTmp);
+                    }
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    document.getElementById('dim-dialog').style.display = 'none'
+                    alert("Error: " + errorThrown);
+                }
+            })
+        }
+    </script>
+    </html>
+
+{% endblock %}

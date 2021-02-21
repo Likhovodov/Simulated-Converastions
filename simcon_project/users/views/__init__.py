@@ -8,3 +8,4 @@ from .student_management import student_management
 from .assignment_management import assignment_management_view, view_templates, view_students, AssignmentDeleteView
 from .student_registration import student_registration
 from .logout import logout
+from .create_assignment import *
