@@ -70,16 +70,16 @@ class SelectTemplateForm(forms.Form):
             else:
                 templates = ConversationTemplate.objects.filter(researcher=request.user.id, archived=False).exclude(
                     id=initial.id).order_by(Lower('name'))
-            select_text_initial = split_creation_date(str(initial.creation_date))
+            select_text_initial = split_creation_date(str(initial.creation_date.astimezone()))
             template_list = [(initial.id, f"{initial.name}: {select_text_initial}")]
             for template in templates:
-                select_text = split_creation_date(str(template.creation_date))
+                select_text = split_creation_date(str(template.creation_date.astimezone()))
                 template_list.append((template.id, f"{template.name}: {select_text}"))
             self.fields['templates'] = forms.ChoiceField(choices=template_list)
 
 
 def split_creation_date(creation_date):
-    creation_date = creation_date.split('+')[0]
+    creation_date = creation_date.rsplit('-', 1)[0]
     if '.' in creation_date:
         creation_date = creation_date.split('.')[0]
     return creation_date
