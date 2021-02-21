@@ -52,10 +52,7 @@ urlpatterns = [
     path('researcher/students/', student_management, name="student-management"),
     path('researcher/assignments/', include('users.urls.ass_man_urls'), name="assignment-management"),
     path('researcher/response/<uuid:pk>/', view_response, name="view-response"),
-    path('researcher/response/delete/<uuid:pk>/', ResponseDeleteView.as_view(), name="delete-response"),
-    path('researcher/response/update/<uuid:pk>/', update_overall_response_feedback, name='update-overall-response-feedback'),
-    path('researcher/response/updatenode/<uuid:pk>/', update_node_response_feedback, name='update-node-response-feedback'),
-    path('researcher/response/updatetranscription/<uuid:pk>/', update_node_transcription, name='update-node-transcription'),
+    path('researcher/response/delete/<uuid:pk>/', ResponseDeleteView.as_view(), name="delete-response")
 ]
 
 if settings.DEBUG:

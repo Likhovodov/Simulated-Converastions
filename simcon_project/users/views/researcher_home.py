@@ -32,7 +32,7 @@ def is_researcher(user):
 @ user_passes_test(is_researcher)
 def researcher_view(request):
     responses = TemplateResponse.objects.filter(
-        template__researcher__email=request.user)
+        template__researcher__email=request.user, archived=False)
     filtered_responses = filter_search(request, responses)
 
     if filtered_responses:

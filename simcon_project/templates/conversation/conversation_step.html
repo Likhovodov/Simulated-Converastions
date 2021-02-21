@@ -43,7 +43,8 @@
         </div>
         <p id="recording"></p>
         {% if audio_response %}
-            <audio controls src="{{ audio_response.url }}">
+            <audio controls>
+                <source src="{{ audio_response.url }}">
             </audio>
         {% endif %}
         <form action="{{ ct_node.get_absolute_url }}" method="POST" id="choice-form" name="choice-form">
@@ -98,20 +99,17 @@
             {% endif %}
 
             function saveRecording(blob) {
+                let token = '{{ csrf_token }}';
                 let formData = new FormData();
                 formData.append('data', blob);
-                let data = { recording:blob };
                 $.ajax({
+                    headers: { "X-CSRFToken": token },
                     type: 'POST',
                     url: '{% url 'save-audio' %}',
                     data: formData,
                     processData: false,
                     contentType: false,
                     cache: false,
-                    csrfmiddlewaretoken: '{{ csrf_token }}',
-                    success: res => {
-                        console.log('Success.')
-                    }
                 });
             }
         </script>

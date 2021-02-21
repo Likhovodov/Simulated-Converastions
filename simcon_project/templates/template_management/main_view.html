@@ -10,77 +10,91 @@
         <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
     </head>
     <body>
-
-    <div class="container-fluid" style="width: 80%">
-        <div class="row">
-            <div class="col-8 mt-3">
-                <h3 style="text-align: center">Templates</h3>
-                <div class="row">
-                    <div class="col">
-                        <!-- Templates -->
+        <div class="container-fluid" style="width: 80%">
+            <div class="row">
+                <!-- Templates -->
+                <div class="col-8 mt-3">
+                    <h3 style="text-align: center">Templates</h3>
+                    <div class="row">
                         <!-- Templates Search Bar-->
-                        {% if folder_pk %}
-                            <form action="{% url 'management:folder-view' folder_pk %}" method="get">
+                        <div class="col">
+                            {% if folder_pk %}
+                                <form action="{% url 'management:folder-view' folder_pk %}" method="get">
+                                    {% csrf_token %}
+                                    <input name="template-filter" type="text" placeholder="Search Templates" class="mb-3">
+                                </form>
+                            {% else %}
+                                <form action="{% url 'management:main'%}" method="get">
+                                    {% csrf_token %}
+                                    <input name="template-filter" type="text" placeholder="Search Templates" class="mb-3">
+                                </form>
+                            {% endif %}
+                        </div>
+                        <!-- Show/Hide Archived Templates Button -->
+                        <div class="col">
+                            {% if show_archived == 'True' %}
+                                <form action="{% url 'management:display-archived-templates' 0 %}" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="back" value="{{ request.path }}">
+                                    <button name="show-archived" class ="btn btn-outline-secondary" type="submit">Hide Archived Templates</button>
+                                </form>
+                            {% else %}
+                                <form action="{% url 'management:display-archived-templates' 1 %}" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="back" value="{{ request.path }}">
+                                    <button name="show-archived" class ="btn btn-outline-secondary" type="submit">Display Archived Templates</button>
+                                </form>
+                            {% endif %}
+                        </div>
+
+                        <div class="col" style="text-align: right">
+                            <!-- Create Template Button--->
+                            <form action="{% url 'management:redirect-to-template-creation' %}" method="post">
                                 {% csrf_token %}
-                                <input name="template-filter" type="text" placeholder="Search Templates" class="mb-3">
+                                <input id="create-template" class="btn btn-outline-secondary" type="submit" value="Create template"/>
                             </form>
-                        {% else %}
-                            <form action="{% url 'management:main'%}" method="get">
-                                {% csrf_token %}
-                                <input name="template-filter" type="text" placeholder="Search Templates" class="mb-3">
-                            </form>
-                        {% endif %}
+                        </div>
                     </div>
 
-                    <div class="col" style="text-align: right">
-                        <!-- Create Template Button--->
-                        <form action="{% url 'management:redirect-to-template-creation' %}" method="post">
-                            {% csrf_token %}
-                            <input id="create-template" class="btn btn-outline-secondary" type="submit" value="Create template"/>
-                        </form>
-                    </div>
-                </div>
-
-                {%  if templateTable %}
-                    {% render_table templateTable %}
-                {% else %}
-                    {% if folder_pk %}
-                        <div>There are no templates in this folder</div>
+                    {%  if templateTable %}
+                        {% render_table templateTable %}
                     {% else %}
-                        <div>There are no templates to show at the moment</div>
-                    {%  endif %}
-                {% endif %}
-
-            </div>
-            <div class="col-4 mt-3">
-                <!-- Folders -->
-                <h3 style="text-align: center">Folders</h3>
-
-                <div class="row">
-                    <div class="col">
-                        <!-- Folder Search Bar-->
                         {% if folder_pk %}
-                            <form action="{% url 'management:folder-view' folder_pk %}" method="get">
-                                {% csrf_token %}
-                                <input name="folder-filter" type="text" placeholder="Search Folders" class="mb-3">
-                            </form>
+                            <div>There are no templates in this folder</div>
                         {% else %}
-                            <form action="{% url 'management:main' %}" method="get">
-                                {% csrf_token %}
-                                <input name="folder-filter" type="text" placeholder="Search Folders" class="mb-3">
-                            </form>
-                        {% endif %}
-                    </div>
+                            <div>There are no templates to show at the moment</div>
+                        {%  endif %}
+                    {% endif %}
 
-                    <div class="col" style="text-align: right">
-                        <!-- Create Folder Button--->
-                        <button id="create-folder" class="btn btn-outline-secondary" type="button" name="button">Create Folder</button>
-                    </div>
                 </div>
+                <div class="col-4 mt-3">
+                    <!-- Folders -->
+                    <h3 style="text-align: center">Folders</h3>
 
-                {% if folder_pk %}
-                    <div class="row mb-3">
-                        <!-- Line these buttons up later with css -->
+                    <div class="row">
+                        <div class="col">
+                            <!-- Folder Search Bar-->
+                            {% if folder_pk %}
+                                <form action="{% url 'management:folder-view' folder_pk %}" method="get">
+                                    {% csrf_token %}
+                                    <input name="folder-filter" type="text" placeholder="Search Folders" class="mb-3">
+                                </form>
+                            {% else %}
+                                <form action="{% url 'management:main' %}" method="get">
+                                    {% csrf_token %}
+                                    <input name="folder-filter" type="text" placeholder="Search Folders" class="mb-3">
+                                </form>
+                            {% endif %}
+                        </div>
+
+                        <div class="col" style="text-align: right">
+                            <!-- Create Folder Button--->
+                            <button id="create-folder" class="btn btn-outline-secondary" type="button" name="button">Create Folder</button>
+                        </div>
+                    </div>
+
+                    {% if folder_pk %}
+                        <div class="row mb-3">
                             <form method="post" action="{% url 'management:main' %}">
                                 {% csrf_token %}
                                 <input id="back-to-all" class="btn btn-outline-success ml-3" type="submit" value="Back">
@@ -91,21 +105,19 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="back" value="{{ request.path }}">
                                 <button id="delete-folder" class="btn btn-outline-danger ml-3" type="submit">Delete</button>
-                        </form>
-                    </div>
-                {% endif %}
+                            </form>
+                        </div>
+                    {% endif %}
 
-                {% if folderTable %}
-                    {% render_table folderTable %}
-                {% else %}
-                    <div>There are no folders to show at the moment</div>
-                {% endif %}
+                    {% if folderTable %}
+                        {% render_table folderTable %}
+                    {% else %}
+                        <div>There are no folders to show at the moment</div>
+                    {% endif %}
 
+                </div>
             </div>
         </div>
-    </div>
-
-
 
     <!-- Code needed for the modal to work properly.
          Content in folder_creation_modal.html is rendered between "#modal-content" div
@@ -129,6 +141,7 @@
                     formURL: $(this).data('form-url')
                 });
             });
+
             $("#create-folder").modalForm({
                 formURL: "{% url 'management:create-folder' %}",
                 modalID: "#create_modal"

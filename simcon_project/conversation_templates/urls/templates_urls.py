@@ -13,4 +13,6 @@ urlpatterns = [
     path('new/', create_conversation_template_view, name="create-conversation-template-view"),
     path('edit/<uuid:pk>/', edit_conversation_template, name="edit_conversation_template"),
     path('redirect/template/', RedirectToTemplateCreation.as_view(), name="redirect-to-template-creation"),
+    path('display/archived/<show_archived>', update_cookie, name="display-archived-templates"),
+    path('archived/<uuid:pk>', archive_template, name="archive-template"),
 ]

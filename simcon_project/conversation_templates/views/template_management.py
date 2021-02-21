@@ -4,7 +4,7 @@ from django.urls import reverse_lazy, reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
 from users.views.researcher_home import is_researcher
-from conversation_templates.models import ConversationTemplate, TemplateFolder
+from conversation_templates.models import ConversationTemplate, TemplateFolder, TemplateResponse
 from conversation_templates.forms import FolderCreationForm
 from users.models import Researcher
 from bootstrap_modal_forms.generic import BSModalCreateView, BSModalUpdateView, BSModalDeleteView
@@ -18,8 +18,11 @@ class FolderTemplateTable(tables.Table):
     The "delete" button has been replaced with a "remove button to
     remove a template from the folder.
     """
-    buttons = TemplateColumn(verbose_name='', template_name='template_management/buttons_template.html',
-                             extra_context={"in_folder": True})
+    archive_button = TemplateColumn(template_name='template_management/archive_button.html', order_by='archived'
+                                    , verbose_name='Archived')
+    edit_button = TemplateColumn(verbose_name='', template_name='template_management/edit_button.html')
+    remove_buttons = TemplateColumn(template_name='template_management/delete_or_remove_template_button.html',
+                                    extra_context={"in_folder": True}, verbose_name='')
     name = tables.columns.LinkColumn('view-all-responses', args=[A('pk')])
 
     class Meta:
@@ -33,7 +36,11 @@ class AllTemplateTable(tables.Table):
     Table for showing the templates for a specific folder.
     Only used when all templates are displayed.
     """
-    buttons = TemplateColumn(verbose_name='', template_name='template_management/buttons_template.html')
+    archive_button = TemplateColumn(template_name='template_management/archive_button.html', order_by='archived'
+                                    , verbose_name = 'Archived')
+    edit_button = TemplateColumn(verbose_name='', template_name='template_management/edit_button.html')
+    remove_buttons = TemplateColumn(template_name='template_management/delete_or_remove_template_button.html',
+                                    verbose_name='')
     name = tables.columns.LinkColumn('view-all-responses', args=[A('pk')])
 
     class Meta:
@@ -60,27 +67,16 @@ def main_view(request):
     Main template management view.
     Main contents of the page are the tables showing all templates and folders the researcher has created.
     """
-    all_templates = get_templates(request.user)
-    templates = filter_templates(request, all_templates)
-    if templates:
-        template_table = AllTemplateTable(templates, prefix="1-")
-        RequestConfig(request, paginate={"per_page": 5}).configure(template_table)
+    show_archived = request.COOKIES.get('show_archived')
+    if show_archived is None:
+        request.COOKIES.get('show_archived', False)
+
+    if show_archived == "True":
+        templates = get_templates(request.user)
     else:
-        template_table = None
+        templates = get_templates(request.user).filter(archived=False)
 
-    folders = filter_folder(request)
-    if folders:
-        folder_table = FolderTable(folders, prefix="2-")
-        RequestConfig(request, paginate={"per_page": 5}).configure(folder_table)
-    else:
-        folder_table = None
-
-    context = {
-        'templateTable': template_table,
-        'folderTable': folder_table,
-        'folder_pk': None,
-    }
-
+    context = main_view_helper(request, templates, None)
     return render(request, 'template_management/main_view.html', context)
 
 
@@ -92,26 +88,54 @@ def folder_view(request, pk):
     """
     current_folder = get_object_or_404(TemplateFolder, pk=pk)
 
-    all_templates = current_folder.templates.all()
+    show_archived = request.COOKIES.get('show_archived')
+    if show_archived is None:
+        request.COOKIES.get('show_archived', False)
+
+    if show_archived == "True":
+        templates = current_folder.templates.all()
+    else:
+        templates = current_folder.templates.filter(archived=False)
+
+    context = main_view_helper(request, templates, pk)
+    return render(request, 'template_management/main_view.html', context)
+
+
+def main_view_helper(request, all_templates, pk):
+    """
+    Filter template table for search value and sets up folder table for the main view.
+    What is displayed depends on if the user has selected a folder and if archived
+    templates are being displayed or not.
+    """
     templates = filter_templates(request, all_templates)
+
     if templates:
-        template_table = FolderTemplateTable(templates, prefix="1-")
-        RequestConfig(request, paginate={"per_page": 5}).configure(template_table)
+        templates = templates.order_by('-creation_date')
+        if pk:
+            template_table = FolderTemplateTable(templates, prefix="1-")
+        else:
+            template_table = AllTemplateTable(templates, prefix="1-")
+
+        RequestConfig(request, paginate={"per_page": 8}).configure(template_table)
     else:
         template_table = None
 
     folders = filter_folder(request)
-    folder_table = FolderTable(folders, prefix="2-")
-
-    RequestConfig(request, paginate={"per_page": 5}).configure(folder_table)
+    if folders:
+        folders.order_by('name')
+        folder_table = FolderTable(folders, prefix="2-")
+        RequestConfig(request, paginate={"per_page": 8}).configure(folder_table)
+    else:
+        folder_table = None
 
     context = {
         'templateTable': template_table,
         'folderTable': folder_table,
-        'folder_pk': pk
+        'folder_pk': pk,
+        'show_archived': request.COOKIES.get('show_archived'),
     }
 
-    return render(request, 'template_management/main_view.html', context)
+    return context
 
 
 class RedirectToTemplateCreation(RedirectView):
@@ -209,6 +233,31 @@ def remove_template(request, pk):
         folder.templates.remove(template)
         back = request.POST.get('back', '/')
         return redirect(back)
+
+
+def update_cookie(request, show_archived):
+    back = request.POST.get('back', '/')
+    response = redirect(back)
+
+    if int(show_archived) == 0:
+        response.set_cookie('show_archived', False)
+    else:
+        response.set_cookie('show_archived', True)
+
+    return response
+
+
+def archive_template(request, pk):
+    template = get_object_or_404(ConversationTemplate, pk=pk)
+    if template.archived:
+        ConversationTemplate.objects.filter(pk=pk).update(archived=False)
+        TemplateResponse.objects.filter(template=template.id).update(archived=False)
+    else:
+        ConversationTemplate.objects.filter(pk=pk).update(archived=True)
+        TemplateResponse.objects.filter(template=template.id).update(archived=True)
+
+    back = request.POST.get('back', '/')
+    return redirect(back)
 
 
 def route_to_current_folder(previous_url):

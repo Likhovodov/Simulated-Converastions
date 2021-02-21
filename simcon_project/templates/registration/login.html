@@ -1,8 +1,47 @@
-<!-- templates/registration/login.html -->
-<h2>Log In</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Log In</button>
-    <a href="{% url 'password-reset' %}">Forgot Password?</a>
-</form>
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <title>SimCon</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Created for Simulated Conversations Senior Capstone Project">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'users/base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'users/center_container.css' %}">
+</head>
+<body>
+
+<div class="container">
+    <div class="card p-3">
+        <form method="post">
+            {% csrf_token %}
+            <form method="post">
+                {{ form.non_field_errors }}
+                <div class="form-group">
+
+                    <label for="{{ form.username.id_for_label }}">Username:</label>
+                    <br>
+                    {{ form.username }}
+                    {{ form.username.errors }}
+
+                </div>
+                <div class="form-group">
+
+                    <label for="{{ form.password.id_for_label }}">Password:</label>
+                    <br>
+                    {{ form.password }}
+                    {{ form.password.errors }}
+                </div>
+                <button class="btn btn-secondary mr-3" type="submit">Login</button>
+                <a href="{% url 'password-reset' %}">Forgot Password?</a>
+            </form>
+        </form>
+    </div>
+</div>
+</body>
+</html>
+

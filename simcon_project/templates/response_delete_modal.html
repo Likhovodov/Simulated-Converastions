@@ -4,17 +4,20 @@
   <div class="modal-header">
     <h3 class="modal-title">Delete Response</h3>
     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-      <span aria-hidden="true">Cancel</span>
+      <span aria-hidden="true">&times;</span>
     </button>
   </div>
 
   <div class="modal-body">
-    <p>Are you sure you want to delete this response
-       and their associated data?</p>
+    <p> <strong> Template Name: </strong> {{ template_name }} <br>
+       <strong> Student Name: </strong> {{ student }} <br>
+        Would you like to notify {{ student }} that this template is available for resubmission? 
+      </p>
   </div>
 
   <div class="modal-footer">
-    <button type="submit" class="btn btn-danger">Delete</button>
+    <button type="submit" class="btn btn-danger">Delete Response</button>
+    <button type="submit" name="reassign" class="btn btn-success">Delete & Notify Response</button>
   </div>
 
 </form>
