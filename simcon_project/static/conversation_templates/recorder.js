@@ -26,7 +26,7 @@ function startRecording() {
 		https://addpipe.com/blog/audio-constraints-getusermedia/
 	*/
     let constraints = { audio: true, video:false }
-	toggleAudioControls(true, false, true);
+	toggleAudioControls(true, false);
 
 	/*
     	We're using the standard promise based getUserMedia()
