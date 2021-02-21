@@ -138,14 +138,9 @@
                         </div>
                     </div>
 
-                    {% if folderTable %}
-                        {% block table-wrapper %}
-                            {% include "template_management/folder_table.html" with table=folderTable%}
-                        {% endblock %}
-                    {% else %}
-                        <div>There are no folders to show at the moment</div>
-                    {% endif %}
-
+                    {% block table-wrapper %}
+                        {% include "template_management/folder_table.html" with table=folderTable%}
+                    {% endblock %}
                 </div>
             </div>
         </div>
