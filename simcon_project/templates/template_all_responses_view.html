@@ -6,14 +6,14 @@
     <title>SimCon | Template Response View</title>
 </head>
 <body>
+    <form method="post">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Go">
+    </form>
     {% if not table %}
         <p>Looks like there are no responses at the moment</p>
     {% else %}
-        <form method="post">
-            {% csrf_token %}
-            {{ form }}
-            <input type="submit" value="Go">
-        </form>
         <a href="{% export_url 'xlsx' %}">Download as .xls</a>
         {% render_table table %}
     {% endif %}
