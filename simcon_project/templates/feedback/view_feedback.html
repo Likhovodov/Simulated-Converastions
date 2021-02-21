@@ -47,7 +47,7 @@
         </div>
         <div class="row">
             <div class="col-sm-4">
-                <audio src="{% static node.audio_response %}" controls></audio>
+                <audio src="{% get_media_prefix %}{{ node.audio_response }}" controls></audio>
             </div>
             <div class="col-sm-4">
                 {{node.transcription}}

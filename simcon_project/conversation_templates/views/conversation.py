@@ -229,7 +229,6 @@ def save_audio(request):
         ct_node_response = TemplateNodeResponse.objects.get(id=request.session.get('ct_node_response_id'))
         ct_node_response.audio_response = audio_path
         ct_node_response.save()
-    # return HttpResponse('saved')
     return HttpResponse(ct_node_response.audio_response.url)
 
 
