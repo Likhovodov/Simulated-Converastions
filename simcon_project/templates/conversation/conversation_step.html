@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-{% load static %}
 {% load embed_video_tags %}
+{% load static %}
 {% block content %}
 <html lang="en">
     <head>
@@ -12,8 +12,9 @@
         <script src="{% static 'conversation_templates/disable_back_button.js' %}"></script>
         <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
         <title>
-            {% block title %}Simulated Conversations | Conversation Step{% endblock %}
+            SimCon | Conversation
         </title>
+    <link rel="shortcut icon" href="{% static './title_image/favicon.ico' %}" type="image/x-icon">
 
         <!-- prevent line breaks when using form fields -->
         <style type="text/css">
