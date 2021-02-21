@@ -66,9 +66,10 @@
                                     <div class="row">
                                         <div class="col">
                                             <p><strong>Step description: </strong> {{ node.template_node.description }} </p>
-                                            <p><strong>Selected choice: </strong> {{ node.selected_choice.choice_text }}
                                             {% if node.custom_response != Null %}
-                                                (Custom)
+                                            <p><strong>Custom Choice: </strong> {{ node.custom_response }}
+                                            {% else %}
+                                            <p><strong>Selected choice: </strong> {{ node.selected_choice.choice_text }}
                                             {% endif %}
                                             </p>
                                             <audio src="{% static node.audio_response %}" controls></audio>

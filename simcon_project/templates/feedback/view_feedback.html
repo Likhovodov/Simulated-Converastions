@@ -42,7 +42,9 @@
         <div class="row">
             <h3> Response {{node.position_in_sequence}}
             {% if node.custom_response != Null %}
-               (Custom)
+            <p><strong>Custom Choice: </strong> {{ node.custom_response }}
+            {% else %}
+            <p><strong>Selected choice: </strong> {{ node.selected_choice.choice_text }}
             {% endif %}
             </h3>
             <div class="row">
