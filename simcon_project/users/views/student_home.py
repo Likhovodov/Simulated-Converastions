@@ -78,7 +78,7 @@ def student_view(request):
     assignments = Assignment.objects.filter(students=student.first()).filter(date_assigned__lte=now)
     # for each assignment, get all templates contained. Get most recent response by the student for each template
     for assignment in assignments:
-        templates_in_assignment = ConversationTemplate.objects.filter(assignments=assignment)
+        templates_in_assignment = ConversationTemplate.objects.filter(assignments=assignment, archived=False)
         for template in templates_in_assignment:
             responses = TemplateResponse.objects.filter(assignment=assignment, template=template,
                                                             student=student.first())
