@@ -19,16 +19,16 @@ def create_assignment_view(request):
 
     stud = Student.objects.all().filter(added_by=curResearcher).filter(is_active=True).values('email', 'first_name','last_name','is_active','registered')
     label = SubjectLabel.objects.all().filter(researcher=curResearcher)
-    template = ConversationTemplate.objects.all().filter(researcher=curResearcher)
+    templates = ConversationTemplate.objects.all().filter(researcher=curResearcher).filter(archived=False)
 
     students = json.dumps(list(stud))
     subLabel = serializers.serialize("json",label)
-    template = serializers.serialize("json",template)
+    templates = serializers.serialize("json",templates)
 
     return render(request, 'create_assignment.html', {
         'students': students,
         'subjectLabels': subLabel,
-        'templates': template,
+        'templates': templates,
     })
 
 
