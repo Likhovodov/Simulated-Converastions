@@ -11,9 +11,7 @@ import operator
 class ResponseTable(tables.Table):
     name = tables.columns.Column(
         accessor="student.get_full_name", order_by="student.last_name")
-    self_rating = tables.columns.Column(
-        verbose_name="Student Self Rating", order_by="self_rating")
-    altered_rating = tables.Column(verbose_name= 'Self Rating', accessor= 'self_rating_to_string', orderable=False)
+    altered_rating = tables.Column(verbose_name= 'Student Self Rating', accessor= 'self_rating_to_string', order_by='self_rating')
     response = tables.TemplateColumn(
         ''' <a class="btn btn btn-outline-secondary btn-sm" href="{% url 'view-response' record.id %}" >View</a>''', verbose_name='')
     delete = tables.TemplateColumn(

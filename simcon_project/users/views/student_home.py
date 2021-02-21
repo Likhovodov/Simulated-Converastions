@@ -87,7 +87,7 @@ def student_view(request):
             responses = TemplateResponse.objects.filter(assignment=assignment, template=template,
                                                             student=student.first())
             last_response = responses.aggregate(Max('completion_date'))
-            attempts_left = assignment.attempts - len(responses)
+            attempts_left = assignment.response_attempts - len(responses)
             if attempts_left < 0:
                 attempts_left = 0
 
