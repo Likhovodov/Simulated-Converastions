@@ -26,7 +26,7 @@ class ResearcherTable(tables.Table):
     first_name = tables.Column(accessor='first_name')
     last_name = tables.Column(accessor='last_name')
     email_address = tables.Column(accessor='email')
-    delete = tables.TemplateColumn(verbose_name='', template_name='settings/delete_researcher_button.html')
+    delete = tables.TemplateColumn(verbose_name='', template_name='settings/buttons_template.html')
 
 
 class ResearcherDeleteView(BSModalDeleteView):
