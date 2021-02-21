@@ -53,6 +53,7 @@ urlpatterns = [
     path('researcher/response/<uuid:pk>/', view_response, name="view-response"),
     path('researcher/response/delete/<uuid:pk>/', ResponseDeleteView.as_view(), name="delete-response"),
     path('researcher/create-assignment/', include('users.urls.create_assignment_urls'), name="create-assignment-view")
+]
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
