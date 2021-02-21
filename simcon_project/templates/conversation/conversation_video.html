@@ -41,16 +41,20 @@
         <button id="recordButton" class="btn btn-primary btn-sm">Record</button>
         <button id="stopButton" class="btn btn-primary btn-sm" disabled>Stop</button>
     </div>
-    <p id="recording"></p>
-    {% if ct_node_response %}
-        <audio controls>
-            <source src="{{ ct_node_response.audio_response.url }}">
+    <div>
+        <audio id="audioPlayer" controls>
+            {% if ct_node_response %}
+            <source id="audioResponse" src="{{ ct_node_response.audio_response.url }}">
+            {% else %}
+            <source id="audioResponse" src="">
+            {% endif %}
         </audio>
-    {% endif %}
+    </div>
     <div id="info"></div>
-    <form action="{% url 'conversation-choice' ct_node.id %}" method="GET">
-        <button type="submit" id="nextButton" class="btn btn-primary btn-sm" disabled>Next</button>
+    <form id="audioForm" action="{% url 'conversation-choice' ct_node.id %}" method="GET">
+        <button type="submit" id="nextButton" class="btn btn-primary btn-sm">Next</button>
     </form>
+    <div id="error"></div>
     <div class="modal fade" tabindex="-1" role="dialog" id="create_modal">
         <div class="modal-dialog" role="document">
             <div class="modal-content"></div>
@@ -65,6 +69,9 @@
     <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
     <script src="{% static 'conversation_templates/recorder.js' %}"></script>
     <script>
+        const form = document.getElementById("audioForm");
+        const errorElement = document.getElementById("error");
+
         $(document).ready(function() {
             {% if ct_node_response %}
                 recordAttempts = JSON.parse(sessionStorage.getItem('recordAttempts'));
@@ -72,13 +79,16 @@
                 recordAttempts = null;
             {% endif %}
             if (recordAttempts === null) {
-                recordAttempts = 0;
+                recordAttempts = {{ recording_attempts }};
                 sessionStorage.setItem('recordAttempts', JSON.stringify(recordAttempts));
             }
 
-            if (hasAttempts() === 0) {
-                toggleAudioControls(true, true, false);
+            if (recordAttempts <= 0) {
+                toggleAudioControls(true, true);
+            } else {
+                toggleAudioControls(false, true);
             }
+            displayRecordingAttempts();
 
             // Modal for exit button
             $(".bs-modal").each(function () {
@@ -87,10 +97,6 @@
                 });
             });
         });
-
-        function hasAttempts() {
-            return {{ recording_attempts }} - recordAttempts;
-        }
 
         function saveRecording(blob) {
             let token = '{{ csrf_token }}';
@@ -104,8 +110,18 @@
                 processData: false,
                 contentType: false,
                 cache: false,
+                success: function (url) {
+                    updateAudio(url);
+                }
             });
         }
+
+        form.addEventListener("submit", (e) => {
+            if (audioResponse.getAttribute("src") === "") {
+                e.preventDefault();
+                errorElement.innerText = "Must provide audio response";
+            }
+        })
     </script>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->

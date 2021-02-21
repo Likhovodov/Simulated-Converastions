@@ -12,9 +12,10 @@ let audioContext;
 
 let recordButton = document.getElementById("recordButton");
 let stopButton = document.getElementById("stopButton");
-let nextButton = document.getElementById("nextButton");
 let info = document.getElementById("info");
 let recording = document.getElementById("recording");
+let audioPlayer = document.getElementById("audioPlayer");
+let audioResponse = document.getElementById("audioResponse");
 
 recordButton.addEventListener("click", startRecording);
 stopButton.addEventListener("click", stopRecording);
@@ -26,10 +27,6 @@ function startRecording() {
 	*/
     let constraints = { audio: true, video:false }
 	toggleAudioControls(true, false, true);
-    // remove previous recording
-	if (recording.children.length > 0) {
-		recording.removeChild(recording.firstChild);
-	}
 
 	/*
     	We're using the standard promise based getUserMedia()
@@ -59,57 +56,42 @@ function startRecording() {
 
 	}).catch(function(err) {
 	  	// enable the record button if getUserMedia() fails
-		toggleAudioControls(false, true, true);
+		toggleAudioControls(false, true);
 		info.innerText = "";
 	});
 }
 
 function stopRecording() {
 	recordAttempts = JSON.parse(sessionStorage.getItem('recordAttempts'));
-	recordAttempts++;
-	let attemptsLeft = hasAttempts();
-	if (attemptsLeft > 1) {
-		toggleAudioControls(false, true, false);
-		info.innerText = recordAttempts + " attempts left to record";
-	} else if (attemptsLeft === 1) {
-		toggleAudioControls(false, true, false);
-		info.innerText = recordAttempts + " attempt left to record";
-	} else {
-		toggleAudioControls(true, true, false);
-		info.innerText = "No attempts left to record";
-	}
-	sessionStorage.setItem('recordAttempts', JSON.stringify(recordAttempts));
+	recordAttempts--;
+    displayRecordingAttempts();
 	rec.stop();
 
 	// stop microphone access
 	gumStream.getAudioTracks()[0].stop();
-	rec.exportWAV(createDownloadLink);
+	rec.exportWAV(saveRecording);
 }
 
-function createDownloadLink(blob) {
-	let url = URL.createObjectURL(blob);
-	let au = document.createElement('audio');
-	let p = document.createElement('p');
-	let link = document.createElement('a');
-
-	// name of .wav file for browser download
-	let filename = new Date().toISOString();
-	au.controls = true;
-	au.src = url;
-	link.href = url;
-	link.download = filename+".wav"; //forces the browser to download the file using the filename
-
-    // Check for old recording
-	if (p.children.length > 0) {
-		p.removeChild(p.firstChild);
-	}
-	p.appendChild(au);
-	recording.appendChild(p);
-	saveRecording(blob);
+function updateAudio(url) {
+	audioResponse.src = url;
+	audioPlayer.load();
 }
 
-function toggleAudioControls(record, stop, next) {
+function toggleAudioControls(record, stop) {
 	recordButton.disabled = record;
 	stopButton.disabled = stop;
-	nextButton.disabled = next;
+}
+
+function displayRecordingAttempts() {
+	if (recordAttempts > 1) {
+		toggleAudioControls(false, true);
+		info.innerText = recordAttempts + " attempts left to record";
+	} else if (recordAttempts === 1) {
+		toggleAudioControls(false, true);
+		info.innerText = recordAttempts + " attempt left to record";
+	} else {
+		toggleAudioControls(true, true);
+		info.innerText = "No attempts left to record";
+	}
+	sessionStorage.setItem('recordAttempts', JSON.stringify(recordAttempts));
 }

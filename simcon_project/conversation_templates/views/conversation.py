@@ -188,7 +188,7 @@ def conversation_choice(request, ct_node_id):
                 return HttpResponseNotFound('<h1>An invalid choice was selected</h1>')
 
         # End conversation or go to next node
-        if ct_node.terminal or choice.destination_node is None or choice is None:
+        if ct_node.terminal or choice is None or choice.destination_node is None:
             return redirect('conversation-end', ct_response_id=ct_response.id)
         return redirect('conversation-video', ct_node_id=choice.destination_node.id)
 
@@ -213,6 +213,7 @@ def save_audio(request):
     file_handle = os.path.join('audio', str(request.user), file_handle)  # Create full file handle
     audio_path = default_storage.save(file_handle, data)  # Store audio in media root
     ct_response = TemplateResponse.objects.get(id=request.session.get('ct_response_id'))
+    ct_node_response = None
 
     # Check if node response already exists
     if request.session.get('ct_node_response_id') is None:
@@ -228,7 +229,8 @@ def save_audio(request):
         ct_node_response = TemplateNodeResponse.objects.get(id=request.session.get('ct_node_response_id'))
         ct_node_response.audio_response = audio_path
         ct_node_response.save()
-    return HttpResponse('saved')
+    # return HttpResponse('saved')
+    return HttpResponse(ct_node_response.audio_response.url)
 
 
 @user_passes_test(is_student)
