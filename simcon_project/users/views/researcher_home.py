@@ -13,6 +13,7 @@ class ResponseTable(tables.Table):
         accessor="student.get_full_name", order_by="student.last_name")
     self_rating = tables.columns.Column(
         verbose_name="Student Self Rating", order_by="self_rating")
+    altered_rating = tables.Column(verbose_name= 'Self Rating', accessor= 'self_rating_to_string', orderable=False)
     response = tables.TemplateColumn(
         ''' <a class="btn btn btn-outline-secondary btn-sm" href="{% url 'view-response' record.id %}" >View</a>''', verbose_name='')
     delete = tables.TemplateColumn(
@@ -22,7 +23,7 @@ class ResponseTable(tables.Table):
         attrs = {'class': 'table table-sm', 'id': 'response-table'}
         model = TemplateResponse
         fields = ['template', 'name', 'completion_date',
-                  'feedback', 'self_rating']
+                  'feedback', 'altered_rating']
 
 
 def is_researcher(user):
