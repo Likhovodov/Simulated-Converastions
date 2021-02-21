@@ -15,8 +15,8 @@ class AssignmentsTable(tables.Table):
     """
     name = tables.Column(verbose_name='Name', accessor='name')
     date_assigned = tables.Column(verbose_name='Date Assigned', accessor='date_assigned')
-    attempts = tables.TemplateColumn(verbose_name='',
-                                     template_name='assignment_management/view_settings_button.html')
+    view_settings = tables.TemplateColumn(verbose_name='',
+                                          template_name='assignment_management/view_settings_button.html')
     view_templates = tables.TemplateColumn(verbose_name='',
                                            template_name='assignment_management/view_templates_button.html')
     view_students = tables.TemplateColumn(verbose_name='',
@@ -32,9 +32,9 @@ class AssignmentDetailsTable(tables.Table):
     response_attempts = tables.Column(verbose_name='Response Attempts',
                                       accessor='response_attempts')
     recording_attempts = tables.Column(verbose_name='Recording Attempts',
-                                      accessor='recording_attempts')
+                                       accessor='recording_attempts')
     allow_typed_response = tables.Column(verbose_name='Allow Typed Response',
-                                      accessor='allow_typed_response')
+                                         accessor='allow_typed_response')
     allow_self_rating = tables.Column(verbose_name='Allow Self Rating',
                                       accessor='allow_self_rating')
 
@@ -123,9 +123,7 @@ def assignment_management_view(request):
         row_data = {}
         row_data.update({"id": assignment.id,
                         "name": assignment.name,
-                         "date_assigned": assignment.date_assigned,
-                         "attempts": assignment.attempts,
-                         "completion": completion_percent})
+                         "date_assigned": assignment.date_assigned})
         assignment_rows.append(row_data)
 
     assignments_table = AssignmentsTable(assignment_rows)
@@ -134,7 +132,7 @@ def assignment_management_view(request):
 
 
 @user_passes_test(is_researcher)
-def view_details(request, pk):
+def view_settings(request, pk):
     """
     View for assignments details modal. Shows the settings for an assignment.
     :param request:
@@ -149,11 +147,11 @@ def view_details(request, pk):
     if assignment.allow_self_rating is True:
         self_rating = "Yes"
     else:
-        self_rating = "Yes"
-    assignment_details = {"response_attempts": assignment.response_attempts,
+        self_rating = "No"
+    assignment_details = [{"response_attempts": assignment.response_attempts,
                           "recording_attempts": assignment.recording_attempts,
                           "allow_typed_response": typed_response,
-                          "allow_self_rating": self_rating}
+                          "allow_self_rating": self_rating}]
     assignment_details_table = AssignmentDetailsTable(assignment_details)
     return render(request, 'assignment_management/view_settings_modal.html', {'table': assignment_details_table})
 
