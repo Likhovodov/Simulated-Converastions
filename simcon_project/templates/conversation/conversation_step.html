@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-{% load embed_video_tags %}
 {% load static %}
+{% load embed_video_tags %}
 {% block content %}
 <html lang="en">
     <head>
@@ -22,62 +22,98 @@
         </style>
     </head>
     <body>
-        <div style="clear:both">
-            <h1 style="float:left">Simulated Conversations</h1>
-            <button
+    <div style="clear:both">
+        <h1 style="float:left">Simulated Conversations</h1>
+        <button
                 style="float:right" class="bs-modal btn btn-danger" type="button" name="button"
                 data-form-url="{% url 'exit-conversation' %}">Exit
-            </button>
-        </div>
-        <div style="clear:both">
-            <h3 style="float:left">{{ ct }}</h3>
-            <h3 style="float:right"><small>{{ request.user }}</small></h3>
-        </div>
-        <br><br>
-        <div id="embedded-video">
-            {% video ct_node.video_url 'small' %}
-            <p>{{ ct_node.description }}</p>
-        </div>
-        <div id="controls">
-            <button id="recordButton" class="btn btn-primary btn-sm">Record</button>
-            <button id="stopButton" class="btn btn-primary btn-sm" disabled>Stop</button>
-        </div>
-        <p id="recording"></p>
-        {% if audio_response %}
-            <audio controls>
-                <source src="{{ audio_response.url }}">
-            </audio>
-        {% endif %}
-        <form action="{{ ct_node.get_absolute_url }}" method="POST" id="choice-form" name="choice-form">
-            {% csrf_token %}
-            {{  choice_form.choices }}
-            {% if ct_node.terminal %}
-                <button type="submit" class="btn btn-primary btn-sm">End Conversation</button>
+        </button>
+    </div>
+    <div style="clear:both">
+        <h3 style="float:left">{{ ct }}</h3>
+        <h3 style="float:right"><small>{{ request.user }}</small></h3>
+    </div>
+    <br><br>
+    <div id="videoPlayer">
+        {% video ct_node.video_url 'small' %}
+        <p>{{ ct_node.description }}</p>
+    </div>
+    <div id="controls">
+        <button id="recordButton" class="btn btn-primary btn-sm">Record</button>
+        <button id="stopButton" class="btn btn-primary btn-sm" disabled>Stop</button>
+    </div>
+    <div>
+        <audio id="audioPlayer" controls>
+            {% if ct_node_response %}
+                <source id="audioResponse" src="{{ ct_node_response.audio_response.url }}">
             {% else %}
-                <button type="submit" class="btn btn-primary btn-sm">Next Scene</button>
+                <source id="audioResponse" src="">
             {% endif %}
-        </form>
-        <div class="modal fade" tabindex="-1" role="dialog" id="create_modal">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content"></div>
-            </div>
+        </audio>
+    </div>
+    <div id="info"></div>
+    <button type="submit" id="nextButton" class="btn btn-primary btn-sm" onclick="toChoices()">Next</button>
+    <form id="choice-form" action="{% url 'conversation-step' ct_node.id %}" method="POST" name="choice-form">
+        {% csrf_token %}
+        {{ choice_form.choices }}
+        {% if ct_node.terminal %}
+            <button type="submit" class="btn btn-primary btn-sm">End Conversation</button>
+        {% else %}
+            <button type="submit" class="btn btn-primary btn-sm" onclick="clearPageSession()">Next Scene</button>
+        {% endif %}
+    </form>
+    <div id="error"></div>
+    <div class="modal fade" tabindex="-1" role="dialog" id="create_modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content"></div>
         </div>
-        <div class="modal fade" tabindex="-1" role="dialog" id="modal">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content"></div>
-            </div>
+    </div>
+    <div class="modal fade" tabindex="-1" role="dialog" id="modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content"></div>
         </div>
-        <!-- inserting these scripts at the end to be able to use all the elements in the DOM -->
-        <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
-        <script src="{% static 'conversation_templates/recorder.js' %}"></script>
-        <script>
-            $(document).ready(function() {
-                $(".bs-modal").each(function () {
-                    $(this).modalForm({
-                        formURL: $(this).data('form-url')
-                    });
-                });
+    </div>
+    <!-- inserting these scripts at the end to be able to use all the elements in the DOM -->
+    <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
+    <script src="{% static 'conversation_templates/recorder.js' %}"></script>
+    <script>
+        const videoPlayer = document.getElementById("videoPlayer");
+        const audioControls = document.getElementById("controls");
+        const nextButton = document.getElementById("nextButton");
+        const choiceForm = document.getElementById("choice-form");
+        const errorElement = document.getElementById("error");
 
+        $(document).ready(function() {
+            // Check which part of page user should be on, if page refresh
+            if (sessionStorage.getItem("toChoices") === "true") {
+              choicePage();
+            } else {
+                choiceForm.style.display = "none";
+            }
+
+            // Persist record attempts
+            recordAttempts = JSON.parse(sessionStorage.getItem("recordAttempts"));
+            if (recordAttempts === -1) {
+               recordAttempts = {{ recording_attempts }};
+               sessionStorage.setItem("recordAttempts", JSON.stringify(recordAttempts));
+            }
+
+            // Disable controls
+            if (recordAttempts <= 0) {
+                toggleAudioControls(true, true);
+            } else {
+                toggleAudioControls(false, true);
+            }
+            displayRecordingAttempts();
+
+            // Modal for exit button
+            $(".bs-modal").each(function () {
+                $(this).modalForm({
+                    formURL: $(this).data("form-url")
+                });
+            });
+
+            {% if allow_typed_response %}
                 // Make input for custom response required when radio is clicked
                 $('.node-choice').change(function () {
                     console.log('click')
@@ -92,32 +128,54 @@
                 if($('#id_choice-custom').is(':checked')){
                     $('#id_custom-input').attr('required', true);
                 };
-            });
-            {% if not audio_response %}
-                document.getElementById("choice-form").style.display = "none";
-            {% else %}
-                toggleElementDisplay();
             {% endif %}
+        });
 
-            function saveRecording(blob) {
-                let token = '{{ csrf_token }}';
-                let formData = new FormData();
-                formData.append('data', blob);
-                $.ajax({
-                    headers: { "X-CSRFToken": token },
-                    type: 'POST',
-                    url: '{% url 'save-audio' %}',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    cache: false,
-                });
+        function saveRecording(blob) {
+            let token = "{{ csrf_token }}";
+            let formData = new FormData();
+            formData.append('data', blob);
+            $.ajax({
+                headers: { "X-CSRFToken": token },
+                type: "POST",
+                url: "{% url 'save-audio' %}",
+                data: formData,
+                processData: false,
+                contentType: false,
+                cache: false,
+                success: function (url) {
+                    updateAudio(url);
+                }
+            });
+        }
+
+        function toChoices() {
+            if (audioResponse.getAttribute("src") === "") {
+                errorElement.innerText = "Must provide audio response";
+            } else {
+                sessionStorage.setItem("toChoices", "true");
+                choicePage();
             }
-        </script>
-        <!-- Optional JavaScript -->
-        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+        }
+
+        function choicePage() {
+            videoPlayer.style.display = "none";
+            audioControls.style.display = "none";
+            nextButton.style.display = "none";
+            choiceForm.style.display = "block";
+            info.style.display = "none";
+            errorElement.innerText = "";
+        }
+
+        function clearPageSession() {
+           sessionStorage.setItem("toChoices", "false");
+           sessionStorage.setItem("recordAttempts", JSON.stringify(-1));
+        }
+    </script>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
     </body>
     {% block extrahead %} {% endblock %}
 

@@ -147,10 +147,12 @@ class TemplateNodeChoiceForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         ct_node = kwargs.pop('ct_node', None)
+        allow_typed_response = kwargs.pop('allow_typed_response', None)
         choice_list = TemplateNodeChoice.objects.filter(parent_template_node=ct_node)
         super(TemplateNodeChoiceForm, self).__init__(*args, **kwargs)
         self.fields['choices'].queryset = TemplateNodeChoice.objects.filter(parent_template_node=ct_node)
-        self.fields['choices'].widget = CustomChoiceRadioSelectWidget(name="choice-widget", data_list=choice_list)
+        if allow_typed_response:
+            self.fields['choices'].widget = CustomChoiceRadioSelectWidget(name="choice-widget", data_list=choice_list)
 
     def is_valid(self):
         valid = super(TemplateNodeChoiceForm, self).is_valid()
