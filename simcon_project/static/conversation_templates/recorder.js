@@ -75,7 +75,6 @@ function stopRecording() {
 function updateAudio(url) {
 	audioResponse.src = url;
 	audioPlayer.load();
-	nextButton.disabled = false;
 }
 
 function toggleAudioControls(record, stop) {

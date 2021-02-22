@@ -1,5 +1,5 @@
 body {
-    background-color: #e8e8e8;
+    background-color: dimgrey;
 }
 
 /**
@@ -81,4 +81,8 @@ Pagination style
     -khtml-opacity: 0.5;      /* khtml, old safari */
     -moz-opacity: 0.5;      /* mozilla, netscape */
     opacity: 0.5;      /* fx, safari, opera */
+}
+
+.pointer-on-hover {
+    cursor: pointer;
 }
