@@ -2,10 +2,19 @@
     Button to select which feedback to view from view-feedback-modal
  -->
 {% block content %}
+{% if record.feedback_read == False %}
     <button
         class="bs-modal btn btn-outline-primary" type="button" name="button"
         data-form-url="{% url 'feedback:view-feedback' record.id  %}"
         onclick="select_click(this)">
-        Select
+        New
     </button>
+{% else %}
+    <button
+        class="bs-modal btn btn-outline-primary" type="button" name="button"
+        data-form-url="{% url 'feedback:view-feedback' record.id  %}"
+        onclick="select_click(this)">
+        Read
+    </button>
+{% endif %}
 {% endblock %}
