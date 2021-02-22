@@ -33,8 +33,9 @@
                                 <option value="{{ student.id }}">{{ student.email }}</option>
                             {% endfor %}
                         </select>
-                        <input type="submit" class="btn btn-sm btn-outline-secondary" value="Students"><br/><br/>
+                        <input type="submit" class="btn btn-sm btn-outline-secondary" value="add students"><br/><br/>
                     </form>
+                 <button id="create-student" class="btn btn-outline-secondary" type="button" name="button">Create Student</button>
                 </div>
                 {% render_table stu_table %}
             </div>
@@ -61,7 +62,14 @@
         </div>
 
     </div>
+
      <div class="modal fade" tabindex="-1" role="dialog" id="modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content"></div>
+        </div>
+    </div>
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="create_modal">
         <div class="modal-dialog" role="document">
             <div class="modal-content"></div>
         </div>
@@ -75,6 +83,10 @@
                 });
             });
             $('.student-select-multiple').select2();
+            $("#create-student").modalForm({
+                formURL: "{% url 'create-student' %}",
+                modalID: "#create_modal"
+            });
         });
 
     </script>

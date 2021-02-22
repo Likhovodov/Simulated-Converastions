@@ -1,6 +1,6 @@
-from users.forms import SendEmail, NewLabel, AddToLabel
+from users.forms import SendEmail, NewLabel, AddToLabel, AddStudentForm
 from django.contrib.sites.shortcuts import get_current_site
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from users.models import Student, Researcher, SubjectLabel
@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from users.views.researcher_home import is_researcher
 from django_tables2 import RequestConfig
-from bootstrap_modal_forms.generic import BSModalDeleteView
+from bootstrap_modal_forms.generic import BSModalDeleteView, BSModalCreateView
 from django.urls import reverse_lazy
 import functools
 import operator
@@ -19,7 +19,8 @@ from django.db.models import Q
 
 
 class AllStudentList(tables.Table):  # collects info from students to display on the table
-    delete = tables.TemplateColumn(template_name='remove_student_button.html', verbose_name='')
+    delete = tables.TemplateColumn(template_name='delete_student_button.html', verbose_name='')
+    remove = tables.TemplateColumn(template_name='remove_student_button.html', verbose_name='')
 
     class Meta:
         attrs = {'class': 'table table-sm', 'id': 'student-table'}
@@ -30,6 +31,13 @@ class AllStudentList(tables.Table):  # collects info from students to display on
 class LabelList(tables.Table):  # collects the table names
     label_name = tables.Column(linkify={"viewname": "student-management", "args": [tables.A("label_name")]},
                                accessor='label_name', verbose_name='Label Name')
+    delete = tables.TemplateColumn(template_name='delete_label_button.html', verbose_name='')
+
+    class Meta:
+        attrs = {'class': 'table table-sm', 'id': 'label-table'}
+        model = SubjectLabel
+        fields = ['label_name']
+
 
 @user_passes_test(is_researcher)
 def student_management(request, name="All Students"):
@@ -84,21 +92,12 @@ def student_management(request, name="All Students"):
             else:
                 messages.error(request, 'Invalid input', fail_silently=False)
 
-        if request.POST.get('email'):
-            form = AddToLabel(request.POST)
-
+        if request.POST.get('Students'):
+            label = SubjectLabel.objects.get(label_name=name)
+            form = AddStudentForm(request.POST)
             if form.is_valid():
-                email = form.cleaned_data.get('email')
-                # checks to make sure user exists
-                if Student.objects.filter(email=email):
-
-                    # adds student to current label
-                    user = Student.objects.get(email=email)
-                    label = SubjectLabel.objects.get(label_name=name, researcher=added_by)
-                    label.students.add(user)
-
-                else:
-                    messages.error(request, 'Student does not already exist', fail_silently=False)
+                for student in request.POST.getlist('Students'):
+                    label.students.add(student)
             else:
                 messages.error(request, 'Invalid input', fail_silently=False)
 
@@ -115,13 +114,15 @@ def student_management(request, name="All Students"):
                                    fail_silently=False)
 
     # creates the table for the labels
-    all_lbl = SubjectLabel.objects.filter(researcher=added_by).values('label_name')
+    all_lbl = SubjectLabel.objects.filter(researcher=added_by)
     label_table = LabelList(all_lbl, prefix="1-")
-    RequestConfig(request, paginate={"per_page": 20}).configure(label_table)
+    RequestConfig(request, paginate={"per_page": 10}).configure(label_table)
 
     # creates the table for the students in current label
     stu_contents = SubjectLabel.objects.get(label_name=name, researcher=added_by).students.all()
     student_table = AllStudentList(stu_contents, prefix="2-")
+    if name == "All Students":
+        student_table.exclude = ('remove',)
     RequestConfig(request, paginate={"per_page": 10}).configure(student_table)
 
     add_students = Student.objects.filter(added_by=added_by)
@@ -131,21 +132,39 @@ def student_management(request, name="All Students"):
                                                         'lbl_table': label_table, 'add_students': add_students})
 
 
-def add_students_to_label(request, pk):
-    label = get_object_or_404(SubjectLabel, pk=pk)
-    print("*")
-    if request.POST.get('Students'):
-        print("&")
-        form = AddStudentForm(request.POST)
-        if form.is_valid():
-            for student in request.POST.getlist('Students'):
-                label.students.add(student)
+def student_remove_view(request, pk):
+    if request.POST:
+        back = request.POST.get('back')
+        back_len = len(back)
+        name = back[21:back_len-1]
+        label = SubjectLabel.objects.get(label_name=name).students
+        student = Student.objects.get(id=pk)
+        label.remove(student)
+        return redirect(back)
+
+
+def delete_label_view(request, pk):
+    if request.POST:
+        back = request.POST.get('back')
+        label = SubjectLabel.objects.get(id=pk)
+        label.delete()
+        return redirect(back)
+
+
+class StudentCreateView(BSModalCreateView):
+    """
+    A modal that appears on top of the main_view to create a folder
+    """
+    model = Student
+    template_name = 'student_creation_modal.html'
+    success_url = reverse_lazy('student-management')
+    form_class = SendEmail
 
 
 class StudentDeleteView(BSModalDeleteView):
     """
-    Deletes a template. Confirmation modal pops up to make sure
-    the user wants to delete a template.
+    Deletes a student. Confirmation modal pops up to make sure
+    the user wants to delete that student.
     """
     model = Student
     template_name = 'student_delete_modal.html'

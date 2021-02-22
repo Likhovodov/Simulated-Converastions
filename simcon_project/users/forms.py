@@ -3,8 +3,7 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import CustomUser, Student, SubjectLabel, Researcher
 import django_tables2 as tables
 from django.forms import ModelForm
-from django_select2 import forms as s2forms
-from django.core.exceptions import ValidationError
+from bootstrap_modal_forms.forms import BSModalModelForm
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -42,20 +41,10 @@ class StudentTable(tables.Table):
         model = Student
 
 
-class StudentWidget(s2forms.ModelSelect2MultipleWidget):
-    search_fields = [
-        "name__icontains",
-    ]
-
-
-class AddStudentForm(forms.ModelForm):
+class AddStudentForm(forms.Form):
     class Meta:
-        model = SubjectLabel
-        fields = ['students']
-        widgets = {
-            "students": StudentWidget,
-        }
-
+        model = Student
+        fields = ['email']
 
 class PassReset(forms.Form):
     email = forms.EmailField(max_length=254, required=True)
@@ -70,8 +59,12 @@ class AddToLabel(forms.Form):
     email = forms.EmailField(max_length=254, required=True, widget=forms.TextInput(attrs={'placeholder': 'Student email'}), label='')
 
 
-class SendEmail(forms.Form):
+class SendEmail(BSModalModelForm):
     student_email = forms.EmailField(max_length=254, required=True, widget=forms.TextInput(attrs={'placeholder': 'Student email'}), label='')
+
+    class Meta:
+        model = Student
+        fields = ['email']
 
 
 class NewLabel(forms.Form):
