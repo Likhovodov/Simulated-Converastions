@@ -49,9 +49,7 @@ class CompletedTemplatesTable(tables.Table):
     completion_date = tables.Column(accessor='conversation_templates__template_responses__completion_date',
                                     verbose_name='Last Response')
     attempts_left = tables.Column(verbose_name='Attempts Left')
-    feedback_read = tables.Column(verbose_name='Feedback Read')
     feedback = tables.TemplateColumn(verbose_name='', template_name='feedback/view_feedback_button.html')
-
 
 
 class ModalFeedbackTable(tables.Table):
@@ -89,7 +87,6 @@ def student_view(request):
                                                             student=student.first())
             last_response = responses.aggregate(Max('completion_date'))
             attempts_left = assignment.response_attempts - len(responses)
-            feedback_read = responses.aggregate(Min('feedback_read'))
 
             if attempts_left < 0:
                 attempts_left = 0
@@ -101,8 +98,7 @@ def student_view(request):
                                           "date_assigned": assignment.date_assigned,
                                           "conversation_templates__template_responses__completion_date":
                                               last_response['completion_date__max'],
-                                          "attempts_left": attempts_left,
-                                          "feedback_read": feedback_read['feedback_read__min']
+                                          "attempts_left": attempts_left
                                           })
             if last_response['completion_date__max'] is None and attempts_left > 0:
                 incomplete_templates.append(assigned_template_row)
