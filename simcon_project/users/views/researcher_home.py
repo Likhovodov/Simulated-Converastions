@@ -21,7 +21,7 @@ class ResponseTable(tables.Table):
         attrs = {'class': 'table table-sm', 'id': 'response-table'}
         model = TemplateResponse
         fields = ['template', 'name', 'completion_date',
-                  'feedback', 'altered_rating']
+                  'feedback', 'altered_rating', 'feedback_read']
 
 
 def is_researcher(user):
