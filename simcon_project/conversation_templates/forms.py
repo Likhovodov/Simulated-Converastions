@@ -90,11 +90,25 @@ class SelectTemplateForm(forms.Form):
         initial = kwargs.pop('initial')
         super().__init__(*args, **kwargs)
         if request.user and initial:
-            templates = ConversationTemplate.objects.filter(researcher=request.user.id).exclude(name=initial).order_by(Lower('name'))
-            template_list = [(ConversationTemplate.objects.get(name=initial).id, initial)]
+            if request.COOKIES.get('show_archived') == "True":
+                templates = ConversationTemplate.objects.filter(researcher=request.user.id).exclude(
+                    id=initial.id).order_by(Lower('name'))
+            else:
+                templates = ConversationTemplate.objects.filter(researcher=request.user.id, archived=False).exclude(
+                    id=initial.id).order_by(Lower('name'))
+            select_text_initial = split_creation_date(str(initial.creation_date.astimezone()))
+            template_list = [(initial.id, f"{initial.name}: {select_text_initial}")]
             for template in templates:
-                template_list.append((template.id, template.name))
+                select_text = split_creation_date(str(template.creation_date.astimezone()))
+                template_list.append((template.id, f"{template.name}: {select_text}"))
             self.fields['templates'] = forms.ChoiceField(choices=template_list)
+
+
+def split_creation_date(creation_date):
+    creation_date = creation_date.rsplit('-', 1)[0]
+    if '.' in creation_date:
+        creation_date = creation_date.split('.')[0]
+    return creation_date
 
 
 class CustomChoiceRadioSelectWidget(forms.RadioSelect):
