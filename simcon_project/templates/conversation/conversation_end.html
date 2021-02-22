@@ -1,6 +1,7 @@
 {% load render_table from django_tables2 %}
 {% load static %}
 <!DOCTYPE html>
+{% block content %}
 <html lang="en">
     <head>
         <meta charset="utf-8">
@@ -18,8 +19,9 @@
         </style>
     </head>
     <body>
-        <h1>Simulated Conversations</h1>
-        <a style="float:right" href="{% url 'student-view' %}" class="button">Exit conversation</a>
+        <div style="clear:both">
+            <h1 style="float:left">Simulated Conversations</h1>
+        </div>
         <div style="clear:both">
             <h3 style="float:left">{{ ct }}</h3>
             <h3 style="float:right"><small>{{ request.user }}</small></h3>
@@ -41,19 +43,20 @@
                     <input type="text" name="{{ response.id }}" id="{{ response.id }}"><br>
                 </div>
             {% endfor %}
-
-            Rate your performance:<br>
-            <input type="radio" name="{{ ct_response.self_rating }}" id="{{ ct_response.self_rating }}" value=1>
-            <label for="{{ ct_response.self_rating }}">1 - Very Unsatisfied</label><br>
-            <input type="radio" name="{{ ct_response.self_rating }}" id="{{ ct_response.self_rating }}" value=2>
-            <label for="{{ ct_response.self_rating }}">2 - Unsatisfied</label><br>
-            <input type="radio" name="{{ ct_response.self_rating }}" id="{{ ct_response.self_rating }}" value=3>
-            <label for="{{ ct_response.self_rating }}">3 - Somewhat Satisfied</label><br>
-            <input type="radio" name="{{ ct_response.self_rating }}" id="{{ ct_response.self_rating }}" value=4>
-            <label for="{{ ct_response.self_rating }}">4 - Satisfied</label><br>
-            <input type="radio" name="{{ ct_response.self_rating }}" id="{{ ct_response.self_rating }}" value=5>
-            <label for="{{ ct_response.self_rating }}">5 - Very Satisfied</label><br>
-            <button type="submit" class="btn btn-primary btn-sm">Finish</button>
+            {% if allow_self_rating %}
+                Rate your performance:<br>
+                <input type="radio" name="{{ ct_response.self_rating }}" id="{{ ct_response.self_rating }}" value=1>
+                <label for="{{ ct_response.self_rating }}">1 - Very Unsatisfied</label><br>
+                <input type="radio" name="{{ ct_response.self_rating }}" id="{{ ct_response.self_rating }}" value=2>
+                <label for="{{ ct_response.self_rating }}">2 - Unsatisfied</label><br>
+                <input type="radio" name="{{ ct_response.self_rating }}" id="{{ ct_response.self_rating }}" value=3>
+                <label for="{{ ct_response.self_rating }}">3 - Somewhat Satisfied</label><br>
+                <input type="radio" name="{{ ct_response.self_rating }}" id="{{ ct_response.self_rating }}" value=4>
+                <label for="{{ ct_response.self_rating }}">4 - Satisfied</label><br>
+                <input type="radio" name="{{ ct_response.self_rating }}" id="{{ ct_response.self_rating }}" value=5>
+                <label for="{{ ct_response.self_rating }}">5 - Very Satisfied</label><br>
+            {% endif %}
+                <button type="submit" class="btn btn-primary btn-sm">Finish</button>
         </form>
         <script>
             const form = document.getElementById('trans-form')
@@ -87,3 +90,4 @@
     </body>
     {% block extrahead %} {% endblock %}
 </html>
+{% endblock %}
