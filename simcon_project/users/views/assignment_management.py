@@ -78,7 +78,7 @@ class AssignmentDeleteView(BSModalDeleteView):
     """
     model = Assignment
     template_name = 'assignment_management/assignment_delete_modal.html'
-    success_message = 'Success: Assignment was deleted.'
+    success_message = None
     success_url = reverse_lazy('ass-management:main')
 
     def get(self, request, *args, **kwargs):
