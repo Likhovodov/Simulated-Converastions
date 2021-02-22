@@ -51,34 +51,10 @@ def student_management(request, name="All Students"):
     # if the table for All Students is deleted or does not exist, make it and add all students the researcher
     # has added and add them to it.
     if not SubjectLabel.objects.filter(label_name='All Students', researcher=added_by):
-       all_stu_lbl = SubjectLabel().create_label('All Students', added_by)
+       all_stu_lbl = SubjectALabel().create_label('All Students', added_by)
        all_students = Student.objects.filter(added_by=added_by, is_active=True)
        for stud in all_students:
            all_stu_lbl.students.add(stud)
-
-    if request.method == "GET":
-        if request.POST.get('student_email'):  # create new student
-            student_email = request.GET.get('student_email')
-            user = Student.objects.get(email=student_email)
-            user.set_unusable_password()
-
-            # adds a student to the "All Students" label
-            label = SubjectLabel.objects.get(label_name="All Students", researcher=added_by)
-            label.students.add(user)
-
-            # collects the current domain of the website and the users uid
-            current_site = get_current_site(self.request)
-            site = current_site.domain
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-
-            # creates the subject and message content for the emails
-            subject = 'Activate your Simulated Conversations account'
-            message = 'Hi, \nPlease register here: \nhttp://' + site + '/student/register/' \
-                      + uid + '\n'
-
-            # sends the email
-            send_mail(subject, message, 'simulated.conversation@mail.com', [email], fail_silently=False)
-
 
     # if researcher presses a submit button
     if request.method == "POST":
@@ -152,22 +128,86 @@ class StudentCreateView(BSModalCreateView):
 
     def form_valid(self, form):
         email = form.cleaned_data['student_email']
-        #print(email)
 
         if not (Student.objects.filter(email=email) and Researcher.objects.filter(email=email)):
             # creates a student with blank fist and last names, then the password is set to unusable
             added = self.request.user.id
             form.instance.added_by = Researcher.objects.get(id=added)
-            form.instance.first_name = ""
-            form.instance.last_name = ""
-            form.instance.password = ""
             form.instance.email = email
+            form.instance.last_name = ""
+            form.instance.first_name = ""
+            form.instance.password = ""
         else:
+            print("******")
             messages.error(self.request, 'Student already exists', fail_silently=False)
         return super().form_valid(form)
 
+    def post(self, request, *args, **kwargs):
+        self.form_valid()
+        email = request.POST.get('student_email')
+        added = request.user
+        added_by = Researcher.objects.get(email=added.email)
+        last_name = ""
+        first_name = ""
+        password = "Password"
+        print("in post")
+        print(email)
+        if not Student.objects.filter(email=email):
+            user = Student.objects.create(email=email, first_name=first_name, last_name=last_name,
+                                          password=password, added_by=added_by, )
 
+            # adds a student to the "All Students" label
+            label = SubjectLabel.objects.get(label_name="All Students", researcher=added_by)
+            label.students.add(user)
+
+            # collects the current domain of the website and the users uid
+            current_site = get_current_site(request)
+            site = current_site.domain
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+            # creates the subject and message content for the emails
+            subject = 'Activate your Simulated Conversations account'
+            message = 'Hi, \nPlease register here: \nhttp://' + site + '/student/register/' \
+                      + uid + '\n'
+
+            # sends the email
+            send_mail(subject, message, 'simcon.dev@gmail.com', [email], fail_silently=False)
+        return redirect('student-management')
+"""        print(request.POST)
+        email = request.POST.get('student_email')
+        #added = request.user
+        #added_by = Researcher.objects.get(email=added.email)
+        #last_name = ""
+        #first_name = ""
+        #password = "Password"
+
+        #user = Student.objects.create(email=email, first_name=first_name, last_name=last_name,
+        #password=password, added_by=added_by, )
+
+        user = Student.objects.get(email=email)
+        user.set_unusable_password()
+
+        # adds a student to the "All Students" label
+        label = SubjectLabel.objects.get(label_name="All Students", researcher=added_by)
+        label.students.add(user)
+
+        # collects the current domain of the website and the users uid
+        current_site = get_current_site(request)
+        site = current_site.domain
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+        # creates the subject and message content for the emails
+        subject = 'Activate your Simulated Conversations account'
+        message = 'Hi, \nPlease register here: \nhttp://' + site + '/student/register/' \
+                  + uid + '\n'
+
+        # sends the email
+        send_mail(subject, message, 'simcon.dev@gmail.com', [email], fail_silently=False)
+
+        return redirect('student-management')
+"""
 class StudentDeleteView(BSModalDeleteView):
+
     """
     Deletes a student. Confirmation modal pops up to make sure
     the user wants to delete that student.
