@@ -13,6 +13,8 @@ from users.views.researcher_home import is_researcher
 from django_tables2 import RequestConfig
 from bootstrap_modal_forms.generic import BSModalDeleteView, BSModalCreateView
 from django.urls import reverse_lazy
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 import functools
 import operator
 from django.db.models import Q
@@ -51,10 +53,10 @@ def student_management(request, name="All Students"):
     # if the table for All Students is deleted or does not exist, make it and add all students the researcher
     # has added and add them to it.
     if not SubjectLabel.objects.filter(label_name='All Students', researcher=added_by):
-       all_stu_lbl = SubjectALabel().create_label('All Students', added_by)
-       all_students = Student.objects.filter(added_by=added_by, is_active=True)
-       for stud in all_students:
-           all_stu_lbl.students.add(stud)
+        all_stu_lbl = SubjectALabel().create_label('All Students', added_by)
+        all_students = Student.objects.filter(added_by=added_by, is_active=True)
+        for stud in all_students:
+            all_stu_lbl.students.add(stud)
 
     # if researcher presses a submit button
     if request.method == "POST":
@@ -138,11 +140,12 @@ class StudentCreateView(BSModalCreateView):
             form.instance.first_name = ""
             form.instance.password = ""
         else:
-            print("******")
             messages.error(self.request, 'Student already exists', fail_silently=False)
         return super().form_valid(form)
 
-    def post(self, request, *args, **kwargs):
+
+    """
+    def post_saving(self, request, *args, **kwargs):
         self.form_valid()
         email = request.POST.get('student_email')
         added = request.user
@@ -173,7 +176,9 @@ class StudentCreateView(BSModalCreateView):
             # sends the email
             send_mail(subject, message, 'simcon.dev@gmail.com', [email], fail_silently=False)
         return redirect('student-management')
-"""        print(request.POST)
+    """
+    """
+    print(request.POST)
         email = request.POST.get('student_email')
         #added = request.user
         #added_by = Researcher.objects.get(email=added.email)
@@ -205,7 +210,7 @@ class StudentCreateView(BSModalCreateView):
         send_mail(subject, message, 'simcon.dev@gmail.com', [email], fail_silently=False)
 
         return redirect('student-management')
-"""
+    """
 class StudentDeleteView(BSModalDeleteView):
 
     """
