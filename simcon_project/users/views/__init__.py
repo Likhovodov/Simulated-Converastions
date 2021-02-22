@@ -5,5 +5,7 @@ from .researcher_registration import researcher_registration
 from .student_settings_page import student_settings_view
 from .student_home import student_view
 from .student_management import student_management, StudentDeleteView, student_remove_view, delete_label_view, StudentCreateView
+from .assignment_management import assignment_management_view, view_settings, view_templates, view_students, AssignmentDeleteView
 from .student_registration import student_registration
 from .logout import logout
+from .create_assignment import *

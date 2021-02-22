@@ -92,4 +92,4 @@ class NewResearcherCreationForm(forms.Form):
 class AddResearcherForm(ModelForm):
     class Meta:
         model = Researcher
-        fields = ['email']
+        fields = ('email',)

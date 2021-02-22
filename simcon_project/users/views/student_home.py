@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import user_passes_test
-from django.db.models import Max
+from django.db.models import Max, Min
 from users.models import *
 from conversation_templates.models import *
 import django_tables2 as tables
 from django_tables2 import RequestConfig
+import datetime
+from tzlocal import get_localzone
 
 
 def is_student(user):
@@ -47,7 +49,9 @@ class CompletedTemplatesTable(tables.Table):
     completion_date = tables.Column(accessor='conversation_templates__template_responses__completion_date',
                                     verbose_name='Last Response')
     attempts_left = tables.Column(verbose_name='Attempts Left')
+    feedback_read = tables.Column(verbose_name='Feedback Read')
     feedback = tables.TemplateColumn(verbose_name='', template_name='feedback/view_feedback_button.html')
+
 
 
 class ModalFeedbackTable(tables.Table):
@@ -55,9 +59,12 @@ class ModalFeedbackTable(tables.Table):
     Table of dates where responses were completed and a button to view the feedback on them
     """
     completion_date = tables.Column(verbose_name='Completion Date', accessor='completion_date', orderable=False)
-    self_rating = tables.Column(verbose_name='Self Rating', accessor='self_rating', orderable=False)
+    altered_rating = tables.Column(verbose_name= 'Self Rating', accessor= 'self_rating_to_string', orderable=False)
     feedback = tables.TemplateColumn(verbose_name='', template_name='feedback/select_feedback_button.html',
                                      orderable=False)
+    class Meta:
+        fields = ['completion_date', 'altered_rating', 'feedback']
+        model = TemplateResponse
 
 
 @user_passes_test(is_student)
@@ -72,15 +79,18 @@ def student_view(request):
     # get the Student object matching logged in student
     student = Student.objects.filter(id=request.user.id)
     # get the assignments for that student
-    assignments = Assignment.objects.filter(students=student.first())
+    now = datetime.datetime.now(get_localzone())
+    assignments = Assignment.objects.filter(students=student.first()).filter(date_assigned__lte=now)
     # for each assignment, get all templates contained. Get most recent response by the student for each template
     for assignment in assignments:
-        templates_in_assignment = ConversationTemplate.objects.filter(assignments=assignment)
+        templates_in_assignment = ConversationTemplate.objects.filter(assignments=assignment, archived=False)
         for template in templates_in_assignment:
             responses = TemplateResponse.objects.filter(assignment=assignment, template=template,
                                                             student=student.first())
             last_response = responses.aggregate(Max('completion_date'))
-            attempts_left = assignment.attempts - len(responses)
+            attempts_left = assignment.response_attempts - len(responses)
+            feedback_read = responses.aggregate(Min('feedback_read'))
+
             if attempts_left < 0:
                 attempts_left = 0
 
@@ -91,7 +101,9 @@ def student_view(request):
                                           "date_assigned": assignment.date_assigned,
                                           "conversation_templates__template_responses__completion_date":
                                               last_response['completion_date__max'],
-                                          "attempts_left": attempts_left})
+                                          "attempts_left": attempts_left,
+                                          "feedback_read": feedback_read['feedback_read__min']
+                                          })
             if last_response['completion_date__max'] is None:
                 incomplete_templates.append(assigned_template_row)
             else:

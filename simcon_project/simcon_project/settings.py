@@ -39,12 +39,14 @@ INSTALLED_APPS = [
     # Our apps
     'users',
     'conversation_templates',
+    'scheduler',
 
     # Third-party apps
     'bootstrap_modal_forms',
     'django_tables2',
     'embed_video',
-    'django_cleanup.apps.CleanupConfig',
+    "django_apscheduler",
+    'django_cleanup.apps.CleanupConfig',  # This must be last in INSTALLED_APPS
 ]
 
 MIDDLEWARE = [
@@ -78,7 +80,7 @@ TEMPLATES = [
 ]
 
 # Tell select2 which cache configuration to use:
-#SELECT2_CACHE_BACKEND = "default"
+SELECT2_CACHE_BACKEND = "default"
 
 WSGI_APPLICATION = 'simcon_project.wsgi.application'
 
@@ -131,12 +133,12 @@ USE_TZ = True
 # Email
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'simcon.dev@gmail.com'
 EMAIL_HOST_PASSWORD = 'zhtsjuriiabkdahg'
-EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'simcon.dev@gmail.com'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
@@ -158,3 +160,14 @@ DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap4.html"
 MEDIAFILES_DIRS = [
     os.path.join(BASE_DIR, 'static/media')
 ]
+
+# See https://docs.djangoproject.com/en/dev/ref/settings/#datetime-format for format string
+# syntax details.
+APSCHEDULER_DATETIME_FORMAT = "m/d/Y h:i A"
+# Maximum run time allowed for jobs that are triggered manually via the Django admin site, which
+# prevents admin site HTTP requests from timing out.
+#
+# Longer running jobs should probably be handed over to a background task processing library
+# that supports multiple background worker processes instead (e.g. Dramatiq, Celery, Django-RQ,
+# etc. See: https://djangopackages.org/grids/g/workers-queues-tasks/ for popular options).
+APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds

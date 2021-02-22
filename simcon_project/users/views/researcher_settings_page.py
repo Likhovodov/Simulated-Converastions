@@ -26,7 +26,7 @@ class ResearcherTable(tables.Table):
     first_name = tables.Column(accessor='first_name')
     last_name = tables.Column(accessor='last_name')
     email_address = tables.Column(accessor='email')
-    delete = tables.TemplateColumn(verbose_name='', template_name='settings/delete_or_remove_template_button.html')
+    delete = tables.TemplateColumn(verbose_name='', template_name='settings/buttons_template.html')
 
 
 class ResearcherDeleteView(BSModalDeleteView):
@@ -103,10 +103,13 @@ def get_current_researchers(request):
     :param request:
     :return:
     """
-    researchers = Researcher.objects.all()
-    researchers_table = ResearcherTable(researchers)
-    researchers_table.paginate(page=request.GET.get("page", 1), per_page=10)
-    return researchers_table
+    researchers = Researcher.objects.exclude(id=request.user.id)
+    if researchers.count() > 0:
+        researchers_table = ResearcherTable(researchers)
+        researchers_table.paginate(page=request.GET.get("page", 1), per_page=10)
+        return researchers_table
+    else:
+        return None
 
 
 @user_passes_test(is_researcher)

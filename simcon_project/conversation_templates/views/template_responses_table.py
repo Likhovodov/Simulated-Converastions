@@ -60,7 +60,7 @@ class TemplateResponsesView(UserPassesTestMixin, LoginRequiredMixin, SingleTable
         export_format = request.GET.get("_export", None)
         context = {
             "table": response_table,
-            "form": SelectTemplateForm(request=request, initial=template.name)
+            "form": SelectTemplateForm(request=request, initial=template)
         }
 
         # Code needed to export table as .xls
