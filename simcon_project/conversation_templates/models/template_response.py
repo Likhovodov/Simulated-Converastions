@@ -31,3 +31,19 @@ class TemplateResponse(models.Model):
 
     def get_absolute_url(self):
         return reverse('conversation-end', kwargs={'ct_response_id': self.id})
+    
+    def self_rating_to_string(self):
+        self_rate = ""
+        if self.self_rating == 0:
+            self_rate = "None"
+        if self.self_rating == 1:
+            self_rate = "Very unsatisfied"
+        if self.self_rating == 2:
+            self_rate = "Unsatisfied"
+        if self.self_rating == 3:
+            self_rate = "Somewhat satisfied" 
+        if self.self_rating == 4:
+            self_rate = "Satisfied"
+        if self.self_rating == 4:
+            self_rate = "Very Satisfied"
+        return self_rate
