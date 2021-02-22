@@ -104,7 +104,7 @@ def student_view(request):
                                           "attempts_left": attempts_left,
                                           "feedback_read": feedback_read['feedback_read__min']
                                           })
-            if last_response['completion_date__max'] is None:
+            if last_response['completion_date__max'] is None and attempts_left > 0:
                 incomplete_templates.append(assigned_template_row)
             else:
                 completed_templates.append(assigned_template_row)
