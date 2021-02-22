@@ -1,14 +1,14 @@
-from django.views.generic import DeleteView, RedirectView
+from django.views.generic import DeleteView, RedirectView, CreateView
 from django.db.models import Q
 from django.urls import reverse_lazy, reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
 from users.views.researcher_home import is_researcher
 from conversation_templates.models import ConversationTemplate, TemplateFolder, TemplateResponse
-from conversation_templates.forms import FolderCreationForm
+from conversation_templates.forms import FolderCreationForm, FolderEditForm, AddTemplatesForm
 from users.models import Researcher
-from bootstrap_modal_forms.generic import BSModalCreateView, BSModalUpdateView, BSModalDeleteView
-from django_tables2 import TemplateColumn, tables, RequestConfig, A
+from bootstrap_modal_forms.generic import BSModalUpdateView, BSModalDeleteView
+from django_tables2 import TemplateColumn, tables, RequestConfig, A, SingleTableView
 import re
 
 
@@ -18,10 +18,10 @@ class FolderTemplateTable(tables.Table):
     The "delete" button has been replaced with a "remove button to
     remove a template from the folder.
     """
-    archive_button = TemplateColumn(template_name='template_management/archive_button.html', order_by='archived'
+    archive_button = TemplateColumn(template_name='template_management/buttons/archive_button.html', order_by='archived'
                                     , verbose_name='Archived')
-    edit_button = TemplateColumn(verbose_name='', template_name='template_management/edit_button.html')
-    remove_buttons = TemplateColumn(template_name='template_management/delete_or_remove_template_button.html',
+    edit_button = TemplateColumn(verbose_name='', template_name='template_management/buttons/edit_template_button.html')
+    remove_buttons = TemplateColumn(template_name='template_management/buttons/delete_or_remove_template_button.html',
                                     extra_context={"in_folder": True}, verbose_name='')
     name = tables.columns.LinkColumn('view-all-responses', args=[A('pk')])
 
@@ -36,10 +36,10 @@ class AllTemplateTable(tables.Table):
     Table for showing the templates for a specific folder.
     Only used when all templates are displayed.
     """
-    edit_button = TemplateColumn(verbose_name='', template_name='template_management/edit_button.html', order_by='name')
-    archive_button = TemplateColumn(template_name='template_management/archive_button.html', order_by='archived'
-                                    , verbose_name = '')
-    remove_buttons = TemplateColumn(template_name='template_management/delete_or_remove_template_button.html',
+    edit_button = TemplateColumn(verbose_name='', template_name='template_management/buttons/edit_template_button.html', order_by='name')
+    archive_button = TemplateColumn(template_name='template_management/buttons/archive_button.html', order_by='archived'
+                                    , verbose_name='Archived')
+    remove_buttons = TemplateColumn(template_name='template_management/buttons/delete_or_remove_template_button.html',
                                     verbose_name='')
     name = tables.columns.LinkColumn('view-all-responses', args=[A('pk')])
 
@@ -53,6 +53,9 @@ class FolderTable(tables.Table):
     """
     Table showing all folders (unique to a researcher in the future)
     """
+    edit_button = tables.columns.TemplateColumn(template_name='template_management/buttons/edit_folder_button.html',
+                                                verbose_name='')
+    delete_button = tables.columns.Column(verbose_name='')
     name = tables.columns.LinkColumn('management:folder-view', args=[A('pk')])
 
     class Meta:
@@ -97,11 +100,11 @@ def folder_view(request, pk):
     else:
         templates = current_folder.templates.filter(archived=False)
 
-    context = main_view_helper(request, templates, pk)
+    context = main_view_helper(request, templates, current_folder)
     return render(request, 'template_management/main_view.html', context)
 
 
-def main_view_helper(request, all_templates, pk):
+def main_view_helper(request, all_templates, current_folder):
     """
     Filter template table for search value and sets up folder table for the main view.
     What is displayed depends on if the user has selected a folder and if archived
@@ -110,8 +113,8 @@ def main_view_helper(request, all_templates, pk):
     templates = filter_templates(request, all_templates)
 
     if templates:
-        templates = templates.order_by('-creation_date')
-        if pk:
+
+        if current_folder:
             template_table = FolderTemplateTable(templates, prefix="1-")
         else:
             template_table = AllTemplateTable(templates, prefix="1-")
@@ -122,41 +125,65 @@ def main_view_helper(request, all_templates, pk):
 
     folders = filter_folder(request)
     if folders:
-        folders.order_by('name')
+        folders = folders.order_by('name')
         folder_table = FolderTable(folders, prefix="2-")
         RequestConfig(request, paginate={"per_page": 8}).configure(folder_table)
     else:
         folder_table = None
 
+    template_list = None
+    if current_folder:
+        template_list = ConversationTemplate.objects.filter(researcher=request.user.id, archived=False)
+        for template in current_folder.templates.all():
+            template_list = template_list.exclude(id=template.id)
+
     context = {
         'templateTable': template_table,
         'folderTable': folder_table,
-        'folder_pk': pk,
+        'current_folder': current_folder,
         'show_archived': request.COOKIES.get('show_archived'),
+        'all_folders': TemplateFolder.objects.filter(researcher=request.user),
+        'templates': templates.order_by('name'),
+        'folder_creation_form': FolderCreationForm(request=request.user),
+        'add_templates_form': AddTemplatesForm(),
+        'all_templates': template_list,
     }
 
     return context
 
 
+class FolderTableView(SingleTableView):
+    model = TemplateFolder
+    table_class = FolderTable
+    template_name = "template_management/folder_table.html"
+
+
+def create_folder(request):
+    if request.POST.get('folder_name'):
+        new_folder = FolderCreationForm(request.POST, request=request)
+        if new_folder.is_valid():
+            folder_name = new_folder.cleaned_data.get('folder_name')
+            researcher = Researcher.objects.get(id=request.user.id)
+            TemplateFolder().create_folder(folder_name, researcher)
+
+    back = request.POST.get('back', '/')
+    return redirect(back)
+
+
+def add_templates(request, pk):
+    folder = get_object_or_404(TemplateFolder, pk=pk)
+    if request.POST.get('templates'):
+        form = AddTemplatesForm(request.POST)
+        if form.is_valid():
+            for template in request.POST.getlist('templates'):
+                folder.templates.add(template)
+
+    back = request.POST.get('back', '/')
+    return redirect(back)
+
+
 class RedirectToTemplateCreation(RedirectView):
     url = reverse_lazy('management:create-conversation-template-view')
-
-
-class FolderCreateView(BSModalCreateView):
-    """
-    A modal that appears on top of the main_view to create a folder
-    """
-    template_name = 'template_management/folder_creation_modal.html'
-    form_class = FolderCreationForm
-
-    def get_success_url(self):
-        success_url = route_to_current_folder(self.request.META.get('HTTP_REFERER'))
-        return success_url
-
-    def form_valid(self, form):
-        researcher = Researcher.objects.get(pk=self.request.user.id)
-        form.instance.researcher = researcher
-        return super().form_valid(form)
 
 
 class FolderEditView(BSModalUpdateView):
@@ -164,8 +191,8 @@ class FolderEditView(BSModalUpdateView):
     A modal that appears on top of the main_view to edit the contents of a folder
     """
     model = TemplateFolder
-    template_name = 'template_management/folder_creation_modal.html'
-    form_class = FolderCreationForm
+    template_name = 'template_management/edit_folder_name_modal.html'
+    form_class = FolderEditForm
 
     def get_success_url(self):
         success_url = route_to_current_folder(self.request.META.get('HTTP_REFERER'))

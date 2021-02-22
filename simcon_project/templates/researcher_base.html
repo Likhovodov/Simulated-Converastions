@@ -10,6 +10,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="{% static './users/base.css' %}">
+    <link rel="shortcut icon" href="{% static './title_image/favicon.ico' %}" type="image/x-icon">
   </head>
   <body>
     {% block nav %}
@@ -22,6 +23,7 @@
           <li class="px-3">{% block nav-researcherView %}<a class="nav_bar_unselected" href="{% url 'researcher-view' %}">  <span >   Home   </span> </a>{% endblock %}</li>
           <li class="px-3">{% block nav-templateView %}<a class="nav_bar_unselected" href="{% url 'management:main' %}">  <span> Templates </span>  </a>{% endblock %}</li>
           <li class="px-3">{% block nav-studentmanagementView %}<a class="nav_bar_unselected" href="{% url 'student-management' %}">   Student Management   </a>{% endblock %}</li>
+            <li class="px-3">{% block nav-assignmentmanagementView %}<a class="nav_bar_unselected" href="{% url 'ass-management:main' %}"><span>Assignments  </span>  </a>{% endblock %}</li>
             {% if user.is_staff %}
                 <li class="px-3">{% block nav-researcherManagementView %}<a class="nav_bar_unselected" href="{% url 'researcher-management' %}">   Researcher Management   </a>{% endblock %}</li>
             {% endif %}

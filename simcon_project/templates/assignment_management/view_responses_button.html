@@ -1,0 +1,10 @@
+<!--
+    View responses button for assignment management 'view templates' modal
+ -->
+{% block content %}
+    <button  class="bs-modal btn btn-outline-secondary btn-sm" type="button" name="button"
+            data-form-url="{% url 'view-all-responses' record.id %}"
+            onclick="select_click(this)">
+        View All Template Responses
+    </button>
+{% endblock %}

@@ -13,8 +13,9 @@
     <link rel="stylesheet" href="{% static 'users/student_home.css' %}">
     <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
     <title>
-    {% block title %}SimCon | Student Page{% endblock %}
+    SimCon | Home
     </title>
+
   </head>
   <body>
     <div class="body-container mt-3">
@@ -25,7 +26,7 @@
           <span> No Templates to Complete </span> 
       {% endif  %}
       {% if completed_table %}
-      <h2>Completed Assignments</h2>
+      <h2>Completed Conversations</h2>
           {% render_table completed_table %}
       {% else %} 
           <span> No Completed Templates </span> 

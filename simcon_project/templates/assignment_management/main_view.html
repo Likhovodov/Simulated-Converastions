@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+{% extends "researcher_base.html" %}
+{% load static %}
+{% block nav-assignmentmanagementView %}<strong class="nav_bar_selected"> Assignments </strong>{% endblock %}
+{% load render_table from django_tables2 %}
+{% block content %}
+<html lang="en">
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Created for Simulated Conversations Senior Capstone Project">
+    <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
+    <!-- prevent line breaks when using form fields -->
+    <style type="text/css">
+    form {display:inline; margin:0px; padding:0px;}
+    </style>
+
+
+    <title>
+    {% block title %}SimCon | Assignment Management{% endblock %}
+    </title>
+
+    {% block extrahead %} {% endblock %}
+  </head>
+  <body>
+    <div class="container-fluid" style="width: 80%">
+        <div class="row">
+            <div class="col mt-3">
+                <form action="{% url 'assignments:create-assignment' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-secondary" name="create_template">Create Assignment</button>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col mt-3">
+                {% if table %}
+                    {% render_table table %}
+                {% endif %}
+            </div>
+        </div>
+    </div> <!-- /container -->
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <!-- Code needed for the modal to work properly.
+         Content in folder_creation_modal.html is rendered between "#modal-content" div
+    -->
+        <div class="modal fade" tabindex="-1" role="dialog" id="create_modal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content"></div>
+            </div>
+        </div>
+
+        <div class="modal fade" tabindex="-1" role="dialog" id="modal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content"></div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+        $(document).ready(function() {
+            $(".bs-modal").each(function () {
+                $(this).modalForm({
+                    formURL: $(this).data('form-url')
+                });
+            });
+        });
+        </script>
+  </body>
+</html>
+{% endblock %}
