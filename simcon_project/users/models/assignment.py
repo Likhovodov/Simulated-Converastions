@@ -17,13 +17,16 @@ JSONEncoder.default = JSONEncoder_newdefault
 
 class Assignment(models.Model):
     id = models.UUIDField(unique=True, editable=False, primary_key=True, default=uuid.uuid4)
-    name = models.CharField(max_length=100) 
-    date_assigned = models.DateField()
-    attempts = models.PositiveSmallIntegerField(default=1, blank=False)
+    name = models.CharField(max_length=100)
+    date_assigned = models.DateTimeField()
+    response_attempts = models.PositiveSmallIntegerField(default=1, blank=False)
     conversation_templates = models.ManyToManyField('conversation_templates.ConversationTemplate', related_name='assignments')
     students = models.ManyToManyField('users.Student', related_name='assignments')
     researcher = models.ForeignKey('users.Researcher', default=0, related_name='assignments', on_delete=models.CASCADE)
     subject_labels = models.ManyToManyField('users.SubjectLabel', related_name='assignments', blank=True)
+    recording_attempts = models.PositiveSmallIntegerField(default=1, blank=False)
+    allow_typed_response = models.BooleanField(default=False)
+    allow_self_rating = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.name}, {self.researcher}, ({self.date_assigned})"

@@ -69,7 +69,7 @@ def conversation_start(request, ct_id, assign_id):
     ct = ConversationTemplate.objects.get(id=ct_id)
     student = Student.objects.get(email=request.user)
     student_attempts = TemplateResponse.objects.filter(student=student, template=ct).count()
-    if student_attempts >= assignment.attempts:
+    if student_attempts >= assignment.response_attempts:
         return HttpResponseNotFound('<h1>Sorry, maximum number of attempts reached for this conversation.</h1>')
 
     # Else, set up conversation

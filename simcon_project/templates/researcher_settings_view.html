@@ -18,25 +18,16 @@
         </style>
 
         <title>
-            {% block title %}Simulated Conversations | Settings{% endblock %}
+            SimCon | Settings
         </title>
         <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
 
-        {% block extrahead %} {% endblock %}
     </head>
     <body>
     <div class="container-fluid mt-3" style="width: 80%">
         {% if researchers_table %}
             <h3>Researchers</h3>
             {% render_table researchers_table %}
-        {% else %}
-            <div class="row justify-content-center">
-                <div class="col-4">
-                    <br>
-                    <p>There are no researchers to display.</p>
-                    <br>
-                </div>
-            </div>
         {% endif %}
         {% if add_researcher_form %}
             <div class="row justify-content-center">

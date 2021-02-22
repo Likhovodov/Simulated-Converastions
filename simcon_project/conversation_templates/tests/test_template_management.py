@@ -114,7 +114,7 @@ class TemplateManagementTests(TestCase):
                                                    , completion_date=timezone.now(), feedback='Not bad kid')
         TemplateNodeResponse.objects.create(transcription='Hello', template_node=node1,
                                             parent_template_response=response, position_in_sequence=0,
-                                            feedback='Nice try', audio_response='notanaudio.txt')
+                                            audio_response='notanaudio.txt')
 
         self.assertEqual(TemplateNode.objects.count(), 3)
         self.assertEqual(TemplateNodeChoice.objects.count(), 2)
