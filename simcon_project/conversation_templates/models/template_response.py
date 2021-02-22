@@ -44,6 +44,6 @@ class TemplateResponse(models.Model):
             self_rate = "Somewhat satisfied" 
         if self.self_rating == 4:
             self_rate = "Satisfied"
-        if self.self_rating == 4:
+        if self.self_rating == 5:
             self_rate = "Very Satisfied"
         return self_rate
