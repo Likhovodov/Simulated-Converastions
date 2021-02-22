@@ -41,10 +41,7 @@
                         <div class="form-group">
                             <div class="mb-3">
                                 {{ field.label }}:
-                                {{ field.auto_id }}
-                                {% for error in field.errors %}
-                                    {{ error }}
-                                {% endfor %}
+                                {{ field }}
                             </div>
                         </div>
                     {% endfor %}

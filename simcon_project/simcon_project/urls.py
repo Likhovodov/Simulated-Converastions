@@ -51,9 +51,9 @@ urlpatterns = [
     path('researcher/students/<str:name>/', student_management, name="student-management"),
     path('researcher/students/', student_management, name="student-management"),
     path('researcher/assignments/', include('users.urls.ass_man_urls'), name="assignment-management"),
+    path('researcher/create-assignment/', include('users.urls.create_assignment_urls'), name="create-assignment-view"),
     path('researcher/response/<uuid:pk>/', view_response, name="view-response"),
     path('researcher/response/delete/<uuid:pk>/', ResponseDeleteView.as_view(), name="delete-response"),
-    path('researcher/create-assignment/', include('users.urls.create_assignment_urls'), name="create-assignment-view"),
 
     # Stuff researcher who is an admin can see
     path('admin/researchers/researcher-management/', researcher_management, name="researcher-management"),

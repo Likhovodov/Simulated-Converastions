@@ -49,7 +49,6 @@ class CompletedTemplatesTable(tables.Table):
     completion_date = tables.Column(accessor='conversation_templates__template_responses__completion_date',
                                     verbose_name='Last Response')
     attempts_left = tables.Column(verbose_name='Attempts Left')
-    feedback_read = tables.Column(verbose_name='Feedback Read')
     feedback = tables.TemplateColumn(verbose_name='', template_name='feedback/view_feedback_button.html')
 
 

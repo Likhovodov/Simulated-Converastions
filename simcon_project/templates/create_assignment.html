@@ -312,8 +312,8 @@
                 success: function(data){
                     if(data.success==0){
                         document.getElementById('dim-dialog').style.display = 'none'
-                        window.alert("Submitted successfully!");
-                        location.reload();
+                        alert("Submitted successfully!");
+                        window.location.replace("{% url 'ass-management:main' %}")
                     }
                     else{
                         document.getElementById('dim-dialog').style.display = 'none'
