@@ -2,7 +2,7 @@
 {% load static %}
 {% load embed_video_tags %}
 {% block content %}
-    <html lang="en">
+<html lang="en">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0 shrink-to-fit=no">
@@ -12,8 +12,9 @@
         <script src="{% static 'conversation_templates/disable_back_button.js' %}"></script>
         <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
         <title>
-            {% block title %}SimCon | Conversation Video{% endblock %}
+            SimCon | Conversation
         </title>
+    <link rel="shortcut icon" href="{% static './title_image/favicon.ico' %}" type="image/x-icon">
 
         <!-- prevent line breaks when using form fields -->
         <style type="text/css">
@@ -178,5 +179,5 @@
     </body>
     {% block extrahead %} {% endblock %}
 
-    </html>
+</html>
 {% endblock %}

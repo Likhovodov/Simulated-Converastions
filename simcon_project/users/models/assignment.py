@@ -17,8 +17,8 @@ JSONEncoder.default = JSONEncoder_newdefault
 
 class Assignment(models.Model):
     id = models.UUIDField(unique=True, editable=False, primary_key=True, default=uuid.uuid4)
-    name = models.CharField(max_length=100) 
-    date_assigned = models.DateField()
+    name = models.CharField(max_length=100)
+    date_assigned = models.DateTimeField()
     response_attempts = models.PositiveSmallIntegerField(default=1, blank=False)
     conversation_templates = models.ManyToManyField('conversation_templates.ConversationTemplate', related_name='assignments')
     students = models.ManyToManyField('users.Student', related_name='assignments')

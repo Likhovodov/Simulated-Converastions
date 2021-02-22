@@ -1,5 +1,6 @@
-<!DOCTYPE html>
 {% load render_table from django_tables2 %}
+{% load static %}
+<!DOCTYPE html>
 {% block content %}
 <html lang="en">
     <head>
@@ -8,8 +9,9 @@
         <meta name="description" content="Created for Simulated Conversations Senior Capstone Project">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
         <title>
-            {% block title %}SimCon | Conversation End{% endblock %}
+            SimCon | Conversation
         </title>
+    <link rel="shortcut icon" href="{% static './title_image/favicon.ico' %}" type="image/x-icon">
 
         <!-- prevent line breaks when using form fields -->
         <style type="text/css">

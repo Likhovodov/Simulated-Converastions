@@ -19,15 +19,13 @@
 
 
     <title>
-    {% block title %}Simulated Conversations | Settings{% endblock %}
+    SimCon | Settings
     </title>
       <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
 
-    {% block extrahead %} {% endblock %}
   </head>
   <body>
     <div class="container">
-      <h1> This is the Settings Page</h1>
             {% for message in messages %}
                 <div class="alert alert-warning">
                     <a class="close" href="#" data-dismiss="alert">×</a>

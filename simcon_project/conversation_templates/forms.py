@@ -1,29 +1,41 @@
 from django import forms
+from django.contrib import messages
 from django.db.models.functions import Lower
 from .models import TemplateFolder, TemplateNodeChoice, ConversationTemplate
 from bootstrap_modal_forms.forms import BSModalModelForm
+from django_select2 import forms as s2forms
 
 
-class SelectTemplates(forms.SelectMultiple):
-    """
-    Function needed to make the multiple templates selectable within the form.
-    """
-    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
-        option = super().create_option(name, value, label, selected, index, subindex, attrs)
-        return option
+class FolderCreationForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        request = kwargs.pop('request')
+        super().__init__(*args, **kwargs)
+        if request:
+            self.request = request
+
+    attrs = {'placeholder': 'Folder Name', 'required': "", "autocomplete": "off"}
+    folder_name = forms.CharField(max_length=TemplateFolder._meta.get_field('name').max_length,
+                                  widget=forms.TextInput(attrs=attrs), label='')
+
+    def clean(self):
+        data = self.cleaned_data
+        name = data['folder_name']
+
+        if TemplateFolder.objects.filter(name=name, researcher=self.request.user):
+            # self.add_error is still needed because of unique constraint
+            self.add_error('folder_name', f'Cannot create Folder. {name} already exists.')
+            messages.error(self.request, f'Cannot create Folder. {name} already exists.')
+
+        return data
 
 
-class FolderCreationForm(BSModalModelForm):
+class FolderEditForm(BSModalModelForm):
     """
     Form to create a TemplateFolder object
     Uses BSModalModelForm which is needed for bootstrap_modal_forms to work properly
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Only show templates unique to each user in the form.
-        if self.request.user:
-            templates = ConversationTemplate.objects.filter(researcher=self.request.user.id)
-            self.fields['templates'].queryset = templates.all()
         self.fields['name'].required = True
 
     def clean(self):
@@ -46,8 +58,22 @@ class FolderCreationForm(BSModalModelForm):
 
     class Meta:
         model = TemplateFolder
-        fields = ['name', 'templates']
-        widgets = {'templates': SelectTemplates}
+        fields = ['name']
+
+
+class TemplatesWidget(s2forms.ModelSelect2MultipleWidget):
+    search_fields = [
+        "name__icontains",
+    ]
+
+
+class AddTemplatesForm(forms.ModelForm):
+    class Meta:
+        model = TemplateFolder
+        fields = ['templates']
+        widgets = {
+            "templates": TemplatesWidget,
+        }
 
 
 class SelectTemplateForm(forms.Form):
@@ -64,11 +90,25 @@ class SelectTemplateForm(forms.Form):
         initial = kwargs.pop('initial')
         super().__init__(*args, **kwargs)
         if request.user and initial:
-            templates = ConversationTemplate.objects.filter(researcher=request.user.id).exclude(name=initial).order_by(Lower('name'))
-            template_list = [(ConversationTemplate.objects.get(name=initial).id, initial)]
+            if request.COOKIES.get('show_archived') == "True":
+                templates = ConversationTemplate.objects.filter(researcher=request.user.id).exclude(
+                    id=initial.id).order_by(Lower('name'))
+            else:
+                templates = ConversationTemplate.objects.filter(researcher=request.user.id, archived=False).exclude(
+                    id=initial.id).order_by(Lower('name'))
+            select_text_initial = split_creation_date(str(initial.creation_date.astimezone()))
+            template_list = [(initial.id, f"{initial.name}: {select_text_initial}")]
             for template in templates:
-                template_list.append((template.id, template.name))
+                select_text = split_creation_date(str(template.creation_date.astimezone()))
+                template_list.append((template.id, f"{template.name}: {select_text}"))
             self.fields['templates'] = forms.ChoiceField(choices=template_list)
+
+
+def split_creation_date(creation_date):
+    creation_date = creation_date.rsplit('-', 1)[0]
+    if '.' in creation_date:
+        creation_date = creation_date.split('.')[0]
+    return creation_date
 
 
 class CustomChoiceRadioSelectWidget(forms.RadioSelect):
@@ -83,10 +123,10 @@ class CustomChoiceRadioSelectWidget(forms.RadioSelect):
     def render(self, name, value, attrs=None, renderer=None):
         choice_html = f'<ul id="id_{name}">'
         for idx, choice in enumerate(self._list):
-            choice_html += f'<li><label for="id_choice-{idx}"><input type="radio" id="id_choice-{idx}"' \
+            choice_html += f'<li><label for="id_choice-{idx}"><input type="radio" id="id_choice-{idx}" required=""' \
                             f'name={name} value="{choice.id}" class="node-choice"> {choice.choice_text}  </label></li>'
 
-        choice_html += f'<li><label for="id_choice-custom"><input type="radio" id="id_choice-custom"' \
+        choice_html += f'<li><label for="id_choice-custom"><input type="radio" id="id_choice-custom" required=""' \
                        f'name={name} value="custom-response" class="node-choice"><input name="custom-text" type="text"'\
                        f'placeholder="Enter Custom Response" id="id_custom-input"></label></li>'
 

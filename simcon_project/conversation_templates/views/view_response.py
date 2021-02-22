@@ -15,6 +15,7 @@ def view_response(request, pk):
     if request.method == 'POST':
         if 'update-overall-feedback' in request.POST:
             response.feedback = request.POST.get('overall-feedback-input')
+            response.feedback_read = False
             response.save()
             return HttpResponseRedirect(reverse('view-response', kwargs={'pk': pk}))
         if 'update-node-transcription' in request.POST:
@@ -53,6 +54,8 @@ def view_response(request, pk):
     if user.get_is_researcher(request.user):
         return render(request, 'view_response.html', {'response_nodes': nodes, 'response': response, 'self_rating': self_rating})
     else:
+        response.feedback_read = True
+        response.save()
         return render(request, 'feedback/view_feedback.html', {'response_nodes': nodes, 'response': response, 'self_rating': self_rating})
 
 class ResponseDeleteView(BSModalDeleteView):

@@ -98,9 +98,14 @@ def conversation_start(request, ct_id, assign_id):
 
 @user_passes_test(is_student)
 def conversation_step(request, ct_node_id):
+    """
+    Renders each step in a conversation where a Student can watch the video, record a response,
+    and select a choice.
+    """
     # Check to make sure student didn't copy paste old conversation link
     check_page_authorization(request)
 
+    # Else, set up TemplateNode data
     ctx = {}
     t = '{}/conversation_step.html'.format(ct_templates_dir)
     ct_node = TemplateNode.objects.get(id=ct_node_id)
