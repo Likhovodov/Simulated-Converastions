@@ -71,14 +71,13 @@ def conversation_start(request, ct_id, assign_id):
     assignment = Assignment.objects.get(id=assign_id)
     ct = ConversationTemplate.objects.get(id=ct_id)
     student = Student.objects.get(email=request.user)
-    student_attempts = TemplateResponse.objects.filter(student=student, template=ct).count()
+    student_attempts = TemplateResponse.objects.filter(student=student, template=ct, assignment=assignment).count()
     if student_attempts >= assignment.response_attempts:
         return HttpResponseNotFound('<h1>Sorry, maximum number of attempts reached for this conversation.</h1>')
 
     # Else, set up conversation
     ctx = {}
     t = '{}/conversation_start.html'.format(ct_templates_dir)
-    ct = ConversationTemplate.objects.get(id=ct_id)
     ct_start_node = TemplateNode.objects.get(parent_template=ct, start=True)
 
     # Clear existing session data leftover from incomplete response
@@ -98,49 +97,12 @@ def conversation_start(request, ct_id, assign_id):
 
 
 @user_passes_test(is_student)
-def conversation_video(request, ct_node_id):
+def conversation_step(request, ct_node_id):
     # Check to make sure student didn't copy paste old conversation link
     check_page_authorization(request)
 
-    # Else, set up TemplateNode data
     ctx = {}
-    t = '{}/conversation_video.html'.format(ct_templates_dir)
-    ct_node = TemplateNode.objects.get(id=ct_node_id)
-    ct_node_response = TemplateNodeResponse.objects.filter(id=request.session.get('ct_node_response_id')).first()
-    ct = ct_node.parent_template
-    recording_attempts = request.session['recording_attempts']
-
-    # Check for page refresh
-    if ct_node.start and request.session.get('ct_response_id') is None:
-        ct_response = TemplateResponse.objects.create(
-            student=Student.objects.get(email=request.user),
-            template=ct,
-            assignment=Assignment.objects.get(id=request.session.get('assign_id')),
-        )
-        request.session['ct_response_id'] = str(ct_response.id)  # persist the template response in the session
-        request.session.modified = True
-
-    ctx.update({
-        'ct': ct,
-        'ct_node': ct_node,
-        'ct_node_response': ct_node_response,
-        'recording_attempts': recording_attempts,
-    })
-    return render(request, t, ctx)
-
-
-@user_passes_test(is_student)
-def conversation_choice(request, ct_node_id):
-    """
-    Renders each step in a conversation where a Student can watch the video, record a response,
-    and select a choice.
-    """
-    # Check to make sure student didn't copy paste old conversation link
-    check_page_authorization(request)
-
-    # Else, set up TemplateNode data
-    ctx = {}
-    t = '{}/conversation_choice.html'.format(ct_templates_dir)
+    t = '{}/conversation_step.html'.format(ct_templates_dir)
     ct_node = TemplateNode.objects.get(id=ct_node_id)
     ct = ct_node.parent_template
     ct_node_response = TemplateNodeResponse.objects.filter(id=request.session.get('ct_node_response_id')).first()
@@ -148,7 +110,7 @@ def conversation_choice(request, ct_node_id):
     recording_attempts = request.session['recording_attempts']
 
     # Check if page has already been completed
-    if not ct_node_response:
+    if if_visited(request, ct_node_id):
         ct_node_response = get_node_response(request, ct_node_id)
 
     # POST request
@@ -190,9 +152,18 @@ def conversation_choice(request, ct_node_id):
         # End conversation or go to next node
         if ct_node.terminal or choice is None or choice.destination_node is None:
             return redirect('conversation-end', ct_response_id=ct_response.id)
-        return redirect('conversation-video', ct_node_id=choice.destination_node.id)
+        return redirect('conversation-step', ct_node_id=choice.destination_node.id)
 
     # GET request
+    # Check for page refresh
+    if ct_node.start and request.session.get('ct_response_id') is None:
+        ct_response = TemplateResponse.objects.create(
+            student=Student.objects.get(email=request.user),
+            template=ct,
+            assignment=Assignment.objects.get(id=request.session.get('assign_id')),
+        )
+        request.session['ct_response_id'] = str(ct_response.id)  # persist the template response in the session
+        request.session.modified = True
     choice_form = TemplateNodeChoiceForm(ct_node=ct_node, allow_typed_response=allow_typed_response)
 
     ctx.update({

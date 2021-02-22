@@ -33,7 +33,7 @@
         <h3 style="float:right"><small>{{ request.user }}</small></h3>
     </div>
     <br><br>
-    <div id="embedded-video">
+    <div id="videoPlayer">
         {% video ct_node.video_url 'small' %}
         <p>{{ ct_node.description }}</p>
     </div>
@@ -44,15 +44,22 @@
     <div>
         <audio id="audioPlayer" controls>
             {% if ct_node_response %}
-            <source id="audioResponse" src="{{ ct_node_response.audio_response.url }}">
+                <source id="audioResponse" src="{{ ct_node_response.audio_response.url }}">
             {% else %}
-            <source id="audioResponse" src="">
+                <source id="audioResponse" src="">
             {% endif %}
         </audio>
     </div>
     <div id="info"></div>
-    <form id="audioForm" action="{% url 'conversation-choice' ct_node.id %}" method="GET">
-        <button type="submit" id="nextButton" class="btn btn-primary btn-sm">Next</button>
+    <button type="submit" id="nextButton" class="btn btn-primary btn-sm" onclick="toChoices()">Next</button>
+    <form id="choice-form" action="{% url 'conversation-step' ct_node.id %}" method="POST" name="choice-form">
+        {% csrf_token %}
+        {{ choice_form.choices }}
+        {% if ct_node.terminal %}
+            <button type="submit" class="btn btn-primary btn-sm">End Conversation</button>
+        {% else %}
+            <button type="submit" class="btn btn-primary btn-sm" onclick="clearPageSession()">Next Scene</button>
+        {% endif %}
     </form>
     <div id="error"></div>
     <div class="modal fade" tabindex="-1" role="dialog" id="create_modal">
@@ -69,20 +76,28 @@
     <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
     <script src="{% static 'conversation_templates/recorder.js' %}"></script>
     <script>
-        const form = document.getElementById("audioForm");
+        const videoPlayer = document.getElementById("videoPlayer");
+        const audioControls = document.getElementById("controls");
+        const nextButton = document.getElementById("nextButton");
+        const choiceForm = document.getElementById("choice-form");
         const errorElement = document.getElementById("error");
 
         $(document).ready(function() {
-            {% if ct_node_response %}
-                recordAttempts = JSON.parse(sessionStorage.getItem('recordAttempts'));
-            {% else %}
-                recordAttempts = null;
-            {% endif %}
-            if (recordAttempts === null) {
-                recordAttempts = {{ recording_attempts }};
-                sessionStorage.setItem('recordAttempts', JSON.stringify(recordAttempts));
+            // Check which part of page user should be on, if page refresh
+            if (sessionStorage.getItem("toChoices") === "true") {
+              choicePage();
+            } else {
+                choiceForm.style.display = "none";
             }
 
+            // Persist record attempts
+            recordAttempts = JSON.parse(sessionStorage.getItem("recordAttempts"));
+            if (recordAttempts === -1) {
+               recordAttempts = {{ recording_attempts }};
+               sessionStorage.setItem("recordAttempts", JSON.stringify(recordAttempts));
+            }
+
+            // Disable controls
             if (recordAttempts <= 0) {
                 toggleAudioControls(true, true);
             } else {
@@ -93,19 +108,36 @@
             // Modal for exit button
             $(".bs-modal").each(function () {
                 $(this).modalForm({
-                    formURL: $(this).data('form-url')
+                    formURL: $(this).data("form-url")
                 });
             });
+
+            {% if allow_typed_response %}
+                // Make input for custom response required when radio is clicked
+                $('.node-choice').change(function () {
+                    console.log('click')
+                    if (this.value == 'custom-response') {
+                        $('#id_custom-input').attr('required', true);
+                    } else {
+                        $('#id_custom-input').attr('required', false);
+                    }
+                });
+
+                // Make input for custom text required if radio is initially selected on page refresh
+                if($('#id_choice-custom').is(':checked')){
+                    $('#id_custom-input').attr('required', true);
+                };
+            {% endif %}
         });
 
         function saveRecording(blob) {
-            let token = '{{ csrf_token }}';
+            let token = "{{ csrf_token }}";
             let formData = new FormData();
             formData.append('data', blob);
             $.ajax({
                 headers: { "X-CSRFToken": token },
-                type: 'POST',
-                url: '{% url 'save-audio' %}',
+                type: "POST",
+                url: "{% url 'save-audio' %}",
                 data: formData,
                 processData: false,
                 contentType: false,
@@ -116,12 +148,28 @@
             });
         }
 
-        form.addEventListener("submit", (e) => {
+        function toChoices() {
             if (audioResponse.getAttribute("src") === "") {
-                e.preventDefault();
                 errorElement.innerText = "Must provide audio response";
+            } else {
+                sessionStorage.setItem("toChoices", "true");
+                choicePage();
             }
-        })
+        }
+
+        function choicePage() {
+            videoPlayer.style.display = "none";
+            audioControls.style.display = "none";
+            nextButton.style.display = "none";
+            choiceForm.style.display = "block";
+            info.style.display = "none";
+            errorElement.innerText = "";
+        }
+
+        function clearPageSession() {
+           sessionStorage.setItem("toChoices", "false");
+           sessionStorage.setItem("recordAttempts", JSON.stringify(-1));
+        }
     </script>
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
