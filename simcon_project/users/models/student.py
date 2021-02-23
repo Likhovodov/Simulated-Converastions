@@ -1,12 +1,6 @@
 from django.db import models
 from .custom_user import CustomUser
 from .subject_label import SubjectLabel
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
-from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import send_mail
-from django.db.models.signals import post_save
-#from django.contrib.sites.models import Site
 
 
 class Student(CustomUser):

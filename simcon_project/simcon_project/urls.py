@@ -59,9 +59,7 @@ urlpatterns = [
     path('researcher/students/remove/<int:pk>/', student_remove_view, name="remove-student"),
     path('researcher/labels/delete/<uuid:pk>/', delete_label_view, name="delete-label"),
     path('researcher/create/', StudentCreateView.as_view(), name="create-student"),
-    #path('researcher/label/add_students/<uuid:pk>/', add_students_to_label, name='add-students-to-label'),
 
-    #path("select2/", include("django_select2.urls")),
 ]
 
 if settings.DEBUG:

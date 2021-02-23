@@ -4,11 +4,6 @@ from .models import CustomUser, Student, SubjectLabel, Researcher
 import django_tables2 as tables
 from django.forms import ModelForm
 from bootstrap_modal_forms.forms import BSModalModelForm
-from django.core.mail import send_mail
-from django.contrib import messages
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
-from django.contrib.sites.shortcuts import get_current_site
 
 
 class CustomUserCreationForm(UserCreationForm):

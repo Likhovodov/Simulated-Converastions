@@ -6,18 +6,12 @@ from django.utils.http import urlsafe_base64_encode
 from users.models import Student, Researcher, SubjectLabel
 from django.core.mail import send_mail
 import django_tables2 as tables
-from django_tables2.config import RequestConfig
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from users.views.researcher_home import is_researcher
 from django_tables2 import RequestConfig
 from bootstrap_modal_forms.generic import BSModalDeleteView, BSModalCreateView
 from django.urls import reverse_lazy
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-import functools
-import operator
-from django.db.models import Q
 
 
 class AllStudentList(tables.Table):  # collects info from students to display on the table
@@ -121,7 +115,7 @@ def delete_label_view(request, pk):
 
 class StudentCreateView(BSModalCreateView):
     """
-    A modal that appears on top of the main_view to create a folder
+    A modal that appears on top of the main_view to create a student
     """
     model = Student
     template_name = 'student_creation_modal.html'
@@ -140,11 +134,11 @@ class StudentCreateView(BSModalCreateView):
             form.instance.first_name = ""
             form.instance.password = ""
             response = super().form_valid(form)
+
             # collects the current domain of the website and the users uid
             current_site = get_current_site(self.request)
             site = current_site.domain
             uid = urlsafe_base64_encode(force_bytes(self.object.pk))
-            #site = "127.0.0.1:8000"  # change before deployment
 
             # creates the subject and message content for the emails
             subject = 'Activate your Simulated Conversations account'
