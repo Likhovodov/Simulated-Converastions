@@ -14,6 +14,9 @@
         <title>
             SimCon | Student
         </title>
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
 
     </head>
 
@@ -24,9 +27,14 @@
                 <div class="row">
                     <form action='/researcher/students/{{ name }}/' method="post" class="ml-3">
                         {%csrf_token%}
-                        {{ form }}
-                        <input type="submit" class="btn btn-sm btn-outline-secondary" value="Add Student"><br/><br/>
+                        <select class="student-select-multiple w-100" name="Students" multiple="multiple">
+                            {% for student in add_students%}
+                                <option value="{{ student.id }}">{{ student.email }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="submit" class="btn btn-sm btn-outline-secondary" value="add students"><br/><br/>
                     </form>
+                 <button id="create-student" class="btn btn-outline-secondary" type="button" name="button">Create Student</button>
                 </div>
                 {% render_table stu_table %}
             </div>
@@ -54,6 +62,33 @@
 
     </div>
 
+     <div class="modal fade" tabindex="-1" role="dialog" id="modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content"></div>
+        </div>
+    </div>
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="create_modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content"></div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $(".bs-modal").each(function () {
+                $(this).modalForm({
+                    formURL: $(this).data('form-url')
+                });
+            });
+            $('.student-select-multiple').select2();
+            $("#create-student").modalForm({
+                formURL: "{% url 'create-student'%}",
+                modalID: "#create_modal"
+            });
+        });
+
+    </script>
     </body>
     </html>
 {% endblock %}

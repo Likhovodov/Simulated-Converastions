@@ -1,0 +1,8 @@
+<!--
+    Delete or remove button TemplateColumn template used in
+    FolderTemplateTable and AllTemplateTable
+ -->
+{% block content %}
+    <button id="delete-student" class="bs-modal btn btn-sm btn-outline-secondary" type="button" name="button"
+            data-form-url="{% url 'delete-student' record.id %}">Delete</button>
+{% endblock %}
