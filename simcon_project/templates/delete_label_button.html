@@ -1,0 +1,13 @@
+<!--
+    Delete or remove button TemplateColumn template used in
+    FolderTemplateTable and AllTemplateTable
+ -->
+{% block content %}
+    {%  if not record.label_name == "All Students" %}
+        <form method="post" action="{% url 'delete-label' record.id %}">
+            <input id="delete-label" class="bs-modal btn btn-sm btn-outline-secondary" type="submit" value="Delete">
+            <input type="hidden" name="back" value="{{ request.path }}">
+            {% csrf_token %}
+        </form>
+    {% endif %}
+{% endblock %}

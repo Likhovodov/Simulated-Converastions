@@ -47,7 +47,9 @@ INSTALLED_APPS = [
     'embed_video',
     "django_apscheduler",
     'django_cleanup.apps.CleanupConfig',  # This must be last in INSTALLED_APPS
+
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

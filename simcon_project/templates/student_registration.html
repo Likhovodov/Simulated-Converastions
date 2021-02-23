@@ -1,5 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
   <head>
 
@@ -36,6 +37,10 @@
             <p>Confirm Email:</p>
             {{form.email}}<br/><br/>
 
+            {% for error in form.email.errors %}
+            <p class="help-block">{{ error }}</p>
+            {% endfor %}
+
             <p>Full Name:</p>
             <small>First Name:</small><br/>
             {{form.first_name}}<br/>
@@ -47,6 +52,10 @@
             {{form.password1}}<br/>
             <small>Repeat Password:</small><br/>
             {{form.password2}}<br/>
+
+            {% for error in form.password2.errors %}
+            <p class="help-block">{{ error }}</p>
+            {% endfor %}
 
             <button type="submit" class="btn btn-success">Submit</button><br/><br/>
         </form>
