@@ -96,10 +96,10 @@ function submit() {
         // Determines the post url without direct hard coding.
         let currentUrl = window.location.href
         let postUrl = ""
-        if(currentUrl.split("edit").length == 1) {
-           postUrl = currentUrl
-        } else {
+        if(modelObject) {
             postUrl = currentUrl.split("edit")[0] + "new/"
+        } else {
+            postUrl = currentUrl
         }
 
         // Make POST request
@@ -117,7 +117,11 @@ function submit() {
             if(response.ok) {
                 formSubmitted = true
                 alert("Template saved successfully")
-                window.location.replace(window.location.href.split('new')[0])
+                if(modelObject) {
+                    window.location.replace(window.location.href.split('edit')[0])
+                } else {
+                    window.location.replace(window.location.href.split('new')[0])
+                }
             } else throw new Error(response.status)
         }).catch(function (error) {
             alert("Something went wrong while submitting the form\n" + error)
