@@ -4,45 +4,51 @@
 {% block nav-studentView %}<strong class="nav_bar_selected"> Home </strong>{% endblock %}
 {% load render_table from django_tables2 %}
 {% block content %}
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
-    <meta name="description" content="Created for Simulated Conversations Senior Capstone Project">
-    <link rel="stylesheet" href="{% static 'users/student_home.css' %}">
-    <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
-    <title>
-    SimCon | Home
-    </title>
+    <html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
+        <meta name="description" content="Created for Simulated Conversations Senior Capstone Project">
+        <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
+        <title>
+            SimCon | Home
+        </title>
 
-  </head>
-  <body>
-    <div class="body-container mt-3">
-      {% if incomplete_table %}
-      <h2>Current Assignments</h2>
-          {% render_table incomplete_table %}
-      {% else %} 
-          <span> No Templates to Complete </span> 
-      {% endif  %}
-      {% if completed_table %}
-      <h2>Completed Conversations</h2>
-          {% render_table completed_table %}
-      {% else %} 
-          <span> No Completed Templates </span> 
-      {% endif  %}
-     </div><!-- /container -->
+    </head>
+    <body>
+    <div class="container-fluid mt-3" style="width: 95%">
+        <div class="row">
+            <div class="col" style="text-align: center;">
+                {% if incomplete_table %}
+                    <h2>Current Assignments</h2>
+                    {% render_table incomplete_table %}
+                {% else %}
+                    <span> No Templates to Complete </span>
+                {% endif  %}
+            </div>
+            <div class="col"  style="text-align: center;">
+                {% if completed_table %}
+                    <h2>Completed Conversations</h2>
+                    {% render_table completed_table %}
+                {% else %}
+                    <span> No Completed Templates </span>
+                {% endif  %}
+            </div>
+
+        </div>
+    </div><!-- /container -->
 
     <div class="modal fade" tabindex="-1" role="dialog" id="create_modal">
-      <div class="modal-dialog" role="document">
-                <div class="modal-content"></div>
-      </div>
+        <div class="modal-dialog" role="document">
+            <div class="modal-content"></div>
+        </div>
     </div>
 
     <div class="modal fade" tabindex="-1" role="dialog" id="modal">
-      <div class="modal-dialog" role="document">
-                <div class="modal-content"></div>
-      </div>
+        <div class="modal-dialog" role="document">
+            <div class="modal-content"></div>
+        </div>
     </div>
     <script type="text/javascript">
         $(document).ready(function() {
@@ -53,6 +59,6 @@
             });
         });
     </script>
-  </body>
-</html>
+    </body>
+    </html>
 {% endblock %}

@@ -2,7 +2,7 @@
 {% load static %}
 <!DOCTYPE html>
 {% block content %}
-<html lang="en">
+    <html lang="en">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0 shrink-to-fit=no">
@@ -11,83 +11,111 @@
         <title>
             SimCon | Conversation
         </title>
-    <link rel="shortcut icon" href="{% static './title_image/favicon.ico' %}" type="image/x-icon">
-
-        <!-- prevent line breaks when using form fields -->
-        <style type="text/css">
-            form {display:inline; margin:0px; padding:0px;}
-        </style>
+        <link rel="shortcut icon" href="{% static './title_image/favicon.ico' %}" type="image/x-icon">
+        <link rel="stylesheet" type="text/css" href="{% static 'users/base.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'users/center_container.css' %}">
     </head>
+
     <body>
-        <div style="clear:both">
-            <h1 style="float:left">Simulated Conversations</h1>
+    <div class="container-fluid mt-3" style="width: 50%">
+        <div class="card">
+            <div class="card-body mr-3 ml-3">
+
+                {#                <p>{{ ct.description }}</p>#}
+                {#                {%  render_table ct_node_table %}#}
+                <div id="error"></div>
+                <form action="{{ ct_response.get_absolute_url }}" method="POST" id="trans-form">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <div class="row">
+                                <div class="col">
+                                    <h3>{{ ct }}</h3>
+                                </div>
+
+                                <div class="col" style="text-align: right">
+                                    <button type="submit" class="btn btn-outline-secondary btn-lg">Finish</button>
+                                </div>
+                            </div>
+                        </li>
+                        {% if allow_self_rating %}
+                            <li class="list-group-item">
+                                <h5 class="mb-3"><strong>Rate your performance:</strong></h5>
+                                <label for="rating-very-unsatisfied" class="ml-2">
+                                    <input type="radio" name="{{ ct_response.self_rating }}" id="rating-very-unsatisfied" value=1 class="mr-2">Very Unsatisfied
+                                </label><br>
+                                <label for="rating-unsatisfied" class="ml-2">
+                                    <input type="radio" name="{{ ct_response.self_rating }}" id="rating-unsatisfied" value=2 class="mr-2">Unsatisfied
+                                </label><br>
+                                <label for="rating-somewhat-satisfied" class="ml-2">
+                                    <input type="radio" name="{{ ct_response.self_rating }}" id="rating-somewhat-satisfied" value=3 class="mr-2">Somewhat Satisfied
+                                </label><br>
+                                <label for="rating-satisfied" class="ml-2">
+                                    <input type="radio" name="{{ ct_response.self_rating }}" id="rating-satisfied" value=4 class="mr-2">Satisfied
+                                </label><br>
+                                <label for="rating-very-satisfied" class="ml-2">
+                                    <input type="radio" name="{{ ct_response.self_rating }}" id="rating-very-satisfied" value=5 class="mr-2">Very Satisfied
+                                </label><br>
+                            </li>
+                        {% endif %}
+                        {% csrf_token %}
+                        {% for response in ct_node_responses %}
+                            <li class="list-group-item">
+                                <div class="row">
+                                    <div class="col ">
+                                        <div class="center-container" style="height: 100%">
+                                            <div id="audio">
+                                                <audio controls src="{{ response.audio_response.url }}">
+                                                </audio>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div id="transcription">
+                                            <label for="{{ response.id }}">Transcription: </label>
+                                            <textarea class="form-control" name="{{ response.id }}" id="{{ response.id }}"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                        <li class="list-group-item">
+                        </li>
+                    </ul>
+                </form>
+            </div>
         </div>
-        <div style="clear:both">
-            <h3 style="float:left">{{ ct }}</h3>
-            <h3 style="float:right"><small>{{ request.user }}</small></h3>
-        </div>
-        <br><br>
-        <p>{{ ct.description }}</p>
-        {%  render_table ct_node_table %}
-        <div id="error"></div>
-        <form action="{{ ct_response.get_absolute_url }}" method="POST" id="trans-form">
-            {% csrf_token %}
+    </div>
+
+    <script>
+        const form = document.getElementById('trans-form')
+        const errorElement = document.getElementById('error')
+
+        form.addEventListener('submit', (e) => {
+            let message = '';
+            let transcription = '';
             {% for response in ct_node_responses %}
-                <div id="audio">
-                    <p>{{ forloop.counter }})</p>
-                    <audio controls src="{{ response.audio_response.url }}">
-                    </audio>
-                </div>
-                <div id="transcription">
-                    <label for="{{ response.id }}">Transcription: </label>
-                    <input type="text" name="{{ response.id }}" id="{{ response.id }}"><br>
-                </div>
-            {% endfor %}
-            {% if allow_self_rating %}
-                Rate your performance:<br>
-                <input type="radio" name="{{ ct_response.self_rating }}" id="{{ ct_response.self_rating }}" value=1>
-                <label for="{{ ct_response.self_rating }}">1 - Very Unsatisfied</label><br>
-                <input type="radio" name="{{ ct_response.self_rating }}" id="{{ ct_response.self_rating }}" value=2>
-                <label for="{{ ct_response.self_rating }}">2 - Unsatisfied</label><br>
-                <input type="radio" name="{{ ct_response.self_rating }}" id="{{ ct_response.self_rating }}" value=3>
-                <label for="{{ ct_response.self_rating }}">3 - Somewhat Satisfied</label><br>
-                <input type="radio" name="{{ ct_response.self_rating }}" id="{{ ct_response.self_rating }}" value=4>
-                <label for="{{ ct_response.self_rating }}">4 - Satisfied</label><br>
-                <input type="radio" name="{{ ct_response.self_rating }}" id="{{ ct_response.self_rating }}" value=5>
-                <label for="{{ ct_response.self_rating }}">5 - Very Satisfied</label><br>
-            {% endif %}
-                <button type="submit" class="btn btn-primary btn-sm">Finish</button>
-        </form>
-        <script>
-            const form = document.getElementById('trans-form')
-            const errorElement = document.getElementById('error')
-
-            form.addEventListener('submit', (e) => {
-                let message = '';
-                let transcription = '';
-                {% for response in ct_node_responses %}
-                    transcription = document.getElementById("{{ response.id }}");
-                    if (transcription.value.length > 1000) {
-                        message = 'Transcription is too long';
-                        document.getElementById("{{ response.id }}").style.borderColor = "red";
-                    }
-                    else {
-                        document.getElementById("{{ response.id }}").style.borderColor = "green";
-                    }
-                {% endfor %}
-
-                if (message !== '') {
-                    e.preventDefault();
-                    errorElement.innerText = message;
+                transcription = document.getElementById("{{ response.id }}");
+                if (transcription.value.length > 1000) {
+                    message = 'Transcription is too long';
+                    document.getElementById("{{ response.id }}").style.borderColor = "red";
                 }
-            })
-        </script>
-        <!-- Optional JavaScript -->
-        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+                else {
+                    document.getElementById("{{ response.id }}").style.borderColor = "green";
+                }
+            {% endfor %}
+
+            if (message !== '') {
+                e.preventDefault();
+                errorElement.innerText = message;
+            }
+        })
+    </script>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
     </body>
     {% block extrahead %} {% endblock %}
-</html>
+    </html>
 {% endblock %}
