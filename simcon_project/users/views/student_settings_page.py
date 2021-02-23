@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import user_passes_test
 from users.views.student_home import is_student
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib import messages
 from django.shortcuts import render
 
 
@@ -13,6 +14,7 @@ def student_settings_view(request):
         if form.is_valid():
             form.save()
             update_session_auth_hash(request, form.user)
+            messages.success(request, 'Password reset successfully')
     else:
         form = PasswordChangeForm(user=request.user)
 
