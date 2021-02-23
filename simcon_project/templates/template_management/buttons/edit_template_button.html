@@ -1,6 +1,0 @@
-{% block content %}
-    <form action="{% url 'management:edit_conversation_template' record.id %}" method="post">
-        {% csrf_token %}
-        <button id="edit-template" class="btn btn-sm btn-outline-secondary pr-4 pl-4" type="submit">Edit</button>
-    </form>
-{% endblock %}

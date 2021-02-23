@@ -18,13 +18,9 @@ class FolderTemplateTable(tables.Table):
     The "delete" button has been replaced with a "remove button to
     remove a template from the folder.
     """
-    archive_button = TemplateColumn(template_name='template_management/buttons/archive_button.html', order_by='archived'
-                                    , verbose_name='Archived')
-    edit_button = TemplateColumn(verbose_name='', template_name='template_management/buttons/edit_template_button.html')
-    remove_buttons = TemplateColumn(template_name='template_management/buttons/delete_or_remove_template_button.html',
-                                    extra_context={"in_folder": True}, verbose_name='')
+    hamburger_button = TemplateColumn(verbose_name='',
+                                      template_name='template_management/buttons/template_hamburger_button.html')
     name = tables.columns.LinkColumn('view-all-responses', args=[A('pk')])
-
     class Meta:
         attrs = {'class': 'table table-sm', 'id': 'template-table'}
         model = ConversationTemplate
@@ -36,11 +32,8 @@ class AllTemplateTable(tables.Table):
     Table for showing the templates for a specific folder.
     Only used when all templates are displayed.
     """
-    edit_button = TemplateColumn(verbose_name='', template_name='template_management/buttons/edit_template_button.html', order_by='name')
-    archive_button = TemplateColumn(template_name='template_management/buttons/archive_button.html', order_by='archived'
-                                    , verbose_name='Archived')
-    remove_buttons = TemplateColumn(template_name='template_management/buttons/delete_or_remove_template_button.html',
-                                    verbose_name='')
+    hamburger_button = TemplateColumn(verbose_name='',
+                                      template_name='template_management/buttons/template_hamburger_button.html')
     name = tables.columns.LinkColumn('view-all-responses', args=[A('pk')])
 
     class Meta:
