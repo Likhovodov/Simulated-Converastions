@@ -135,7 +135,7 @@ class StudentCreateView(BSModalCreateView):
             form.instance.password = ""
             response = super().form_valid(form)
 
-            if self.request.is_ajax():
+            if not self.request.is_ajax():
                 # collects the current domain of the website and the users uid
                 current_site = get_current_site(self.request)
                 site = current_site.domain
