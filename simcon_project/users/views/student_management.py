@@ -47,7 +47,7 @@ def student_management(request, name="All Students"):
     # if the table for All Students is deleted or does not exist, make it and add all students the researcher
     # has added and add them to it.
     if not SubjectLabel.objects.filter(label_name='All Students', researcher=added_by):
-        all_stu_lbl = SubjectALabel().create_label('All Students', added_by)
+        all_stu_lbl = SubjectLabel().create_label('All Students', added_by)
         all_students = Student.objects.filter(added_by=added_by, is_active=True)
         for stud in all_students:
             all_stu_lbl.students.add(stud)
