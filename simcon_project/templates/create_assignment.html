@@ -1,7 +1,7 @@
 {% extends "researcher_base.html" %}
 {% load static %}
 {% block content %}
-<!DOCTYPE html>
+    <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8" />
@@ -20,97 +20,151 @@
 
     <div class="dim" id="dim-dialog" title="Event"></div>
 
-    <form class="border rounded mx-auto mt-5 p-3 " style="min-height: 100vh;">
-        <h2>Simulated Conversations</h2>
-        <!--left part -->
-        <div class="left" style="width:45%; float:left; margin-left:2%; margin-top:20px;">
-            <input type="button" class="btn btn-outline-secondary" onclick="sub()" value="Submit"/>
-            <div class="form-group">
-                <label for="assign_name">Assignment name</label>
-                <input type="text" class="form-control col-lg-10" id="assign_name" required>
-            </div>
-            <div class="form-group">
-                <label for="assign_now">Assign Now?</label>
-                <input type="checkbox" id="assign_now" onchange="checkbox()" checked>
-                <div id="datetime_fields" style="display: none">
-                    <div class="input-group date" id="datetimepicker1" data-target-input="nearest">
-                        <input type="text" class="form-control datetimepicker-input" data-target="#datetimepicker1"
-                               id="assign_datetime" placeholder="Please select an assignment start date."/>
-                        <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
-                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+    <div class="container-fluid" style="width: 80%">
+        <form class="border rounded mx-auto mt-5 p-3 " style="min-height: 100vh;">
+            <!--left part -->
+            <div class="row">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="assign_name">Assignment name:</label>
+                                <input type="text" class="form-control col-lg-10" id="assign_name" required style="width: 70%">
+                            </div>
+                            <div class="form-group mb-0">
+                                <div class="row mb-3">
+                                    <div class="col">
+                                <input type="checkbox" id="assign_now" onchange="checkbox()" checked>
+                                <label for="assign_now">Assign Now</label>
+                                <div id="datetime_fields" style="display: none">
+                                    <div class="input-group date" id="datetimepicker1" data-target-input="nearest" style="width: 0%">
+                                        <input type="text" class="form-control datetimepicker-input" data-target="#datetimepicker1"
+                                               id="assign_datetime" placeholder="Please select an assignment start date."/>
+                                        <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
+                                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="row mb-3">
+                                    <div class="col">
+                                        <label for="response_attempts">Response Attempts Per Template:</label><br>
+                                        <input type="number" id="response_attempts" name="response_attempts" value="1" required><br>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col">
+                                    <label for="record_attempts">Recording Attempts Per Step:</label><br>
+                                    <input type="number" id="record_attempts" name="record_attempts" value=1 required><br>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col">
+                                        <input type="checkbox" id="allow_typed_response" name="allow_typed_response">
+                                        <label for="allow_typed_response">Allow Typed Response</label><br>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col">
+                                    <input type="checkbox" id="allow_self_rating" name="allow_self_rating">
+                                    <label for="allow_self_rating">Allow Self Rating</label><br>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="button" class="btn btn-outline-secondary" onclick="sub()" value="Submit"/>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div>
-                <label for="response_attempts">Response Attempts Per Template</label>
-                <input type="number" id="response_attempts" name="response_attempts" value="1" required><br>
-                <label for="record_attempts">Recording Attempts Per Step</label>
-                <input type="number" id="record_attempts" name="record_attempts" value=1 required><br>
-                <label for="allow_typed_response">Allow Typed Response?</label>
-                <input type="checkbox" id="allow_typed_response" name="allow_typed_response"><br>
-                <label for="allow_self_rating">Allow Self Rating?</label>
-                <input type="checkbox" id="allow_self_rating" name="allow_self_rating"><br>
-            </div>
 
-            <!--add student -->
-            <br>
-            <div class="add" style="display: flex;">
-                <select id="stu_list"></select>
-                <input type="button" class="btn btn-outline-secondary ml-3" value="Add student" onclick="add_student(stu_list.value)">
-            </div>
-            <br>
-            <table class="table table-bordered table-hover col-lg-10">
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Delete</th>
-                </tr>
-                </thead>
-                <tbody id="student-table-body"></tbody>
-            </table>
-        </div>
+                <!--right part -->
+                <div class="col">
+                    <div class="row mb-3">
+                        <div class="col template-table">
+                            <div class="add mb-3" style="display: flex;">
+                                <select id="temp_list"></select>
+                                <input type="button" class="btn btn-outline-secondary ml-3" value="Add template" onclick="add_template(temp_list.value)">
+                            </div>
+                        </div>
 
-        <!--right part -->
-        <div class="right" style="width:47%; float: right; margin-right:2%; margin-top:20px;">
+                        <div class="col label-table" style="display: none">
+                            <!--add label -->
+                            <div class="add mb-3" style="display: flex;">
+                                <select id="label_list"></select>
+                                <input type="button" class="btn btn-outline-secondary ml-3" value="Add label" onclick="add_label(label_list.value)">
+                            </div>
+                        </div>
 
-            <!--add template -->
-            <div class="add" style="display: flex;">
-                <select id="temp_list"></select>
-                <input type="button" class="btn btn-outline-secondary ml-3" value="Add template" onclick="add_template(temp_list.value)">
-            </div>
-            <br>
-            <table class="table table-bordered table-hover col-lg-10">
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Date</th>
-                    <th>Delete</th>
-                </tr>
-                </thead>
-                <tbody id="template-table-body"></tbody>
-            </table>
-            <br>
+                        <div class="col student-table" style="display: none">
+                            <!--add student -->
+                            <div class="add mb-3" style="display: flex;">
+                                <select id="stu_list"></select>
+                                <input type="button" class="btn btn-outline-secondary ml-3" value="Add student" onclick="add_student(stu_list.value)">
+                            </div>
+                        </div>
 
-            <!--add label -->
-            <div class="add" style="display: flex;">
-                <select id="label_list"></select>
-                <input type="button" class="btn btn-outline-secondary ml-3" value="Add label" onclick="add_label(label_list.value)">
+                        <div class="col" style="text-align: right;">
+                            <select id="table-toggle">
+                                <option value="templates">Templates</option>
+                                <option value="students">Students</option>
+                                <option value="labels">Labels</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!--add template -->
+                    <div class="template-table">
+                        <table class="table table-bordered table-hover col-lg">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Date</th>
+                                <th>Delete</th>
+                            </tr>
+                            </thead>
+                            <tbody id="template-table-body"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="label-table" style="display: none">
+                        <!--add label -->
+                        <table class="table table-bordered table-hover col-lg">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Number of students</th>
+                                <th>Delete</th>
+                            </tr>
+                            </thead>
+                            <tbody id="label-table-body"></tbody>
+                        </table>
+                    </div>
+
+
+                    <div class="student-table" style="display: none">
+
+                        <table class="table table-bordered table-hover col-lg">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Delete</th>
+                            </tr>
+                            </thead>
+                            <tbody id="student-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
-            <br>
-            <table class="table table-bordered table-hover col-lg-10">
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Number of students</th>
-                    <th>Delete</th>
-                </tr>
-                </thead>
-                <tbody id="label-table-body"></tbody>
-            </table>
-        </div>
-    </form>
+        </form>
+
+    </div>
     </body>
 
     <script>
@@ -141,6 +195,26 @@
             var stu_list=document.getElementById("stu_list");
             var temp_list=document.getElementById("temp_list");
             var label_list=document.getElementById("label_list");
+
+            $("#table-toggle").on("input", function (event) {
+                let selectedOption = document.getElementById("table-toggle").value
+                switch (selectedOption) {
+                    case ("templates"):
+                        for(const element of document.getElementsByClassName("template-table")) element.style.display = "block";
+                        for(const element of document.getElementsByClassName("label-table")) element.style.display = "none";
+                        for(const element of document.getElementsByClassName("student-table")) element.style.display = "none";
+                        break;
+                    case ("labels"):
+                        for(const element of document.getElementsByClassName("template-table")) element.style.display = "none";
+                        for(const element of document.getElementsByClassName("label-table")) element.style.display = "block";
+                        for(const element of document.getElementsByClassName("student-table")) element.style.display = "none";
+                        break;
+                    case ("students"):
+                        for(const element of document.getElementsByClassName("template-table")) element.style.display = "none";
+                        for(const element of document.getElementsByClassName("label-table")) element.style.display = "none";
+                        for(const element of document.getElementsByClassName("student-table")) element.style.display = "block";
+                }
+            })
 
             // Add student options
             stu_list.insertAdjacentHTML('afterbegin',
