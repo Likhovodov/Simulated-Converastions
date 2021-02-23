@@ -15,14 +15,8 @@ class AssignmentsTable(tables.Table):
     """
     name = tables.Column(verbose_name='Name', accessor='name')
     date_assigned = tables.Column(verbose_name='Date Assigned', accessor='date_assigned')
-    view_settings = tables.TemplateColumn(verbose_name='',
-                                          template_name='assignment_management/view_settings_button.html')
-    view_templates = tables.TemplateColumn(verbose_name='',
-                                           template_name='assignment_management/view_templates_button.html')
-    view_students = tables.TemplateColumn(verbose_name='',
-                                          template_name='assignment_management/view_students_button.html')
-    delete = tables.TemplateColumn(verbose_name='',
-                                   template_name='assignment_management/delete_ass_button.html')
+    hamburger_button = tables.TemplateColumn(verbose_name='',
+                                             template_name='assignment_management/assignment_hamburger_button.html')
 
 
 class AssignmentDetailsTable(tables.Table):
@@ -49,7 +43,6 @@ class TemplatesContainedTable(tables.Table):
     description = tables.Column(verbose_name='Description',
                                 accessor='description',
                                 orderable=False)
-    # creation_date = tables.Column(verbose_name='Creation Date', accessor='creation_date', orderable=False)
     view_responses = tables.TemplateColumn(verbose_name='',
                                            template_name='assignment_management/view_responses_button.html',
                                            orderable=False)
@@ -106,20 +99,6 @@ def assignment_management_view(request):
 
     # build each row for table. one assignment per row
     for assignment in assignments:
-        total_assigned_templates = ConversationTemplate.objects.filter(assignments=assignment).count() * \
-                                   assignment.students.count()
-        templates = ConversationTemplate.objects.filter(assignments=assignment)
-        total_completed_templates = TemplateResponse.objects.exclude(completion_date=None) \
-                                                            .filter(assignment=assignment,
-                                                                    template__in=templates) \
-                                                            .values('student') \
-                                                            .distinct().count()
-        if total_assigned_templates <= 0:
-            completion_percent = 'N/A'
-        else:
-            completion_percent = total_completed_templates / total_assigned_templates
-            completion_percent = str(completion_percent*100)[:-2] + '%'
-
         row_data = {}
         row_data.update({"id": assignment.id,
                         "name": assignment.name,
