@@ -1,7 +1,7 @@
-<!DOCTYPE html>
 {% extends "researcher_base.html" %}
 {% load static %}
 {% block content %}
+<!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8" />
@@ -20,7 +20,7 @@
 
     <div class="dim" id="dim-dialog" title="Event"></div>
 
-    <form class="bg-light border rounded mx-auto mt-5 p-3 " style="min-height: 100vh;">
+    <form class="border rounded mx-auto mt-5 p-3 " style="min-height: 100vh;">
         <h2>Simulated Conversations</h2>
         <!--left part -->
         <div class="left" style="width:45%; float:left; margin-left:2%; margin-top:20px;">
@@ -60,7 +60,7 @@
                 <input type="button" class="btn btn-outline-secondary ml-3" value="Add student" onclick="add_student(stu_list.value)">
             </div>
             <br>
-            <table class="table table-bordered table-hover col-lg-10" style="background-color: white;">
+            <table class="table table-bordered table-hover col-lg-10">
                 <thead>
                 <tr>
                     <th>Name</th>
@@ -81,7 +81,7 @@
                 <input type="button" class="btn btn-outline-secondary ml-3" value="Add template" onclick="add_template(temp_list.value)">
             </div>
             <br>
-            <table class="table table-bordered table-hover col-lg-10" style="background-color: white;">
+            <table class="table table-bordered table-hover col-lg-10">
                 <thead>
                 <tr>
                     <th>Name</th>
@@ -99,7 +99,7 @@
                 <input type="button" class="btn btn-outline-secondary ml-3" value="Add label" onclick="add_label(label_list.value)">
             </div>
             <br>
-            <table class="table table-bordered table-hover col-lg-10" style="background-color: white;">
+            <table class="table table-bordered table-hover col-lg-10">
                 <thead>
                 <tr>
                     <th>Name</th>
