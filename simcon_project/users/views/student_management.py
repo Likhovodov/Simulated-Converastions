@@ -135,18 +135,19 @@ class StudentCreateView(BSModalCreateView):
             form.instance.password = ""
             response = super().form_valid(form)
 
-            # collects the current domain of the website and the users uid
-            current_site = get_current_site(self.request)
-            site = current_site.domain
-            uid = urlsafe_base64_encode(force_bytes(self.object.pk))
+            if self.request.is_ajax():
+                # collects the current domain of the website and the users uid
+                current_site = get_current_site(self.request)
+                site = current_site.domain
+                uid = urlsafe_base64_encode(force_bytes(self.object.pk))
 
-            # creates the subject and message content for the emails
-            subject = 'Activate your Simulated Conversations account'
-            message = 'Hi, \nPlease register here: \nhttp://' + site + '/student/register/' \
-                      + uid + '\n'
+                # creates the subject and message content for the emails
+                subject = 'Activate your Simulated Conversations account'
+                message = 'Hi, \nPlease register here: \nhttp://' + site + '/student/register/' \
+                          + uid + '\n'
 
-            # sends the email
-            send_mail(subject, message, 'simcon.dev@gmail.com', [email], fail_silently=False)
+                # sends the email
+                send_mail(subject, message, 'simcon.dev@gmail.com', [email], fail_silently=False)
             return response
         return self.success_url
 
