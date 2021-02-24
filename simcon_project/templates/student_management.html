@@ -1,15 +1,12 @@
 {% extends "researcher_base.html" %}
 {% load static %}
-{% block nav-studentmanagementView %}<strong class="nav_bar_selected"> Student Management</strong>{% endblock %}
+{% block nav-studentmanagementView %}<strong class="nav_bar_selected"> Students </strong>{% endblock %}
 {% load render_table from django_tables2 %}
 {% block content %}
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <!-- prevent line breaks when using form fields -->
-        <style type="text/css">
-            form {display:inline; margin:0px; padding:0px;}
-        </style>
 
         <title>
             SimCon | Student
@@ -19,38 +16,52 @@
         <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
 
     </head>
+    <body>
 
     <div class="container-fluid mt-3" style="width: 80%">
         <div class="row">
             <div class="col-md-8">
-                <p>Add Student to the "{{ name }}" label:</p>
-                <div class="row">
-                    <form action='/researcher/students/{{ name }}/' method="post" class="ml-3">
-                        {%csrf_token%}
-                        <select class="student-select-multiple w-100" name="Students" multiple="multiple">
-                            {% for student in add_students%}
-                                <option value="{{ student.id }}">{{ student.email }}</option>
-                            {% endfor %}
-                        </select>
-                        <input type="submit" class="btn btn-sm btn-outline-secondary" value="add students"><br/><br/>
-                    </form>
-                 <button id="create-student" class="btn btn-outline-secondary" type="button" name="button">Create Student</button>
+                <p class="mb-2">Add Student to the <strong>"{{ name }}"</strong> label:</p>
+                <div class="row mb-3">
+                    <div class="col-9">
+                        <form action='/researcher/students/{{ name }}/' method="post" class="ml-3">
+                            {%csrf_token%}
+                            <div class="row">
+                                <div class="col pl-0 pr-0">
+                                    <select class="student-select-multiple w-100" name="Students" multiple="multiple">
+                                        {% for student in add_students%}
+                                            <option value="{{ student.id }}">{{ student.email }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col pl-0">
+                                    <input type="submit" class="btn btn-outline-secondary ml-3" value="Add Students">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-3" style="text-align: right">
+                        <button id="create-student" class="btn btn-outline-secondary" type="button" name="button">Register Student</button>
+                    </div>
                 </div>
-                {% render_table stu_table %}
+                <div class="table-container" >
+                    {% render_table stu_table %}
+                </div>
             </div>
 
 
             <div class="col-md-4">
-                <p>Add New Label:</p>
-                <div class="row">
+                <p class="mb-2">Add New Label:</p>
+                <div class="row mb-3">
                     <form action='/researcher/students/{{ name }}/' method="post" class="ml-3">
                         {%csrf_token%}
                         {{ form2 }}
-                        <input type="submit" class="btn btn-sm btn-outline-secondary" value="Add Label"><br/><br/>
+                        <input type="submit" class="btn btn-outline-secondary ml-2" value="Add Label">
                     </form>
                 </div>
-
-                {% render_table lbl_table %}
+                <div class="table-container" >
+                    {% render_table lbl_table %}
+                </div>
                 {% for message in messages %}
                     <div class="alert alert-warning">
                         <a class="close" href="#" data-dismiss="alert">×</a>
@@ -59,10 +70,9 @@
                 {% endfor %}
             </div>
         </div>
-
     </div>
 
-     <div class="modal fade" tabindex="-1" role="dialog" id="modal">
+    <div class="modal fade" tabindex="-1" role="dialog" id="modal">
         <div class="modal-dialog" role="document">
             <div class="modal-content"></div>
         </div>

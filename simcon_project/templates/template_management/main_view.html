@@ -12,138 +12,135 @@
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     </head>
     <body>
-        {% for message in messages %}
-            <div class="alert alert-warning">
-                <a class="close" href="#" data-dismiss="alert">×</a>
-                {{ message }}
-            </div>
-        {% endfor %}
-        <div class="container-fluid" style="width: 80%">
-            <div class="row">
-                <!-- Templates -->
-                <div class="col-8 mt-3">
-                    {% if current_folder %}
-                        <h3 style="text-align: center">{{ current_folder.name }}</h3>
-                    {% else %}
-                        <h3 style="text-align: center">All Templates</h3>
-                    {% endif %}
-                    <div class="row">
-                        <div class="col">
-                            {% if current_folder %}
-                                <form action="{% url 'management:folder-view' current_folder.id %}" method="get" autocomplete="off">
-                                    {% csrf_token %}
-                                    <input list="templates" name="template-filter" type="text" placeholder="Search Templates" class="mb-3">
-                                </form>
-                            {% else %}
-                                <form action="{% url 'management:main'%}" method="get" autocomplete="off">
-                                    {% csrf_token %}
-                                    <input list="templates" name="template-filter" type="text" placeholder="Search Templates" class="mb-3">
-                                </form>
-                            {% endif %}
-                            <datalist id="templates">
-                                {% for template in templates %}
-                                    <option value="{{ template.name }}"></option>
-                                {% endfor %}
-                            </datalist>
-                        </div>
-                        <!-- Show/Hide Archived Templates Button -->
-                        <div class="col">
-                            {% if show_archived == 'True' %}
-                                <form action="{% url 'management:display-archived-templates' 0 %}" method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="back" value="{{ request.path }}">
-                                    <button name="show-archived" class ="btn btn-outline-secondary" type="submit">Hide Archived</button>
-                                </form>
-                            {% else %}
-                                <form action="{% url 'management:display-archived-templates' 1 %}" method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="back" value="{{ request.path }}">
-                                    <button name="show-archived" class ="btn btn-outline-secondary" type="submit">Display Archived</button>
-                                </form>
-                            {% endif %}
-                        </div>
-
-                        <div class="col" style="text-align: right">
-                            <!-- Create Template Button--->
-                            <form action="{% url 'management:redirect-to-template-creation' %}" method="post">
-                                {% csrf_token %}
-                                <input id="create-template" class="btn btn-outline-secondary" type="submit" value="Create template"/>
-                            </form>
-                        </div>
-                    </div>
-
-                    {% if current_folder %}
-                        <form method="post" action="{% url 'management:edit-folder-templates' current_folder.id %}">
-                            {% csrf_token %}
-                            <div class="row">
-                                <div class="col col-sm-10">
-                                    <select class="template-select-multiple w-100" name="templates" multiple="multiple">
-                                        {% for template in all_templates%}
-                                            <option value="{{ template.id }}" title="{{ template.name }}">{{ template.name }}: {{template.creation_date }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col">
-                                    <input type="hidden" name="back" value="{{ request.path }}">
-                                    <input class="btn btn-sm btn-outline-secondary" type="submit" value="Add">
-                                </div>
-                            </div>
-                        </form>
-                    {% endif %}
-
-                    {%  if templateTable %}
-                        {% render_table templateTable %}
-                    {% else %}
+    {% for message in messages %}
+        <div class="alert alert-warning">
+            <a class="close" href="#" data-dismiss="alert">×</a>
+            {{ message }}
+        </div>
+    {% endfor %}
+    <div class="container-fluid" style="width: 80%">
+        <div class="row">
+            <!-- Templates -->
+            <div class="col-7 mt-3">
+                {% if current_folder %}
+                    <h3 style="text-align: center">{{ current_folder.name }}</h3>
+                {% else %}
+                    <h3 style="text-align: center">All Templates</h3>
+                {% endif %}
+                <div class="row">
+                    <div class="col">
                         {% if current_folder %}
-                            <div>There are no templates in this folder</div>
-                        {% else %}
-                            <div>There are no templates to show at the moment</div>
-                        {%  endif %}
-                    {% endif %}
-
-                </div>
-                <div class="col-4 mt-3">
-                    <!-- Folders -->
-                    <h3 style="text-align: center">Folders</h3>
-
-                    <div class="row">
-                        <div class="col">
-                            {% if current_folder %}
-                                <form action="{% url 'management:folder-view' current_folder.id %}" method="get" autocomplete="off">
-                                    {% csrf_token %}
-                                    <input list="folders" name="folder-filter" type="text" placeholder="Search Folders" class="mb-3">
-                                </form>
-                            {% else %}
-                                <form action="{% url 'management:main' %}" method="get" autocomplete="off">
-                                    {% csrf_token %}
-                                    <input list="folders" name="folder-filter" type="text" placeholder="Search Folders" class="mb-3">
-                                </form>
-                            {% endif %}
-                            <datalist id="folders">
-                                {% for folder in all_folders %}
-                                    <option value="{{ folder.name }}"></option>
-                                {% endfor %}
-                            </datalist>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col">
-                            <form method="post" action="{% url 'management:create-folder' %}">
+                            <form action="{% url 'management:folder-view' current_folder.id %}" method="get" autocomplete="off">
                                 {% csrf_token %}
-                                {{ folder_creation_form }}
-                                <input type="submit" value="Create Folder" class="btn btn-sm btn-outline-secondary">
-                                <input type="hidden" name="back" value="{{ request.path }}">
+                                <input list="templates" name="template-filter" type="text" placeholder="Search Templates" class="mb-3">
                             </form>
-                        </div>
+                        {% else %}
+                            <form action="{% url 'management:main'%}" method="get" autocomplete="off">
+                                {% csrf_token %}
+                                <input list="templates" name="template-filter" type="text" placeholder="Search Templates" class="mb-3">
+                            </form>
+                        {% endif %}
+                        <datalist id="templates">
+                            {% for template in templates %}
+                                <option value="{{ template.name }}"></option>
+                            {% endfor %}
+                        </datalist>
+                    </div>
+                    <!-- Show/Hide Archived Templates Button -->
+                    <div class="col">
+                        {% if show_archived == 'True' %}
+                            <form action="{% url 'management:display-archived-templates' 0 %}" method="post" style="text-align: center;">
+                                {% csrf_token %}
+                                <input type="hidden" name="back" value="{{ request.path }}">
+                                <button name="show-archived" class ="btn btn-outline-secondary" type="submit">Hide Archived</button>
+                            </form>
+                        {% else %}
+                            <form action="{% url 'management:display-archived-templates' 1 %}" method="post" style="text-align: center;">
+                                {% csrf_token %}
+                                <input type="hidden" name="back" value="{{ request.path }}">
+                                <button name="show-archived" class ="btn btn-outline-secondary" type="submit">Display Archived</button>
+                            </form>
+                        {% endif %}
                     </div>
 
-                    {% block table-wrapper %}
-                        {% include "template_management/folder_table.html" with table=folderTable%}
-                    {% endblock %}
+                    <div class="col" style="text-align: right">
+                        <!-- Create Template Button--->
+                        <form action="{% url 'management:redirect-to-template-creation' %}" method="post">
+                            {% csrf_token %}
+                            <input id="create-template" class="btn btn-outline-secondary" type="submit" value="Create template"/>
+                        </form>
+                    </div>
                 </div>
+
+                {% if current_folder %}
+                    <form method="post" action="{% url 'management:edit-folder-templates' current_folder.id %}">
+                        {% csrf_token %}
+                        <div class="row mb-3">
+                            <div class="col col-sm-10">
+                                <select class="template-select-multiple w-100" name="templates" multiple="multiple">
+                                    {% for template in all_templates%}
+                                        <option value="{{ template.id }}" title="{{ template.name }}">{{ template.name }}: {{template.creation_date }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-2">
+                                <input type="hidden" name="back" value="{{ request.path }}">
+                                <input class="btn btn-outline-secondary" type="submit" value="Add">
+                            </div>
+                        </div>
+                    </form>
+                {% endif %}
+
+                {%  if templateTable %}
+                    {% render_table templateTable %}
+                {% else %}
+                    {% if current_folder %}
+                        <div>There are no templates in this folder</div>
+                    {% else %}
+                        <div>There are no templates to show at the moment</div>
+                    {%  endif %}
+                {% endif %}
+
+            </div>
+            <div class="col-5 mt-3">
+                <!-- Folders -->
+                <h3 style="text-align: center">Folders</h3>
+
+                <div class="row">
+                    <div class="col-4">
+                        {% if current_folder %}
+                            <form action="{% url 'management:folder-view' current_folder.id %}" method="get" autocomplete="off">
+                                {% csrf_token %}
+                                <input list="folders" name="folder-filter" type="text" placeholder="Search Folders" class="mb-3">
+                            </form>
+                        {% else %}
+                            <form action="{% url 'management:main' %}" method="get" autocomplete="off">
+                                {% csrf_token %}
+                                <input list="folders" name="folder-filter" type="text" placeholder="Search Folders" class="mb-3">
+                            </form>
+                        {% endif %}
+                        <datalist id="folders">
+                            {% for folder in all_folders %}
+                                <option value="{{ folder.name }}"></option>
+                            {% endfor %}
+                        </datalist>
+                    </div>
+                    <div class="col-8" style="text-align: right">
+                        <form method="post" action="{% url 'management:create-folder' %}">
+                            {% csrf_token %}
+                            {{ folder_creation_form }}
+                            <input type="submit" value="Create Folder" class="btn btn-sm btn-outline-secondary">
+                            <input type="hidden" name="back" value="{{ request.path }}">
+                        </form>
+                    </div>
+                </div>
+
+                {% block table-wrapper %}
+                    {% include "template_management/folder_table.html" with table=folderTable%}
+                {% endblock %}
             </div>
         </div>
+    </div>
 
     <!-- Code needed for the modal to work properly.
          Content in folder_creation_modal.html is rendered between "#modal-content" div
@@ -184,18 +181,18 @@
         // inside the multiselect box.
         function formatState (state) {
             if (!state.id) {
-              return state.text;
+                return state.text;
             }
 
             var $state = $(
-              '<span><span></span></span>'
+                '<span><span></span></span>'
             );
 
             // Use .text() instead of HTML string concatenation to avoid script injection issues
             $state.find("span").text(state.title);
 
             return $state;
-        };
+        }
     </script>
     </body>
 {% endblock %}

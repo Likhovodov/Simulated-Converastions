@@ -2,7 +2,7 @@
 {% load static %}
 {% load embed_video_tags %}
 {% block content %}
-<html lang="en">
+    <html lang="en">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0 shrink-to-fit=no">
@@ -14,55 +14,127 @@
         <title>
             SimCon | Conversation
         </title>
-    <link rel="shortcut icon" href="{% static './title_image/favicon.ico' %}" type="image/x-icon">
-
-        <!-- prevent line breaks when using form fields -->
-        <style type="text/css">
-            form {display:inline; margin:0px; padding:0px;}
-        </style>
+        <link rel="shortcut icon" href="{% static './title_image/favicon.ico' %}" type="image/x-icon">
+        <link rel="stylesheet" type="text/css" href="{% static 'users/base.css' %}">
     </head>
     <body>
-    <div style="clear:both">
-        <h1 style="float:left">Simulated Conversations</h1>
-        <button
-                style="float:right" class="bs-modal btn btn-danger" type="button" name="button"
-                data-form-url="{% url 'exit-conversation' %}">Exit
-        </button>
+
+    <div class="container-fluid mt-5" style="width: 50%">
+        <div class="card">
+            <div class="card-body">
+
+                <ul class="list-group list-group-flush">
+
+                    <li class="list-group-item" style="text-align: center">
+                        <div class="row justify-content-center mb-3">
+                            <div id="videoPlayer">
+                                {% video ct_node.video_url%}
+                            </div>
+                        </div>
+
+                        <div class="row justify-content-center" style="text-align: center">
+                            <p >{{ ct_node.description }}</p>
+                        </div>
+                    </li>
+
+                    <li class="list-group-item">
+                        <div class="row justify-content-center mb-3">
+                            <div id="controls">
+                                <button id="recordButton" class="btn btn-primary btn-sm">Record</button>
+                                <button id="stopButton" class="btn btn-primary btn-sm pr-3 pl-3" disabled>Stop</button>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center">
+                            <audio id="audioPlayer" controls>
+                                {% if ct_node_response %}
+                                    <source id="audioResponse" src="{{ ct_node_response.audio_response.url }}">
+                                {% else %}
+                                    <source id="audioResponse" src="">
+                                {% endif %}
+                            </audio>
+                        </div>
+                        <div class="row justify-content-center mt-3">
+                            <div id="info"></div>
+                        </div>
+                    </li>
+
+
+                    <li class="list-group-item" id="choice-form" style="display: none">
+                    <form action="{% url 'conversation-step' ct_node.id %}" method="POST" name="choice-form">
+                        {% csrf_token %}
+                        {{ choice_form.choices }}
+                        <div class="row">
+                            <div class="col" style="text-align: center">
+                                <br>
+                                <label>
+                                    <button data-form-url="{% url 'exit-conversation' %}" class="bs-modal" type="button" name="image" value="one" style="display: none"></button>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" fill="currentColor" class="bi bi-arrow-left-square-fill pointer-on-hover" viewBox="0 0 16 16" >
+                                        <path d="M16 14a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12zm-4.5-6.5H5.707l2.147-2.146a.5.5 0 1 0-.708-.708l-3 3a.5.5 0 0 0 0 .708l3 3a.5.5 0 0 0 .708-.708L5.707 8.5H11.5a.5.5 0 0 0 0-1z"/>
+                                    </svg>
+                                </label>
+                                <p>Exit</p>
+                            </div>
+                            {% if ct_node.terminal %}
+{#                                <button type="submit" class="btn btn-primary btn-sm">End Conversation</button>#}
+
+                                <div class="col" style="text-align: center">
+                                    <br>
+                                    <label>
+                                        <input type="submit" name="image" value="one" style="display: none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" fill="currentColor" class="bi bi-arrow-right-square-fill pointer-on-hover" viewBox="0 0 16 16">
+                                            <path d="M0 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2v12zm4.5-6.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5a.5.5 0 0 1 0-1z"/>
+                                        </svg>
+                                    </label>
+                                    <p>End Conversation</p>
+                                </div>
+                            {% else %}
+{#                                <button type="submit" class="btn btn-primary btn-sm" onclick="clearPageSession()">Next Scene</button> #}
+                                <div class="col" style="text-align: center">
+                                    <br>
+                                    <label>
+                                        <input type="submit" name="image" value="one" style="display: none" onclick="clearPageSession()">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" fill="currentColor" class="bi bi-arrow-right-square-fill pointer-on-hover" viewBox="0 0 16 16">
+                                            <path d="M0 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2v12zm4.5-6.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5a.5.5 0 0 1 0-1z"/>
+                                        </svg>
+                                    </label>
+                                    <p>Next Scene</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                    </form>
+                    </li>
+
+                    <li class="list-group-item" id="record-nav" style="display: none">
+                        <div class="row">
+                            <div class="col" style="text-align: center">
+                                <br>
+                                    <label>
+                                        <button data-form-url="{% url 'exit-conversation' %}" class="bs-modal" type="button" name="image" value="one" style="display: none"></button>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" fill="currentColor" class="bi bi-arrow-left-square-fill pointer-on-hover" viewBox="0 0 16 16" >
+                                            <path d="M16 14a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12zm-4.5-6.5H5.707l2.147-2.146a.5.5 0 1 0-.708-.708l-3 3a.5.5 0 0 0 0 .708l3 3a.5.5 0 0 0 .708-.708L5.707 8.5H11.5a.5.5 0 0 0 0-1z"/>
+                                        </svg>
+                                    </label>
+                                    <p>Exit</p>
+                            </div>
+                            <div class="col" style="text-align: center">
+                                <br>
+                                <label>
+                                    <input type="submit" name="image" value="one" style="display: none" onclick="toChoices()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" fill="currentColor" class="bi bi-arrow-right-square-fill pointer-on-hover" viewBox="0 0 16 16">
+                                        <path d="M0 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2v12zm4.5-6.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5a.5.5 0 0 1 0-1z"/>
+                                    </svg>
+                                </label>
+                                <p>Next scene</p>
+                            </div>
+                        </div>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
     </div>
-    <div style="clear:both">
-        <h3 style="float:left">{{ ct }}</h3>
-        <h3 style="float:right"><small>{{ request.user }}</small></h3>
-    </div>
-    <br><br>
-    <div id="videoPlayer">
-        {% video ct_node.video_url 'small' %}
-        <p>{{ ct_node.description }}</p>
-    </div>
-    <div id="controls">
-        <button id="recordButton" class="btn btn-primary btn-sm">Record</button>
-        <button id="stopButton" class="btn btn-primary btn-sm" disabled>Stop</button>
-    </div>
-    <div>
-        <audio id="audioPlayer" controls>
-            {% if ct_node_response %}
-                <source id="audioResponse" src="{{ ct_node_response.audio_response.url }}">
-            {% else %}
-                <source id="audioResponse" src="">
-            {% endif %}
-        </audio>
-    </div>
-    <div id="info"></div>
-    <button type="submit" id="nextButton" class="btn btn-primary btn-sm" onclick="toChoices()">Next</button>
-    <form id="choice-form" action="{% url 'conversation-step' ct_node.id %}" method="POST" name="choice-form">
-        {% csrf_token %}
-        {{ choice_form.choices }}
-        {% if ct_node.terminal %}
-            <button type="submit" class="btn btn-primary btn-sm">End Conversation</button>
-        {% else %}
-            <button type="submit" class="btn btn-primary btn-sm" onclick="clearPageSession()">Next Scene</button>
-        {% endif %}
-    </form>
-    <div id="error"></div>
+
     <div class="modal fade" tabindex="-1" role="dialog" id="create_modal">
         <div class="modal-dialog" role="document">
             <div class="modal-content"></div>
@@ -73,29 +145,33 @@
             <div class="modal-content"></div>
         </div>
     </div>
+
+
     <!-- inserting these scripts at the end to be able to use all the elements in the DOM -->
     <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
     <script src="{% static 'conversation_templates/recorder.js' %}"></script>
     <script>
         const videoPlayer = document.getElementById("videoPlayer");
         const audioControls = document.getElementById("controls");
-        const nextButton = document.getElementById("nextButton");
+        const recordNav = document.getElementById("record-nav");
         const choiceForm = document.getElementById("choice-form");
-        const errorElement = document.getElementById("error");
 
         $(document).ready(function() {
             // Check which part of page user should be on, if page refresh
             if (sessionStorage.getItem("toChoices") === "true") {
-              choicePage();
+                choiceForm.style.display = "block";
+                recordNav.style.display = "none";
+                choicePage();
             } else {
                 choiceForm.style.display = "none";
+                recordNav.style.display = "block";
             }
 
             // Persist record attempts
             recordAttempts = JSON.parse(sessionStorage.getItem("recordAttempts"));
             if (recordAttempts === -1) {
-               recordAttempts = {{ recording_attempts }};
-               sessionStorage.setItem("recordAttempts", JSON.stringify(recordAttempts));
+                recordAttempts = {{ recording_attempts }};
+                sessionStorage.setItem("recordAttempts", JSON.stringify(recordAttempts));
             }
 
             // Disable controls
@@ -116,7 +192,6 @@
             {% if allow_typed_response %}
                 // Make input for custom response required when radio is clicked
                 $('.node-choice').change(function () {
-                    console.log('click')
                     if (this.value == 'custom-response') {
                         $('#id_custom-input').attr('required', true);
                     } else {
@@ -151,7 +226,7 @@
 
         function toChoices() {
             if (audioResponse.getAttribute("src") === "") {
-                errorElement.innerText = "Must provide audio response";
+                alert("Must provide audio response")
             } else {
                 sessionStorage.setItem("toChoices", "true");
                 choicePage();
@@ -161,15 +236,14 @@
         function choicePage() {
             videoPlayer.style.display = "none";
             audioControls.style.display = "none";
-            nextButton.style.display = "none";
+            recordNav.style.display = "none";
             choiceForm.style.display = "block";
             info.style.display = "none";
-            errorElement.innerText = "";
         }
 
         function clearPageSession() {
-           sessionStorage.setItem("toChoices", "false");
-           sessionStorage.setItem("recordAttempts", JSON.stringify(-1));
+            sessionStorage.setItem("toChoices", "false");
+            sessionStorage.setItem("recordAttempts", JSON.stringify(-1));
         }
     </script>
     <!-- Optional JavaScript -->
@@ -179,5 +253,5 @@
     </body>
     {% block extrahead %} {% endblock %}
 
-</html>
+    </html>
 {% endblock %}

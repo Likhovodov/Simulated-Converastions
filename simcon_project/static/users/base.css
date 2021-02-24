@@ -1,5 +1,6 @@
-body {
+html, body {
     background-color: #e8e8e8;
+    height: 100%;
 }
 
 /**
@@ -45,10 +46,12 @@ th, td {
 
 th a {
     color: white;
+    padding: .3rem !important;
 }
 
 th {
     background-color: #8a9b3e;
+    padding: .3rem !important;
 }
 
 /**
@@ -79,4 +82,29 @@ Pagination style
     -khtml-opacity: 0.5;      /* khtml, old safari */
     -moz-opacity: 0.5;      /* mozilla, netscape */
     opacity: 0.5;      /* fx, safari, opera */
+}
+
+.pointer-on-hover {
+    cursor: pointer;
+}
+
+/**
+Random elements
+ */
+
+.center-container {
+    height: 80%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.no-bullet-unordered-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+input[type="radio"]{
+    vertical-align: middle;
 }

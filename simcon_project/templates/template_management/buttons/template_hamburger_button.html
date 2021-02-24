@@ -1,0 +1,64 @@
+<style>
+.btn-block {
+    border-color: white;
+}
+
+.dropdown-menu {
+    min-width: 0em;
+    padding: 0px;
+}
+</style>
+
+{% block content %}
+<!-- Collapse button -->
+<button class="btn btn-outline-secondary" type="button" id="dropdownMenuButton"
+        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M2.5 11.5A.5.5 0 0 1 3 11h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4A.5.5 0 0 1 3 7h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4A.5.5 0 0 1 3 3h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+</svg>
+</button>
+<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    {% if record.archived %}
+        <form action="{% url 'management:archive-template' record.id %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="back" value="{{ request.path }}">
+            <button id="archive-template" class="btn btn-block btn-sm btn-outline-secondary" type="submit">Unarchive
+            </button>
+        </form>
+    {% else %}
+        <form action="{% url 'management:archive-template' record.id %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="back" value="{{ request.path }}">
+            <button id="archive-template" class="btn btn-block btn-sm btn-outline-secondary pr-3 pl-3" type="submit">
+                Archive </button>
+        </form>
+    {% endif %}
+    <form action="{% url 'management:edit_conversation_template' record.id %}" method="post">
+            {% csrf_token %}
+        <button id="edit-template" class="btn btn-block btn-sm btn-outline-secondary pr-4 pl-4" type="submit">Edit</button>
+        </form>
+              {% if in_folder %}
+    <form action="{% url 'management:remove-template' record.id %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="back" value="{{ request.path }}">
+        <button id="remove-template" class="btn btn-block btn-sm btn-outline-secondary" type="submit">Remove</button>
+    </form>
+    {% else %}
+    <button id="delete-template" class="bs-modal btn-block btn btn-sm btn-outline-secondary pr-3 pl-3" type="button"
+            name="button"
+            data-form-url="{% url 'management:delete-template' record.id %}" style="display: inline" >Delete</button>
+    <!-- Links -->
+    {% endif %}
+</div>
+<script>
+$(function () {
+  $('[data-toggle="popover"]').popover()
+})
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+</script>
+  <!-- Collapsible content -->
+{% endblock %}
+
+

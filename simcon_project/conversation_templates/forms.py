@@ -101,7 +101,7 @@ class SelectTemplateForm(forms.Form):
             for template in templates:
                 select_text = split_creation_date(str(template.creation_date.astimezone()))
                 template_list.append((template.id, f"{template.name}: {select_text}"))
-            self.fields['templates'] = forms.ChoiceField(choices=template_list)
+            self.fields['templates'] = forms.ChoiceField(choices=template_list, label='')
 
 
 def split_creation_date(creation_date):
@@ -121,14 +121,20 @@ class CustomChoiceRadioSelectWidget(forms.RadioSelect):
         self._list = data_list
 
     def render(self, name, value, attrs=None, renderer=None):
-        choice_html = f'<ul id="id_{name}">'
+        choice_html = f'<ul id="id_{name}" class="no-bullet-unordered-list">'
         for idx, choice in enumerate(self._list):
-            choice_html += f'<li><label for="id_choice-{idx}"><input type="radio" id="id_choice-{idx}" required=""' \
-                            f'name={name} value="{choice.id}" class="node-choice"> {choice.choice_text}  </label></li>'
+            choice_html += f'<li>' \
+                           f'<label for="id_choice-{idx}">' \
+                           f'<input type="radio" id="id_choice-{idx}" required="" name={name} value="{choice.id}" class="node-choice"> {choice.choice_text}' \
+                           f'</label>' \
+                           f'</li>'
 
-        choice_html += f'<li><label for="id_choice-custom"><input type="radio" id="id_choice-custom" required=""' \
-                       f'name={name} value="custom-response" class="node-choice"><input name="custom-text" type="text"'\
-                       f'placeholder="Enter Custom Response" id="id_custom-input"></label></li>'
+        choice_html += f'<li>' \
+                       f'<label for="id_choice-custom" style="width:100%;">' \
+                       f'<input type="radio" id="id_choice-custom" required="" name="{name}" value="custom-response" class="node-choice mb-3">' \
+                       f'<textarea rows="1" name="custom-text" placeholder="Enter Custom Response" id="id_custom-input" class="ml-1"  style="width:90%;"></textarea>' \
+                       f'</label>' \
+                       f'</li>'
 
         choice_html += '</ul>'
 
@@ -141,7 +147,7 @@ class TemplateNodeChoiceForm(forms.Form):
     """
     choices = forms.ModelChoiceField(
         queryset=None,
-        widget=forms.RadioSelect,
+        widget=forms.RadioSelect(attrs={'class': "no-bullet-unordered-list"}),
     )
 
     def __init__(self, *args, **kwargs):

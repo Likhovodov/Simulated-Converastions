@@ -20,13 +20,14 @@ class ResponseTable(tables.Table):
     class Meta:
         attrs = {'class': 'table table-sm', 'id': 'response-table'}
         model = TemplateResponse
-        fields = ['template', 'name', 'completion_date',
-                  'feedback', 'altered_rating', 'feedback_read']
+        fields = ['template', 'name', 'completion_date', 'altered_rating', 'feedback_read']
 
 
 def is_researcher(user):
     return user.is_authenticated and user.get_is_researcher()
 
+def is_admin(user):
+    return user.is_authenticated and user.get_is_staff()
 
 @ user_passes_test(is_researcher)
 def researcher_view(request):
@@ -36,7 +37,7 @@ def researcher_view(request):
 
     if filtered_responses:
         response_table = ResponseTable(filtered_responses)
-        RequestConfig(request, paginate={"per_page": 20}).configure(
+        RequestConfig(request, paginate={"per_page": 10}).configure(
             response_table)
     else:
         response_table = None

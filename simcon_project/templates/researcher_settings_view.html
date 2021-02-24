@@ -1,55 +1,60 @@
-<!DOCTYPE html>
 {% extends "researcher_base.html" %}
-{% block nav-settingsView %}<strong class="nav_bar_selected"> Settings </strong>{% endblock %}
+{% block nav-settingsView %}<strong class="nav_bar_selected"> <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-gear-fill" viewBox="1 1 16 16">
+    <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+</svg>Settings </strong>{% endblock %}
 {% load static %}
 {% load render_table from django_tables2 %}
 {% block content %}
+    <!DOCTYPE html>
     <html lang="en">
     <head>
-
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="Created for Simulated Conversations Senior Capstone Project">
-
-        <!-- prevent line breaks when using form fields -->
-        <style type="text/css">
-            form {display:inline; margin:0px; padding:0px;}
-        </style>
-
-        <title>
-            SimCon | Settings
-        </title>
+        <title>SimCon | Settings</title>
         <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
-
     </head>
     <body>
-    <div class="container-fluid mt-3" style="width: 80%">
-        {% if researchers_table %}
-            <h3>Researchers</h3>
-            {% render_table researchers_table %}
+    <div class="container-fluid mt-4" style="width: 30%">
+
+        {% if messages %}
+            <ul class="messages pl-0">
+                {% for message in messages %}
+                    <div class="alert alert-success alert-dismissible">
+                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                        <strong>{{ message|escape }}</strong>
+                    </div>
+                {% endfor %}
+            </ul>
         {% endif %}
-        {% if add_researcher_form %}
-            <div class="row justify-content-center">
-                <div class="col-4">
-                    <p style="text-align:left">Add New Researcher:</p>
-                    <form id="add_researcher_form" method="post">
-                        {% csrf_token %}
-                        {{ add_researcher_form }}
-                        <br>
-                        <button type="submit" class="btn btn-outline-secondary" form="add_researcher_form" name="add_researcher">Send Registration Email</button>
-                    </form>
-                    <br><br><br>
+
+        {% if form.errors %}
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <div class="alert alert-danger alert-dismissible">
+                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                        <strong>{{ error|escape }}</strong>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <div class="alert alert-danger alert-dismissible">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    <strong>{{ error|escape }}</strong>
                 </div>
-            </div>
+            {% endfor %}
         {% endif %}
-        <div class="row justify-content-center">
-            <div class="col-4">
-                <form id="change_password_form" method="post">
+
+        <div class="card">
+            <div class="card-body">
+                <form id="form" method="post">
                     {% csrf_token %}
-                    {% for field in change_password_form %}
+                    {% for field in form %}
                         <div class="form-group">
-                            <label for="{{ field.attrs.id  }}">{{ field.label }} </label>
+                            <div class="mb-2">
+                                {{ field.label }}:
+                            </div>
                             {{ field }}
                         </div>
                     {% endfor %}
@@ -62,40 +67,12 @@
                         <br>
                         - Your password can’t be entirely numeric.
                     </p>
-                    <button type="submit" class="btn btn-outline-secondary" form="change_password_form" name="change_password">Save changes</button>
+                    <button type="submit" class="btn btn-outline-secondary" form="form" name="change_password">Save changes</button>
                 </form>
-                <br>
             </div>
         </div>
-    </div> <!-- /container -->
 
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <!-- Code needed for the modal to work properly.
-         Content in folder_creation_modal.html is rendered between "#modal-content" div
-    -->
-    <div class="modal fade" tabindex="-1" role="dialog" id="create_modal">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content"></div>
-        </div>
     </div>
-
-    <div class="modal fade" tabindex="-1" role="dialog" id="modal">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content"></div>
-        </div>
-    </div>
-
-    <script type="text/javascript">
-        $(document).ready(function() {
-            $(".bs-modal").each(function () {
-                $(this).modalForm({
-                    formURL: $(this).data('form-url')
-                });
-            });
-        });
-    </script>
     </body>
     </html>
 {% endblock %}
