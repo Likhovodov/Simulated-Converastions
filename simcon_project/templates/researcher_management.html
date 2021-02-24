@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% extends "researcher_base.html" %}
-{% block nav-researcherManagementView %}<strong class="nav_bar_selected"> Researcher Management </strong>{% endblock %}
+{% block nav-researcherManagementView %}<strong class="nav_bar_selected"> Researchers </strong>{% endblock %}
 {% load static %}
 {% load render_table from django_tables2 %}
 {% block content %}
@@ -13,7 +13,7 @@
         <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
 
         <title>
-            {% block title %}Researcher Management{% endblock %}
+            {% block title %} SimCon | Researcher Management{% endblock %}
         </title>
     </head>
     <body>

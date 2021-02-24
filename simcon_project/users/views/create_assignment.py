@@ -147,7 +147,7 @@ def add_assignment(request):
             assignment.conversation_templates.add(tempTmp)
 
     subject = 'Simulated Conversation Assignment Update'
-    msg = 'You received this email because you have a new assignment: '+name+'. Please check the assignment page.'
+    msg = 'You have a new assignment. Please check your home page.'
     recipient = [i[0] for i in assignment.students.values_list('email')]
     # when an error occurs, there is no need to add this task to the schedule.
     if success == 0:

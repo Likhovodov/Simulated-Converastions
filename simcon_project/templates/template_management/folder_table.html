@@ -43,7 +43,7 @@
                                     <form method="post" action="{% url 'management:delete-folder' row.record.id %}">
                                         {% csrf_token %}
                                         <input type="hidden" name="back" value="{{ request.path }}">
-                                        <button id="delete-folder" class="btn btn-sm btn-outline-danger ml-3" type="submit">Delete</button>
+                                        <button id="delete-folder" class="btn btn-sm btn-outline-secondary ml-3" type="submit">Delete</button>
                                     </form>
                                 </td>
                             {% endif %}

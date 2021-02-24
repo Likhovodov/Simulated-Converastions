@@ -77,7 +77,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <input type="button" class="btn btn-outline-secondary" onclick="sub()" value="Submit"/>
+                            <input type="button" class="btn btn-outline-secondary" onclick="sub()" value="Assign"/>
                         </div>
                     </div>
                 </div>
@@ -226,7 +226,7 @@
 
             // Add template options
             temp_list.insertAdjacentHTML('afterbegin',
-                `<option value="template-select-default"> Select a template to be added </option>`);
+                `<option value="template-select-default" disabled selected hidden>Select a template to be added </option>`);
             for(const template of templates) {
                 const templateOption =
                     `<option value='${template.pk}'>
@@ -386,7 +386,7 @@
                 success: function(data){
                     if(data.success==0){
                         document.getElementById('dim-dialog').style.display = 'none'
-                        alert("Submitted successfully!");
+                        alert("Assigned successfully!");
                         window.location.replace("{% url 'ass-management:main' %}")
                     }
                     else{

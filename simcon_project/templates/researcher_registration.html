@@ -1,66 +1,90 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Created for Simulated Conversations Senior Capstone Project">
-
-    <!-- prevent line breaks when using form fields -->
-    <style type="text/css">
-    form {display:inline; margin:0px; padding:0px;}
-    </style>
+    <link rel="stylesheet" href="{% static './users/base.css' %}">
 
     <title>
-    SimCon | Registration
+        SimCon | Registration
     </title>
     <link rel="shortcut icon" href="{% static './title_image/favicon.ico' %}" type="image/x-icon">
 
-    {% block extrahead %} {% endblock %}
-  </head>
-  <body>
-      <div>
-        <p class="container">
-          <h1>Researcher Registration</h1>
-            {% block content %}
-            {% endblock %}
-      </div>
+</head>
+<body>
+<div class="container-fluid mt-5" style="width: 30%">
 
-      <div class="row">
-          <div class="col-md-6">
-
-            <form method="post">
-                {%csrf_token%}
-                <p>Confirm Email:</p>
-                {{form.email}}<br/><br/>
-
-                <p>Full Name:</p>
-                <small>First Name:</small><br/>
-                {{form.first_name}}<br/>
-                <small>Last Name:</small><br/>
-                {{ form.last_name }}<br/><br/>
-
-                <p>Set Password:</p>
-                <small>Password:</small><br/>
-                {{form.password1}}<br/>
-                <small>Repeat Password:</small><br/>
-                {{form.password2}}<br/>
-
-                <button type="submit" class="btn btn-success">Submit</button><br/><br/>
-            </form>
-          </div>
-        {% for message in messages %}
-
-                <div class="alert alert-warning">
-                    <a class="close" href="#" data-dismiss="alert">×</a>
-
-                    {{ message }}
-
+    {% if form.errors %}
+        {% for field in form %}
+            {% for error in field.errors %}
+                <div class="alert alert-danger alert-dismissible">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    <strong>{{ error|escape }}</strong>
                 </div>
+            {% endfor %}
         {% endfor %}
-      </div>
-  </body>
+        {% for error in form.non_field_errors %}
+            <div class="alert alert-danger alert-dismissible">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <strong>{{ error|escape }}</strong>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% for message in messages %}
+
+        <div class="alert alert-warning">
+            <a class="close" href="#" data-dismiss="alert">×</a>
+
+            {{ message }}
+
+        </div>
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <div class="col-md-6 mt-3">
+                <form method="post">
+                    <div class="col">
+                        {%csrf_token%}
+                        <div class="row mb-3">
+                            <label for="{{ form.email.id_for_label }}">Confirm Email:</label>
+                            {{form.email}}
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="{{ form.first_name.id_for_label }}">First Name:</label>
+                            {{form.first_name}}
+                        </div>
+                        <div class="row mb-3">
+                            <label for="{{ form.last_name.id_for_label }}">Last Name:</label>
+                            {{ form.last_name }}
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="{{ form.password1.id_for_label }}">Set Password:</label>
+                            {{form.password1}}
+                        </div>
+                        <div class="row mb-3">
+                            <label for="{{ form.password2.id_for_label }}">Confirm Password:</label>
+                            {{form.password2}}
+                        </div>
+
+                        <div class="row mb-3">
+                            <button type="submit" class="btn btn-outline-secondary">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
 </html>

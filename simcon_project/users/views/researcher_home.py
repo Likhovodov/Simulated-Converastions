@@ -37,7 +37,7 @@ def researcher_view(request):
 
     if filtered_responses:
         response_table = ResponseTable(filtered_responses)
-        RequestConfig(request, paginate={"per_page": 20}).configure(
+        RequestConfig(request, paginate={"per_page": 10}).configure(
             response_table)
     else:
         response_table = None

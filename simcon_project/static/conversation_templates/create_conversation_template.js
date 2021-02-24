@@ -129,7 +129,7 @@ function submit() {
     } else { // If the input was invalid turn on validation and validate everything
         validating = true
         getValidateToggle().checked = true
-        alert("Template is incomplete")
+        alert("There are issues with the template")
         updateValidityIndicatorOnAllStepNodes()
         validateAllVisibleFields()
         validateIsFirstNodeCheck()

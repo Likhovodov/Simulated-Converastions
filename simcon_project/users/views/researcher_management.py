@@ -81,7 +81,7 @@ def get_current_researchers(request):
     researchers = Researcher.objects.exclude(id=request.user.id)
     if researchers.count() > 0:
         researchers_table = ResearcherTable(researchers)
-        RequestConfig(request, paginate={"per_page": 20}).configure(
+        RequestConfig(request, paginate={"per_page": 10}).configure(
             researchers_table)
 
         return researchers_table

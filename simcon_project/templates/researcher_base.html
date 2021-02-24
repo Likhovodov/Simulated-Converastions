@@ -23,10 +23,10 @@
         <ul class="nav navbar-collapse collapse">
           <li class="px-3">{% block nav-researcherView %}<a class="nav_bar_unselected" href="{% url 'researcher-view' %}">  <span >   Home   </span> </a>{% endblock %}</li>
           <li class="px-3">{% block nav-templateView %}<a class="nav_bar_unselected" href="{% url 'management:main' %}">  <span> Templates </span>  </a>{% endblock %}</li>
-          <li class="px-3">{% block nav-studentmanagementView %}<a class="nav_bar_unselected" href="{% url 'student-management' %}">   Student Management   </a>{% endblock %}</li>
+          <li class="px-3">{% block nav-studentmanagementView %}<a class="nav_bar_unselected" href="{% url 'student-management' %}">   Students   </a>{% endblock %}</li>
             <li class="px-3">{% block nav-assignmentmanagementView %}<a class="nav_bar_unselected" href="{% url 'ass-management:main' %}"><span>Assignments  </span>  </a>{% endblock %}</li>
             {% if user.is_staff %}
-                <li class="px-3">{% block nav-researcherManagementView %}<a class="nav_bar_unselected" href="{% url 'researcher-management' %}">   Researcher Management   </a>{% endblock %}</li>
+                <li class="px-3">{% block nav-researcherManagementView %}<a class="nav_bar_unselected" href="{% url 'researcher-management' %}">   Researchers </a>{% endblock %}</li>
             {% endif %}
         </ul>
         <ul class="nav navbar-nav justify-content-end">
