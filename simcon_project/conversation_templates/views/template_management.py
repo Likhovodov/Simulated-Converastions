@@ -19,7 +19,8 @@ class FolderTemplateTable(tables.Table):
     remove a template from the folder.
     """
     hamburger_button = TemplateColumn(verbose_name='',
-                                      template_name='template_management/buttons/template_hamburger_button.html')
+                                      template_name='template_management/buttons/template_hamburger_button.html',
+                                      extra_context={"in_folder": True})
     name = tables.columns.LinkColumn('view-all-responses', args=[A('pk')])
     class Meta:
         attrs = {'class': 'table table-sm', 'id': 'template-table'}
