@@ -55,7 +55,7 @@ def student_management(request, name="All Students"):
     # if researcher presses a submit button
     if request.method == "POST":
         if request.POST.get('Students'):
-            label = SubjectLabel.objects.get(label_name=name)
+            label = SubjectLabel.objects.get(label_name=name, researcher=request.user)
             form = AddStudentForm(request.POST)
             if form.is_valid():
                 for student in request.POST.getlist('Students'):
