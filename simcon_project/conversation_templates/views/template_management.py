@@ -23,7 +23,8 @@ class FolderTemplateTable(tables.Table):
                                       extra_context={"in_folder": True})
     name = tables.columns.LinkColumn('view-all-responses', args=[A('pk')])
     class Meta:
-        attrs = {'class': 'table table-sm', 'id': 'template-table'}
+        attrs = {'class': 'table table-sm', 'id': 'template-table', 'data-id': lambda record: record.archived}
+        row_attrs = {'class': lambda record: 'archived' if record.archived else '' }
         model = ConversationTemplate
         fields = ['name', 'description', 'creation_date']
 
@@ -39,6 +40,7 @@ class AllTemplateTable(tables.Table):
 
     class Meta:
         attrs = {'class': 'table table-sm', 'id': 'template-table'}
+        row_attrs = {'class': lambda record: 'archived' if record.archived else '' }
         model = ConversationTemplate
         fields = ['name', 'description', 'creation_date']
 
