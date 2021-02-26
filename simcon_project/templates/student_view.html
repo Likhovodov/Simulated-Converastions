@@ -17,9 +17,9 @@
 
     </head>
     <body>
-    <div class="container-fluid mt-3" style="width: 95%">
+    <div class="container-fluid mt-3" style="width: 80%">
         <div class="row">
-            <div class="col" style="text-align: center;">
+            <div class="col-4" style="text-align: center;">
                 {% if incomplete_table %}
                     <h2>Current Assignments</h2>
                     {% render_table incomplete_table %}
@@ -27,7 +27,7 @@
                     <span> No Templates to Complete </span>
                 {% endif  %}
             </div>
-            <div class="col"  style="text-align: center;">
+            <div class="col-8"  style="text-align: center;">
                 {% if completed_table %}
                     <h2>Completed Conversations</h2>
                     {% render_table completed_table %}
