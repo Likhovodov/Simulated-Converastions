@@ -108,3 +108,7 @@ Random elements
 input[type="radio"]{
     vertical-align: middle;
 }
+
+tr.archived {
+    background-color: lightgray;
+}
