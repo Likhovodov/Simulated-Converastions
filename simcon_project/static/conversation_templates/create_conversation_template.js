@@ -461,7 +461,7 @@ function getEmbeddableUrl(url) {
     const match = url.match(REGEX)
     const regexedUrl = (match&&match[7].length==11)? match[7] : ""
     if(!(regexedUrl == "")) {
-        return "https://www.youtube.com/embed/" + regexedUrl
+        return "https://www.youtube-nocookie.com/embed/" + regexedUrl + "?rel=0&modestbranding=1&wmode=opaque"
     }
     return ""
 }

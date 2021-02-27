@@ -28,7 +28,12 @@
                     <li class="list-group-item" style="text-align: center">
                         <div class="row justify-content-center mb-3">
                             <div id="videoPlayer">
-                                {% video ct_node.video_url%}
+                                <iframe width="480" height="360"
+                                        src="{{ ct_node.get_no_cookie_url }}?rel=0&modestbranding=1&wmode=opaque"
+                                        loading="lazy"
+                                        frameborder="0"
+                                        allowfullscreen="">
+                                </iframe>
                             </div>
                         </div>
 
