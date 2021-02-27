@@ -1,6 +1,5 @@
 from django.db import models
 from embed_video.fields import EmbedVideoField
-from embed_video.backends import detect_backend
 from urllib.parse import urlparse
 import uuid
 
@@ -28,5 +27,9 @@ class TemplateNode(models.Model):
         return f"{self.parent_template}: {self.description}"
 
     def get_no_cookie_url(self):
+        """
+        Adds nocookie to url to ignore if user is signed in to Google account.
+        :return:
+        """
         parsed_url = urlparse(str(self.video_url)) #get video id. might only work for youtube.
         return "https://www.youtube-nocookie.com/embed/" + parsed_url[2][1:]
