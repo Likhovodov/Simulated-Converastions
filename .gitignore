@@ -7,6 +7,11 @@ db.sqlite3
 **/media/**
 !**/media
 !**/media/audio
+**/migrations/**
+!**/migrations
+!**/migrations/__init__.py
+**/static/**
+
 
 # Backup files # 
 *.bak 
@@ -103,7 +108,5 @@ GitHub.sublime-settings
 .vscode/
 .history
 
-# migrations
-**/migrations/**
-!**/migrations
-!**/migrations/__init__.py
+# Secrets JSON file
+**/secrets.json

@@ -1,0 +1,14 @@
+/*
+    Researcher Page Body to be centered rather than skewed left
+*/
+.body-container {
+    text-align: center;
+}
+
+/*
+    Container the Table lives in 
+*/
+.table-container {
+    width: 80%;
+    margin: auto;
+}

@@ -10,21 +10,41 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import os
+import json
+from django.core.exceptions import ImproperlyConfigured
 from pathlib import Path
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+with open(os.path.join(BASE_DIR, 'secrets.json')) as secrets_file:
+    secrets = json.load(secrets_file)
+
+
+def get_secret(setting, secrets=secrets):
+    """Get secret setting or fail with ImproperlyConfigured"""
+    try:
+        return secrets[setting]
+    except KeyError:
+        raise ImproperlyConfigured("Set the {} setting".format(setting))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'kq=+@9%dho5nid!*2*f#i_%-!$cs&8_mo1&7mpesdgl36*^v2e'
+# SECRET_KEY = 'kq=+@9%dho5nid!*2*f#i_%-!$cs&8_mo1&7mpesdgl36*^v2e'
+SECRET_KEY = get_secret('SECRET KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['conversation.research.pdx.edu']
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -88,12 +108,24 @@ WSGI_APPLICATION = 'simcon_project.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'postgresql.oit.pdx.edu',
+            'NAME': 'web31415_conversation',
+            'USER': get_secret('DB_USER'),
+            'PASSWORD': get_secret('DB_PASSWORD'),
+            'HOST': 'localhost',
+            'PORT': '',
+        }
+    }
 
 # Allows Django to use our User class
 # https://testdriven.io/blog/django-custom-user-model/#user-model
@@ -134,23 +166,30 @@ USE_TZ = True
 
 # Email
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'simcon.dev@gmail.com'
-EMAIL_HOST_PASSWORD = 'zhtsjuriiabkdahg'
+if DEBUG:
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_HOST_USER = 'simcon.dev@gmail.com'
+    EMAIL_HOST_PASSWORD = 'zhtsjuriiabkdahg'
+    DEFAULT_FROM_EMAIL = 'simcon.dev@gmail.com'
+else:
+    EMAIL_HOST = 'mailhost.pdx.edu'
+    EMAIL_HOST_USER = 'simcon.donotreply@gmail.com'
+    EMAIL_HOST_PASSWORD = get_secret('EMAIL_PASSWORD')
+    DEFAULT_FROM_EMAIL = 'simcon.donotreply@gmail.com'
+    SERVER_EMAIL = 'simcon.donotreply@gmail.com'
 EMAIL_USE_SSL = False
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'simcon.dev@gmail.com'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static')
+    os.path.join(BASE_DIR, 'static_files')
 ]
 
 # Static URLS [These are used when in non production environments]
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 LOGIN_REDIRECT_URL = 'redirect-from-login'

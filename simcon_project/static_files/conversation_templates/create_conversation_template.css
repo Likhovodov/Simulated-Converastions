@@ -1,0 +1,29 @@
+.container-fluid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+.column-button-container {
+    display: flex;
+    justify-content: center;
+}
+
+.column-button {
+    width: 80px !important;
+}
+
+.step-node-card:hover {
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+
+.invalid {
+    box-shadow: 0 0 3px #CC0000 !important;
+}
+
+.invalid-indicator {
+    color: red !important;
+    opacity: .6 !important;
+    display:none;
+}
