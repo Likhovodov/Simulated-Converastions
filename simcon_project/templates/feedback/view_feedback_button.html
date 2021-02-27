@@ -2,7 +2,7 @@
     Button to see the list of feedback for an assigned template
  -->  
 {% block content %}
-    {% if record.feedback_read == False %}
+    {% if record.new_feedback == True %}
     <button
         class="bs-modal btn btn-sm btn-outline-primary" type="button" name="button"
         data-form-url="{% url 'feedback:select-feedback' record.id record.conversation_templates__id  %}">
