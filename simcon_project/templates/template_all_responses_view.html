@@ -27,7 +27,8 @@
             <div class="col">
                 <form action="{% url 'view-all-responses' pk %}" method="get">
                     {% csrf_token %}
-                    <input type="text" name="filter" placeholder="Search">
+                    <input type="text" name="filter" title="Search by name, rating, or transcription content."
+                           placeholder="Search">
                 </form>
             </div>
             <div class="col">
