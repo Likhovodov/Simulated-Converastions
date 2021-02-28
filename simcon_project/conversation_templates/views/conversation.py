@@ -229,7 +229,6 @@ def conversation_end(request, ct_response_id):
 
     # POST request
     if request.method == 'POST':
-        print(request.POST)
         for response in ct_node_responses:
             response.transcription = request.POST.get(str(response.id), '')
             response.save()
