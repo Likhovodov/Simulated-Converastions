@@ -78,8 +78,8 @@ class TemplateResponsesView(UserPassesTestMixin, LoginRequiredMixin, SingleTable
             response_table = None
         else:
             response_table = ResponseTable(data=table_data, extra_columns=extra_columns)
+            RequestConfig(request, paginate=False).configure(response_table)
 
-        RequestConfig(request, paginate=False).configure(response_table)
 
         export_format = request.GET.get("_export", None)
         context = {

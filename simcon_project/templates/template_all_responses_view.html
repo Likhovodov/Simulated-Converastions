@@ -9,8 +9,8 @@
 </head>
 <body>
     {% if not table %}
-        <div class="row table-tools">
-            <div class="col">
+        <div class="container-fluid">
+            <div class="row table-tools">
                 <form method="post">
                     {% csrf_token %}
                     <label for="id_templates">Change Templates:</label>
@@ -18,8 +18,8 @@
                     <input type="submit" value="Go">
                 </form>
             </div>
-            <div class="col">
-                <p>Looks like there are no responses at the moment</p>
+            <div class="row no-responses">
+                <h5>Looks like there are no responses at the moment.</h5>
             </div>
         </div>
     {% else %}

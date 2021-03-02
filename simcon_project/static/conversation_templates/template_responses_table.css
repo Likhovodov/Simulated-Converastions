@@ -21,3 +21,8 @@ th.data-column {
 .table-row {
     margin-left: 15px;
 }
+
+.no-responses {
+    text-align: center;
+    padding-left: 15px;
+}
