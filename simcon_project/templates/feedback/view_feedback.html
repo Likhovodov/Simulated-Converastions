@@ -62,12 +62,27 @@
                                             <audio src="{% get_media_prefix %}{{ node.audio_response }}" controls></audio>
                                         </div>
                                         <div class="col">
+                                            {% if node.transcription_student_editable == True %}
                                             <form method="post">
                                                 {% csrf_token %}
                                                 <input type="hidden" value="{{ node.id }}" name="template-node-response-id"/>
                                                 <p><strong>Transcription: </strong> </p>
+                                                <div class="form-group">
+                                                    <textarea class="form-control" name="node-transcription-input">{{ node.transcription }}</textarea>
+                                                </div>
+                                                <div style="text-align: center">
+                                                    <button class="btn btn-sm btn-secondary" type="submit" name="update-node-transcription">Update Transcription</button>
+                                                </div>
+                                            </form>
+                                            {% else %}
+                                            <form method="post">
+                                                {% csrf_token %}
+                                                <input type="hidden" value="{{ node.id }}" name="template-node-response-id"/>
+
+                                                <p><strong>Transcription: </strong> </p>
                                                 <p>{{ node.transcription }}</p>
                                             </form>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>

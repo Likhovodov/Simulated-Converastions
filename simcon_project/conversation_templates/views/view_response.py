@@ -12,6 +12,9 @@ from django.core.mail import send_mail
 @user_passes_test(is_authenticated)
 def view_response(request, pk):
     response = get_object_or_404(TemplateResponse, pk=pk)
+
+    user = get_user_model()
+
     if request.method == 'POST':
         if 'update-overall-feedback' in request.POST:
             response.feedback = request.POST.get('overall-feedback-input')
@@ -19,9 +22,12 @@ def view_response(request, pk):
             response.save()
             return HttpResponseRedirect(reverse('view-response', kwargs={'pk': pk}))
         if 'update-node-transcription' in request.POST:
-            nodeId= request.POST.get('template-node-response-id')
+            nodeId = request.POST.get('template-node-response-id')
             currentNode = get_object_or_404(TemplateNodeResponse, pk=nodeId)
             currentNode.transcription = request.POST.get('node-transcription-input')
+            if user.get_is_researcher(request.user):
+                currentNode.transcription_student_editable = False
+
             currentNode.save()
             return HttpResponseRedirect(reverse('view-response', kwargs={'pk': pk}))
 
@@ -34,8 +40,6 @@ def view_response(request, pk):
                                                           position_in_sequence=i))
         else:
             break
-
-    user = get_user_model()
 
     self_rating = ""
     if response.self_rating == 0:
