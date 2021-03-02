@@ -46,7 +46,10 @@ class CompletedTemplatesTable(tables.Table):
     completion_date = tables.Column(accessor='conversation_templates__template_responses__completion_date',
                                     verbose_name='Last Response')
     attempts_left = tables.Column(verbose_name='Attempts Left')
-    feedback = tables.TemplateColumn(verbose_name='', template_name='feedback/view_feedback_button.html')
+    feedback = tables.TemplateColumn(verbose_name='',
+                                     template_name='feedback/view_feedback_button.html',
+                                     extra_context={"new_feedback": lambda record: True if record.new_feedback
+                                     else False})
 
 
 class ModalFeedbackTable(tables.Table):
@@ -84,6 +87,11 @@ def student_view(request):
                                                             student=student.first())
             last_response = responses.aggregate(Max('completion_date'))
             attempts_left = assignment.response_attempts - len(responses)
+            new_feedback = False
+            for feedback in responses:
+                if not feedback.feedback_read:
+                    new_feedback = True
+                    break
 
             if attempts_left < 0:
                 attempts_left = 0
@@ -95,7 +103,8 @@ def student_view(request):
                                           "date_assigned": assignment.date_assigned,
                                           "conversation_templates__template_responses__completion_date":
                                               last_response['completion_date__max'],
-                                          "attempts_left": attempts_left
+                                          "attempts_left": attempts_left,
+                                          "new_feedback": new_feedback
                                           })
             if last_response['completion_date__max'] is None and attempts_left > 0:
                 incomplete_templates.append(assigned_template_row)
