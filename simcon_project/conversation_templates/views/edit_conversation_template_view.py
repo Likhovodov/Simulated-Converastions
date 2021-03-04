@@ -21,6 +21,7 @@ def edit_conversation_template(request, pk):
         model_JSON = json.dumps({
             'name' : conversation_template.name,
             'description' : conversation_template.description,
+            'example_conversation' : conversation_template.example_conversation,
             'nodes' : [
                 {
                     'id' : node.id,
