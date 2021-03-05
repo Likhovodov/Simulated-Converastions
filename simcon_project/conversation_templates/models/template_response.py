@@ -31,7 +31,8 @@ class TemplateResponse(models.Model):
 
     def get_absolute_url(self):
         return reverse('conversation-end', kwargs={'ct_response_id': self.id})
-    
+
+    @property
     def self_rating_to_string(self):
         self_rate = ""
         if self.self_rating == 0:
@@ -47,3 +48,11 @@ class TemplateResponse(models.Model):
         if self.self_rating == 5:
             self_rate = "Very Satisfied"
         return self_rate
+
+    @property
+    def ends_with_custom(self):
+        for node in self.node_responses.all():
+            if node.custom_response:
+                return True
+
+        return False

@@ -16,18 +16,21 @@ class ResponseTable(tables.Table):
         ''' <a class="btn btn btn-outline-secondary btn-sm" href="{% url 'view-response' record.id %}" >View</a>''', verbose_name='')
     delete = tables.TemplateColumn(
         '''<button class="bs-modal btn btn-outline-secondary btn-sm" type="button" name="button" data-form-url="{% url 'delete-response' record.id %}" >Delete</button>''', verbose_name='')
+    custom_end = tables.BooleanColumn(accessor="ends_with_custom", orderable=False)
 
     class Meta:
         attrs = {'class': 'table table-sm', 'id': 'response-table'}
         model = TemplateResponse
-        fields = ['template', 'name', 'completion_date', 'altered_rating']
+        fields = ['template', 'name', 'completion_date', 'altered_rating', 'custom_end']
 
 
 def is_researcher(user):
     return user.is_authenticated and user.get_is_researcher()
 
+
 def is_admin(user):
     return user.is_authenticated and user.get_is_staff()
+
 
 @ user_passes_test(is_researcher)
 def researcher_view(request):

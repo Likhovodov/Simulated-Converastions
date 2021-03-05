@@ -1,21 +1,52 @@
 {% extends "researcher_base.html" %}
 {% load render_table from django_tables2 %}
 {% load export_url from django_tables2 %}
+{% load static %}
 {% block content %}
 <head>
     <title>SimCon | Template Response</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'conversation_templates/template_responses_table.css' %}">
 </head>
 <body>
-    <form method="post">
-        {% csrf_token %}
-        {{ form }}
-        <input type="submit" value="Go">
-    </form>
     {% if not table %}
-        <p>Looks like there are no responses at the moment</p>
+        <div class="container-fluid">
+            <div class="row table-tools">
+                <form method="post">
+                    {% csrf_token %}
+                    <label for="id_templates">Change Templates:</label>
+                    {{ form }}
+                    <input type="submit" value="Go">
+                </form>
+            </div>
+            <div class="row no-responses">
+                <h5>Looks like there are no responses at the moment.</h5>
+            </div>
+        </div>
     {% else %}
-        <a href="{% export_url 'xlsx' %}">Download as .xls</a>
-        {% render_table table %}
+        <div class="row table-tools">
+            <div class="col">
+                <form action="{% url 'view-all-responses' pk %}" method="get">
+                    {% csrf_token %}
+                    <input type="text" name="filter" title="Search by name, rating, or transcription content."
+                           placeholder="Search">
+                </form>
+            </div>
+            <div class="col">
+                <form method="post">
+                    {% csrf_token %}
+                    <label for="id_templates">Change Templates:</label>
+                    {{ form }}
+                    <input type="submit" value="Go">
+                </form>
+            </div>
+            <div class="col" style="text-align: center">
+                <a class="btn btn-outline-primary" href="{% export_url 'xlsx' %}" title="Download as .xls">
+                    Download</a>
+            </div>
+        </div>
+        <div class="row table-row">
+            {% render_table table %}
+        </div>
     {% endif %}
 </body>
 {% endblock %}
