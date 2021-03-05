@@ -32,4 +32,7 @@ class TemplateNode(models.Model):
         :return:
         """
         parsed_url = urlparse(str(self.video_url))
-        return "https://www.youtube-nocookie.com/embed/" + parsed_url[2][1:]
+        if parsed_url[4] is not "":
+            return "https://www.youtube-nocookie.com/embed/" + parsed_url[4][2:]
+        else:
+            return "https://www.youtube-nocookie.com/embed/" + parsed_url[2][1:]
