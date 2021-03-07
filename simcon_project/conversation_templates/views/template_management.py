@@ -3,13 +3,16 @@ from django.db.models import Q
 from django.urls import reverse_lazy, reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.http import HttpResponse
 from users.views.researcher_home import is_researcher
-from conversation_templates.models import ConversationTemplate, TemplateFolder, TemplateResponse
+from conversation_templates.models import ConversationTemplate, TemplateFolder, TemplateResponse, TemplateNode, TemplateNodeChoice
 from conversation_templates.forms import FolderCreationForm, FolderEditForm, AddTemplatesForm
 from users.models import Researcher
 from bootstrap_modal_forms.generic import BSModalUpdateView, BSModalDeleteView
 from django_tables2 import TemplateColumn, tables, RequestConfig, A, SingleTableView
 import re
+import json
 
 
 class FolderTemplateTable(tables.Table):
@@ -22,9 +25,10 @@ class FolderTemplateTable(tables.Table):
                                       template_name='template_management/buttons/template_hamburger_button.html',
                                       extra_context={"in_folder": True})
     name = tables.columns.LinkColumn('view-all-responses', args=[A('pk')])
+
     class Meta:
         attrs = {'class': 'table table-sm', 'id': 'template-table'}
-        row_attrs = {'class': lambda record: 'archived' if record.archived else '' }
+        row_attrs = {'class': lambda record: 'archived' if record.archived else ''}
         model = ConversationTemplate
         fields = ['name', 'description', 'creation_date']
 
@@ -47,7 +51,7 @@ class AllTemplateTable(tables.Table):
 
 class FolderTable(tables.Table):
     """
-    Table showing all folders (unique to a researcher in the future)
+    Table showing all folders for the signed-in researcher
     """
     edit_button = tables.columns.TemplateColumn(template_name='template_management/buttons/edit_folder_button.html',
                                                 verbose_name='')
@@ -193,6 +197,90 @@ class FolderEditView(BSModalUpdateView):
     def get_success_url(self):
         success_url = route_to_current_folder(self.request.META.get('HTTP_REFERER'))
         return success_url
+
+
+@user_passes_test(is_researcher)
+@ensure_csrf_cookie
+def share_template_modal(request, pk):
+    """
+    A modal to share a template with other researchers
+    """
+    template = ConversationTemplate.objects.filter(pk=pk).first()
+    return render(request,
+                  'template_management/share_template_modal.html',
+                  {'template_name': template.name,
+                   'template_pk': pk})
+
+
+@user_passes_test(is_researcher)
+@ensure_csrf_cookie
+def validate_share_email(request):
+    success = 0
+    name = ''
+    email_address = request.POST.get("email")
+    researcher = Researcher.objects.filter(email=email_address).first()
+    if researcher is None:
+        success = 1
+    elif researcher == Researcher.objects.filter(id=request.user.id).first():
+        success = 2
+    else:
+        name = researcher.first_name + ' ' + researcher.last_name
+
+    return HttpResponse(json.dumps({
+        'success': success,
+        'name': name,
+    }))
+
+
+@user_passes_test(is_researcher)
+@ensure_csrf_cookie
+def share_template_finalize(request):
+    success = 1
+    error_message = ''
+    template_pk = request.POST.get("pk")
+    template = ConversationTemplate.objects.filter(pk=template_pk).first()
+    researchers = decode(request.POST.get("researchers"))
+    if template is None:
+        success = 1
+        error_message += 'Invalid template selection.'
+    if researchers is None or researchers == '':
+        success = 1
+        error_message += 'No researchers selected.'
+    for researcher_email in researchers:
+        template_clone = template
+        nodes = TemplateNode.objects.filter(parent_template=template)
+        template_clone.pk = None
+        template_clone.researcher = Researcher.objects.filter(email=researcher_email).first()
+        template_clone.save()
+        for node in nodes:
+            node_clone = node
+            node_choices = TemplateNodeChoice.objects.filter(parent_template_node=node)
+            node_clone.pk = None
+            node_clone.parent_template = template_clone
+            node_clone.save()
+            for node_choice in node_choices:
+                choice_clone = node_choice
+                choice_clone.pk = None
+                choice_clone.parent_template_node = node
+                choice_clone.save()
+
+    return HttpResponse(json.dumps({
+        'success': success,
+        'message': error_message,
+    }))
+
+
+# Transfer string type list to list type
+def decode(str):
+    if str[0] != '[':
+        return
+    temp = str[1:-1]
+    temp = temp.split(',')
+    listTmp = []
+    for t in temp:
+        t = t[1:-1]
+        listTmp.append(t)
+    return listTmp
 
 
 class FolderDeleteView(DeleteView):

@@ -1,0 +1,136 @@
+{% load render_table from django_tables2 %}
+{% block content %}
+<form method="post" action="">
+  {% csrf_token %}
+    <div class="dim" id="dim-dialog" title="Event"></div>
+
+    <div class="modal-header">
+        <h3 class="modal-title">Share Template</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div class="modal-body">
+        <p>Who do you want to share <strong>{{ template_name }}</strong> with?</p>
+        <input id="email" type="text" placeholder="Researcher Email Address" style="width: 74%">
+        <button id="add-researcher"
+              type="button"
+              class="btn btn-sm btn-outline-secondary mb-1"
+              onclick="add_researcher(email.value)">
+            Add Researcher</button>
+        <div id="alert" class="alert alert-danger alert-dismissible" hidden>
+            <strong id="alert-text">Researcher Not Found</strong>
+        </div>
+        <div class="researcher-table mt-3">
+            <table class="table table-bordered table-hover col-lg">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody id="researcher-table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="submit"
+                class="btn btn-success"
+                onclick="share_template()">
+            Share Template</button>
+    </div>
+</form>
+<script type="text/javascript">
+var addedResearchers = [];
+function add_researcher(email) {
+    $.ajaxSetup({
+        data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
+    });
+    if (addedResearchers.includes(email)) {
+        return;
+    }
+    if (email == "") {
+        document.getElementById("alert").hidden = false;
+        document.getElementById("alert-text").innerHTML = "Enter an email address.";
+        return;
+    }
+    $.ajax({
+        url:"{% url 'management:validate-share-email' %}",
+        type:'POST',
+        data: {
+            'email': email,
+        },
+        dataType:'json',
+        success: function(data){
+            if(data.success==0){
+                document.getElementById("alert").hidden = true;
+                addedResearchers.push(email)
+                let rowToAdd = `
+                <tr id="${email}">
+                      <td>${data.name}</td>
+                      <td>${email}</td>
+                </tr>`
+                document.getElementById("researcher-table-body").insertAdjacentHTML('beforeend', rowToAdd)
+            }
+            else if (data.success==1) {
+                document.getElementById("alert").hidden = false;
+                document.getElementById("alert-text").innerHTML = "Researcher not found.";
+            }
+            else {
+                document.getElementById("alert").hidden = false;
+                document.getElementById("alert-text").innerHTML = "You cannot add yourself.";
+            }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            document.getElementById('dim-dialog').style.display = 'none'
+            alert("Error: " + errorThrown);
+        }
+    })
+}
+
+function share_template() {
+    document.getElementById('dim-dialog').style.display = 'block'
+    researchersJSON=JSON.stringify(addedResearchers);
+    $.ajaxSetup({
+        data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
+    });
+    $.ajax({
+        url:"{% url 'management:share-template-finalize' %}",
+        type:'POST',
+        data: {
+            'pk': "{{ template_pk }}",
+            'researchers': researchersJSON,
+        },
+        dataType:'json',
+        success: function(data){
+            if(data.success==0){
+                document.getElementById('dim-dialog').style.display = 'none'
+                alert("Template shared successfully!");
+                window.location.replace("{% url 'management:main' %}")
+            }
+            else{
+                document.getElementById('dim-dialog').style.display = 'none'
+                var msgTmp=data.message;
+                window.alert(msgTmp);
+            }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            document.getElementById('dim-dialog').style.display = 'none'
+            alert("Error: " + errorThrown);
+        }
+    })
+}
+
+$(document).on("keypress", 'form', function (e) {
+    var code = e.keyCode || e.which;
+    console.log(code);
+    if (code == 13) {
+        console.log('Inside');
+        e.preventDefault();
+        return false;
+    }
+});
+</script>
+{% endblock %}
