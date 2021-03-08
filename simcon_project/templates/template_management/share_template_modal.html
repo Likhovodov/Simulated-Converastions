@@ -1,4 +1,5 @@
 {% load render_table from django_tables2 %}
+{% load static %}
 {% block content %}
 <form method="post" action="">
   {% csrf_token %}
@@ -14,11 +15,11 @@
     <div class="modal-body">
         <p>Who do you want to share <strong>{{ template_name }}</strong> with?</p>
         <input id="email" type="text" placeholder="Researcher Email Address" style="width: 74%">
-        <button id="add-researcher"
+        <input id="add-researcher"
               type="button"
               class="btn btn-sm btn-outline-secondary mb-1"
-              onclick="add_researcher(email.value)">
-            Add Researcher</button>
+               value="Add Researcher"
+              onclick="add_researcher(email.value)"/>
         <div id="alert" class="alert alert-danger alert-dismissible" hidden>
             <strong id="alert-text">Researcher Not Found</strong>
         </div>
@@ -36,10 +37,10 @@
     </div>
 
     <div class="modal-footer">
-        <button type="submit"
+        <input type="button"
                 class="btn btn-success"
-                onclick="share_template()">
-            Share Template</button>
+                onclick="share_template()"
+                value="Share Template"/>
     </div>
 </form>
 <script type="text/javascript">
@@ -65,6 +66,7 @@ function add_researcher(email) {
         dataType:'json',
         success: function(data){
             if(data.success==0){
+                document.getElementById("email").value = "";
                 document.getElementById("alert").hidden = true;
                 addedResearchers.push(email)
                 let rowToAdd = `

@@ -65,6 +65,7 @@ class FolderTable(tables.Table):
 
 
 @user_passes_test(is_researcher)
+@ensure_csrf_cookie
 def main_view(request):
     """
     Main template management view.
@@ -200,7 +201,6 @@ class FolderEditView(BSModalUpdateView):
 
 
 @user_passes_test(is_researcher)
-@ensure_csrf_cookie
 def share_template_modal(request, pk):
     """
     A modal to share a template with other researchers
@@ -215,6 +215,9 @@ def share_template_modal(request, pk):
 @user_passes_test(is_researcher)
 @ensure_csrf_cookie
 def validate_share_email(request):
+    """
+    Confirm that entered in email is in database and user isn't sharing with themselves.
+    """
     success = 0
     name = ''
     email_address = request.POST.get("email")
@@ -235,17 +238,21 @@ def validate_share_email(request):
 @user_passes_test(is_researcher)
 @ensure_csrf_cookie
 def share_template_finalize(request):
-    success = 1
+    """
+    Clone template and share with each researcher specified in modal.
+    """
+    success = 0
     error_message = ''
     template_pk = request.POST.get("pk")
     template = ConversationTemplate.objects.filter(pk=template_pk).first()
     researchers = decode(request.POST.get("researchers"))
     if template is None:
         success = 1
-        error_message += 'Invalid template selection.'
+        error_message += 'Invalid template selection.\n'
     if researchers is None or researchers == '':
         success = 1
-        error_message += 'No researchers selected.'
+        error_message += 'No researchers selected.\n'
+    # for each researcher, clone template, all it's nodes and each node's choices.
     for researcher_email in researchers:
         template_clone = template
         nodes = TemplateNode.objects.filter(parent_template=template)
