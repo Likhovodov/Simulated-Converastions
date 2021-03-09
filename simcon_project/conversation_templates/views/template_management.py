@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import HttpResponse
+from django.core.mail import send_mail
 from users.views.researcher_home import is_researcher
 from conversation_templates.models import ConversationTemplate, TemplateFolder, TemplateResponse, TemplateNode, TemplateNodeChoice
 from conversation_templates.forms import FolderCreationForm, FolderEditForm, AddTemplatesForm
@@ -253,24 +254,32 @@ def share_template_finalize(request):
         success = 1
         error_message += 'No researchers selected.\n'
     # for each researcher, clone template, all it's nodes and each node's choices.
-    for researcher_email in researchers:
-        template_clone = template
-        nodes = TemplateNode.objects.filter(parent_template=template)
-        template_clone.pk = None
-        template_clone.researcher = Researcher.objects.filter(email=researcher_email).first()
-        template_clone.save()
-        for node in nodes:
-            node_clone = node
-            node_choices = TemplateNodeChoice.objects.filter(parent_template_node=node)
-            node_clone.pk = None
-            node_clone.parent_template = template_clone
-            node_clone.save()
-            for node_choice in node_choices:
-                choice_clone = node_choice
-                choice_clone.pk = None
-                choice_clone.parent_template_node = node
-                choice_clone.save()
+    if success == 0:
+        for researcher_email in researchers:
+            template_clone = template
+            nodes = TemplateNode.objects.filter(parent_template=template)
+            template_clone.pk = None
+            template_clone.researcher = Researcher.objects.filter(email=researcher_email).first()
+            template_clone.save()
+            for node in nodes:
+                node_clone = node
+                node_choices = TemplateNodeChoice.objects.filter(parent_template_node=node)
+                node_clone.pk = None
+                node_clone.parent_template = template_clone
+                node_clone.save()
+                for node_choice in node_choices:
+                    choice_clone = node_choice
+                    choice_clone.pk = None
+                    choice_clone.parent_template_node = node
+                    choice_clone.save()
 
+    sender = Researcher.objects.filter(id=request.user.id)
+    sender_name = str(sender.first().get_full_name())
+    template_name = str(template)
+    subject = 'Simulated Conversations Template Shared with You'
+    msg = sender_name+ ' has shared ' + template_name + ' with you on Simulated Conversations.'
+    recipients = [i[0] for i in researchers]
+    send_mail(subject, msg, 'simcon.dev@gmail.com', recipients, fail_silently=False)
     return HttpResponse(json.dumps({
         'success': success,
         'message': error_message,
