@@ -275,11 +275,12 @@ def share_template_finalize(request):
 
     sender = Researcher.objects.filter(id=request.user.id)
     sender_name = str(sender.first().get_full_name())
+    sender_email = str(sender.first())
     template_name = str(template)
     subject = 'Simulated Conversations Template Shared with You'
-    msg = sender_name+ ' has shared ' + template_name + ' with you on Simulated Conversations.'
-    recipients = [i[0] for i in researchers]
-    send_mail(subject, msg, 'simcon.dev@gmail.com', recipients, fail_silently=False)
+    msg = sender_name + ' (' + sender_email + ') ' + 'has shared \"' + template_name + '\" with you on Simulated ' \
+                                                                                       'Conversations.'
+    send_mail(subject, msg, 'simcon.dev@gmail.com', researchers, fail_silently=False)
     return HttpResponse(json.dumps({
         'success': success,
         'message': error_message,
