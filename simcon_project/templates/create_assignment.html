@@ -255,7 +255,7 @@
                 const student = students.find(student => student.email == studentEmail)
                 let rowToAdd = `
                 <tr id="${studentEmail}">
-                      <td>${student.first_name} ${student.first_name}</td>
+                      <td>${student.first_name} ${student.last_name}</td>
                       <td>${studentEmail}</td>
                       <td><a href="javascript:remove_student('${studentEmail}')">Delete</a></td>
                 </tr>`
