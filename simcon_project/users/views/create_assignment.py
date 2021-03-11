@@ -119,7 +119,7 @@ def add_assignment(request):
     if stuIsNull and labelIsNull:
         success = 1
         errMsg = errMsg+'Either students or labels must not be empty.\n\n'
-    labelStudents = Student.objects.filter(labels__label_name__in=labels)
+    labelStudents = Student.objects.filter(labels__label_name__in=labels, added_by=researcher)
     if stuIsNull and not labelIsNull:
         if stuIsNull and labelStudents.count() <= 0:
             success = 1
