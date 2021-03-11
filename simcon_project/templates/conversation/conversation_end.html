@@ -20,6 +20,7 @@
     <div class="container-fluid mt-3" style="width: 50%">
         <div class="card">
             <div class="card-body mr-3 ml-3">
+
                 <div id="error"></div>
                 <form action="{{ ct_response.get_absolute_url }}" method="POST" id="trans-form">
                     <ul class="list-group list-group-flush">
@@ -36,6 +37,10 @@
                         </li>
                         {% if allow_self_rating %}
                             <li class="list-group-item">
+                                {% if ct.example_conversation %}
+                                    <h5 class="mb-3"><strong>Example Conversation:</strong></h5>
+                                    <p>{{ ct.example_conversation }}</p>
+                                {% endif %}
                                 <h5 class="mb-3"><strong>Rate your performance:</strong></h5>
                                 <label for="rating-very-unsatisfied" class="ml-2">
                                     <input type="radio" name="{{ ct_response.self_rating }}" id="rating-very-unsatisfied" value=1 class="mr-2">Very Unsatisfied
