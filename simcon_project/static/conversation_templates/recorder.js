@@ -10,12 +10,12 @@ let recordAttempts;					//Count of record response attempts
 let AudioContext = window.AudioContext || window.webkitAudioContext;
 let audioContext;
 
-let recordButton = document.getElementById("recordButton");
-let stopButton = document.getElementById("stopButton");
+let recordButton = document.getElementById("record-button");
+let stopButton = document.getElementById("stop-button");
 let info = document.getElementById("info");
 let recording = document.getElementById("recording");
-let audioPlayer = document.getElementById("audioPlayer");
-let audioResponse = document.getElementById("audioResponse");
+let audioPlayer = document.getElementById("audio-player");
+let audioResponse = document.getElementById("audio-response");
 
 recordButton.addEventListener("click", startRecording);
 stopButton.addEventListener("click", stopRecording);
@@ -85,13 +85,13 @@ function toggleAudioControls(record, stop) {
 function displayRecordingAttempts() {
 	if (recordAttempts > 1) {
 		toggleAudioControls(false, true);
-		info.innerText = recordAttempts + " attempts left to record";
+		info.innerText = recordAttempts + " attempts remaining";
 	} else if (recordAttempts === 1) {
 		toggleAudioControls(false, true);
-		info.innerText = recordAttempts + " attempt left to record";
+		info.innerText = recordAttempts + " attempt remaining";
 	} else {
 		toggleAudioControls(true, true);
-		info.innerText = "No attempts left to record";
+		info.innerText = "No remaining attempts";
 	}
 	sessionStorage.setItem('recordAttempts', JSON.stringify(recordAttempts));
 }
