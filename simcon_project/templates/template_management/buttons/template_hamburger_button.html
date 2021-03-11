@@ -3,6 +3,10 @@
     border-color: white;
 }
 
+.btn-block+.btn-block {
+    margin-top: 0em;
+}
+
 .dropdown-menu {
     min-width: 0em;
     padding: 0px;
@@ -36,18 +40,24 @@
     <form action="{% url 'management:edit_conversation_template' record.id %}" method="post">
             {% csrf_token %}
         <button id="edit-template" class="btn btn-block btn-sm btn-outline-secondary pr-4 pl-4" type="submit">Edit</button>
-        </form>
-              {% if in_folder %}
-    <form action="{% url 'management:remove-template' record.id %}" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="back" value="{{ request.path }}">
-        <button id="remove-template" class="btn btn-block btn-sm btn-outline-secondary" type="submit">Remove</button>
     </form>
-    {% else %}
-    <button id="delete-template" class="bs-modal btn-block btn btn-sm btn-outline-secondary pr-3 pl-3" type="button"
+    <button id="share-template"
+            class="bs-modal btn-block btn btn-sm btn-outline-secondary pr-3 pl-3" type="button"
             name="button"
-            data-form-url="{% url 'management:delete-template' record.id %}" style="display: inline" >Delete</button>
-    <!-- Links -->
+            data-form-url="{% url 'management:share-template-modal' record.id %}" style="display: inline" >
+        Share</button>
+    {% if in_folder %}
+        <form action="{% url 'management:remove-template' record.id %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="back" value="{{ request.path }}">
+            <button id="remove-template" class="btn btn-block btn-sm btn-outline-secondary" type="submit">Remove</button>
+        </form>
+    {% else %}
+        <button id="delete-template"
+                class="bs-modal btn-block btn btn-sm btn-outline-secondary pr-3 pl-3" type="button"
+                name="button"
+                data-form-url="{% url 'management:delete-template' record.id %}" style="display: inline" >
+            Delete</button>
     {% endif %}
 </div>
 <script>
