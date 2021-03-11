@@ -20,9 +20,14 @@ def create_conversation_template_view(request):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
 
+        example_conversation = body['exampleConversation']
+        if example_conversation == "":
+            example_conversation = None
+
         conv_template = ConversationTemplate(
             name=body['templateName'],
             description=body['templateDescription'],
+            example_conversation=example_conversation,
             researcher=Researcher.objects.get(email=request.user.email))
         conv_template.save()
 
