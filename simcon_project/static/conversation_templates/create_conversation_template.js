@@ -1,6 +1,7 @@
 // Character count max values from models
 let CHOICE_DESCRIPTION_CHAR_MAX = 500
 let TEMPLATE_NAME_CHAR_MAX = 100
+let TEMPLATE_NODE_NAME_CHAR_MAX = 100
 let TEMPLATE_DESCRIPTION_CHAR_MAX = 4000
 let TEMPLATE_NODE_DESCRIPTION_CHAR_MAX = 4000
 let EXAMPLE_CONVERSATION_CHAR_MAX = 4000
@@ -39,6 +40,7 @@ class StepNode {
     // Used when submitting to the backend (when JSON.stringify() is called)
     toJSON() {
         return {
+            name: this.nodeName,
             videoURL: this.videoUrl,
             description: this.nodeDescription,
             isFirst: this.isFirst,
@@ -177,6 +179,14 @@ function loadState() {
                     clientNode.lastChoiceIndex++
                 }
                 clientNode.videoUrl = serverNode.video_url
+                clientNode.nodeName = serverNode.name
+                if(serverNode.name === null) {
+                    clientNode.name = ""
+                    $("#step-" + clientNode.index + " .card-title").text("")
+                } else {
+                    clientNode.name = serverNode.name
+                    $("#step-" + clientNode.index + " .card-title").text(serverNode.name)
+                }
                 clientNode.nodeDescription = serverNode.description
                 clientNode.isFirst = serverNode.start
                 clientNode.isTerminal = serverNode.terminal
@@ -489,6 +499,7 @@ function handleNodeNameInput() {
     const input = getNodeNameInput().value.trim()
     $("#step-" + currentNodeInFocus.index + " .card-title").text(input)
     currentNodeInFocus.nodeName = input
+    if(validating) validateNodeNameInput()
 }
 
 function handleURLInput() {
@@ -629,6 +640,7 @@ function validateRequiredTextField(element, input, charLimit) {
  */
 function nodeIsValid(node) {
     if(
+        node.nodeName.length > TEMPLATE_NODE_NAME_CHAR_MAX ||
         node.nodeDescription == "" ||
         node.nodeDescription.length > TEMPLATE_NODE_DESCRIPTION_CHAR_MAX ||
         node.videoUrl == "" ||
@@ -661,6 +673,7 @@ function nodeIsValid(node) {
 function validateAllVisibleFields() {
     validateURLInput()
     validateNodeDescriptionInput()
+    validateNodeNameInput()
     validateTemplateNameInput()
     validateTemplateDescriptionInput()
     validateExampleConversationInput()
@@ -688,6 +701,17 @@ function updateValidityIndicatorOnAllStepNodes() {
     nodes.forEach((value) => {
         updateNodeValidityIndicator(value)
     })
+}
+
+function validateNodeNameInput() {
+    const element = getNodeNameInput()
+    if(element.value.trim().length > TEMPLATE_NODE_NAME_CHAR_MAX) {
+        setElementAsInvalid(element, "Must be no longer than " + TEMPLATE_NODE_NAME_CHAR_MAX + " characters")
+        return false
+    } else {
+        setElementAsValid(element)
+        return true
+    }
 }
 
 function validateURLInput() {

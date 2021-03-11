@@ -17,6 +17,7 @@ class TemplateNode(models.Model):
     parent_template: ConversationTemplate object that a TemplateNode belongs to
     """
     id = models.UUIDField(unique=True, editable=False, primary_key=True, default=uuid.uuid4)
+    name = models.CharField(max_length=100, null=True, blank=True)
     description = models.CharField(max_length=4000)
     video_url = EmbedVideoField()
     start = models.BooleanField(default=False)

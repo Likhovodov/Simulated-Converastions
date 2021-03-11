@@ -25,6 +25,7 @@ def edit_conversation_template(request, pk):
             'nodes' : [
                 {
                     'id' : node.id,
+                    'name' : node.name,
                     'description' : node.description,
                     'video_url' : node.video_url,
                     'start' : node.start,
