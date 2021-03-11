@@ -6,21 +6,28 @@
     <div class="dim" id="dim-dialog" title="Event"></div>
 
     <div class="modal-header">
-        <h3 class="modal-title">Share Template</h3>
+        <h4 class="modal-title">Share Template</h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
 
-    <div class="modal-body">
-        <p>Who do you want to share <strong>{{ template_name }}</strong> with?</p>
-        <input id="email" type="text" placeholder="Researcher Email Address" style="width: 74%">
-        <input id="add-researcher"
-              type="button"
-              class="btn btn-sm btn-outline-secondary mb-1"
-               value="Add Researcher"
-              onclick="add_researcher(email.value)"/>
+    <div class="modal-body w-100">
+            <p>Who do you want to share '<strong>{{ template_name }}</strong>' with?</p>
+            <div class="input-group mb-3" style="max-width: 100%">
+                <input class="form-control" id="email" type="text" placeholder="Researcher Email Address">
+                <div class="input-group-append">
+                    <input id="add-researcher"
+                           type="button"
+                           class="btn btn-outline-secondary"
+                           value="Add Researcher"
+                           onclick="add_researcher(email.value)">
+                </div>
+            </div>
+
+
         <div id="alert" class="alert alert-danger alert-dismissible" hidden>
+              <span type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></span>
             <strong id="alert-text">Researcher Not Found</strong>
         </div>
         <div class="researcher-table mt-3">
@@ -38,7 +45,7 @@
 
     <div class="modal-footer">
         <input type="button"
-                class="btn btn-success"
+                class="btn btn-secondary"
                 onclick="share_template()"
                 value="Share Template"/>
     </div>
@@ -127,9 +134,7 @@ function share_template() {
 
 $(document).on("keypress", 'form', function (e) {
     var code = e.keyCode || e.which;
-    console.log(code);
     if (code == 13) {
-        console.log('Inside');
         e.preventDefault();
         return false;
     }
