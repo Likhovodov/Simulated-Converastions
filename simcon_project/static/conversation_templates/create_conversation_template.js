@@ -3,6 +3,7 @@ let CHOICE_DESCRIPTION_CHAR_MAX = 500
 let TEMPLATE_NAME_CHAR_MAX = 100
 let TEMPLATE_DESCRIPTION_CHAR_MAX = 4000
 let TEMPLATE_NODE_DESCRIPTION_CHAR_MAX = 4000
+let EXAMPLE_CONVERSATION_CHAR_MAX = 4000
 
 // Error message(s) used in multiple places
 let NO_DESTINATION_FOR_CHOICE_ERROR = "No destination selected"
@@ -10,6 +11,7 @@ let NO_DESTINATION_FOR_CHOICE_ERROR = "No destination selected"
 // Variables used to keep track of state that will eventually get sent to the backend
 let templateName = ""           // Holds template's name
 let templateDescription = ""    // Holds template's description
+let exampleConversation = ""    // Holds example conversation that a user can provide
 let nodes = new Map()           // Map from counter to node. Used to keep track of all the created nodes
 let formSubmitted = false       // Used to indicate if a form was submitted successfully
 
@@ -63,14 +65,18 @@ function submit() {
     // Checks that everything is valid before submission
     let everythingIsValid = true
     let foundFirst = false
-    nodes.forEach((node) => {
-        if(!nodeIsValid(node)){
-            everythingIsValid = false
-        }
-        if(node.isFirst) {
-            foundFirst = true
-        }
-    })
+    if(validateTemplateNameInput() && validateTemplateDescriptionInput() && validateExampleConversationInput()){
+        nodes.forEach((node) => {
+            if(!nodeIsValid(node)){
+                everythingIsValid = false
+            }
+            if(node.isFirst) {
+                foundFirst = true
+            }
+        })
+    } else {
+        everythingIsValid = false
+    }
 
     if(everythingIsValid && foundFirst) {
         // Retrieves csrftoken
@@ -90,7 +96,8 @@ function submit() {
         const postBody = JSON.stringify({
             nodes: Array.from(nodes),
             templateName: templateName,
-            templateDescription: templateDescription
+            templateDescription: templateDescription,
+            exampleConversation: exampleConversation
         })
 
         // Determines the post url without direct hard coding.
@@ -143,8 +150,10 @@ function loadState() {
     $(document).ready(() => {
 
         if(modelObject) {
+            modelObject.nodes.reverse() //Reverse the order of the template nodes so they are rendered in the same order as they did when the template was created
             templateDescription = modelObject.description
             templateName = modelObject.name
+            exampleConversation = modelObject.example_conversation
 
             let nodeIdToIndexMap = new Map()
             for(const serverNode of modelObject.nodes) {
@@ -176,6 +185,7 @@ function loadState() {
             updateNodeInFocus(1)
             getTemplateNameInput().value = templateName
             getTemplateDescriptionInput().value = templateDescription
+            getExampleConversationInput().value = exampleConversation
         } else {
             addStepNode()
             updateNodeInFocus(1)
@@ -222,6 +232,9 @@ function loadState() {
                     break
                 case "template-description-input":
                     handleTemplateDescriptionInput()
+                    break
+                case "template-example-conversation-input":
+                    handleExampleConversationInput()
                     break
                 case "validate-check-input":
                     handleValidateToggle()
@@ -533,6 +546,11 @@ function handleTemplateDescriptionInput() {
     if(validating) validateTemplateDescriptionInput()
 }
 
+function handleExampleConversationInput() {
+    exampleConversation = getExampleConversationInput().value.trim()
+    if(validating) validateExampleConversationInput()
+}
+
 function handleChoiceDescriptionInput(choiceIndex) {
     currentNodeInFocus.responseChoices.get(choiceIndex).description = getChoiceDescriptionInput(choiceIndex).value.trim()
     if(validating) validateChoiceDescriptionInput(choiceIndex)
@@ -591,6 +609,7 @@ function setElementAsValid(element) {
  * Used to handle validity of a text input
  * @param element element who's validity is to be checked
  * @param charLimit max characters for this input
+ * @returns {boolean} indicating if the field is valid (ture if yes, false otherwise)
  */
 function validateRequiredTextField(element, input, charLimit) {
     if(input == "") {
@@ -599,6 +618,7 @@ function validateRequiredTextField(element, input, charLimit) {
         setElementAsInvalid(element, "Must be no longer than " + charLimit + " characters")
     } else {
         setElementAsValid(element)
+        return true
     }
 }
 
@@ -643,6 +663,7 @@ function validateAllVisibleFields() {
     validateNodeDescriptionInput()
     validateTemplateNameInput()
     validateTemplateDescriptionInput()
+    validateExampleConversationInput()
     validateResponseChoices()
     validateIsFirstNodeCheck()
 }
@@ -706,13 +727,24 @@ function validateIsFirstNodeCheck() {
 function validateTemplateNameInput() {
     const element = getTemplateNameInput()
     const input = element.value.trim()
-    validateRequiredTextField(element, input, TEMPLATE_NAME_CHAR_MAX)
+    return validateRequiredTextField(element, input, TEMPLATE_NAME_CHAR_MAX)
 }
 
 function validateTemplateDescriptionInput() {
     const element = getTemplateDescriptionInput()
     const input = element.value.trim()
-    validateRequiredTextField(element, input, TEMPLATE_DESCRIPTION_CHAR_MAX)
+    return validateRequiredTextField(element, input, TEMPLATE_DESCRIPTION_CHAR_MAX)
+}
+
+function validateExampleConversationInput() {
+    const element = getExampleConversationInput()
+    if(element.value.trim().length > EXAMPLE_CONVERSATION_CHAR_MAX) {
+        setElementAsInvalid(element, "Must be no longer than " + EXAMPLE_CONVERSATION_CHAR_MAX + " characters")
+        return false
+    } else {
+        setElementAsValid(element)
+        return true
+    }
 }
 
 function validateChoiceDescriptionInput(choiceIndex) {
@@ -755,6 +787,10 @@ function getTemplateNameInput() {
 
 function getTemplateDescriptionInput() {
     return document.getElementById("template-description-input")
+}
+
+function getExampleConversationInput() {
+    return document.getElementById("template-example-conversation-input")
 }
 
 function getNodeNameInput() {
