@@ -112,3 +112,7 @@ input[type="radio"]{
 tr.archived {
     background-color: lightgray;
 }
+
+audio:focus {
+    outline: none;
+}
