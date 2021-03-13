@@ -35,6 +35,7 @@ def create_conversation_template_view(request):
         for received_node in body['nodes']:
             received_node_body = received_node[1]
             new_node = TemplateNode(
+                name=received_node_body['name'],
                 description=received_node_body['description'],
                 video_url=received_node_body['videoURL'],
                 start=received_node_body['isFirst'],
