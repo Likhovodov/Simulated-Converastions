@@ -119,7 +119,9 @@ def add_assignment(request):
     if stuIsNull and labelIsNull:
         success = 1
         errMsg = errMsg+'Either students or labels must not be empty.\n\n'
-    labelStudents = Student.objects.filter(labels__label_name__in=labels, added_by=researcher)
+    labelStudents = Student.objects.filter(labels__label_name__in=labels,
+                                           labels__researcher=researcher,
+                                           added_by=researcher)
     if stuIsNull and not labelIsNull:
         if stuIsNull and labelStudents.count() <= 0:
             success = 1
@@ -134,7 +136,7 @@ def add_assignment(request):
             assignment.students.add(stuTmp)
         # Assign label information to assignment
         for label in labels:
-            labelTmp = SubjectLabel.objects.get(label_name=label,researcher=researcher)
+            labelTmp = SubjectLabel.objects.get(label_name=label, researcher=researcher)
             assignment.subject_labels.add(labelTmp)
 
     # Assign template information to assignment
