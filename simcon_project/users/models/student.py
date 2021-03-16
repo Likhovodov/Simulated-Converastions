@@ -4,7 +4,7 @@ from .subject_label import SubjectLabel
 
 
 class Student(CustomUser):
-    added_by = models.ForeignKey('users.Researcher', default=0, related_name='students', on_delete=models.CASCADE)
+    added_by = models.ManyToManyField('users.Researcher', default=0, related_name='students')
 
     def save(self, *args, **kwargs):
         if not self.pk:

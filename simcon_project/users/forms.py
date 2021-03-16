@@ -69,8 +69,10 @@ class SendEmail(BSModalModelForm):
     def clean(self):
         data = self.cleaned_data
         email = data['student_email']
-        if Student.objects.filter(email=email) or Researcher.objects.filter(email=email):
-            self.add_error('student_email', 'Account already created')
+
+        if Researcher.objects.filter(email=email):
+            self.add_error('student_email', 'Account is a Researcher')
+            return
 
 
 class NewLabel(forms.Form):
