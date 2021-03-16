@@ -43,7 +43,7 @@ def researcher_view(request):
         RequestConfig(request, paginate={"per_page": 10}).configure(
             response_table)
     else:
-        response_table = None
+        response_table = ResponseTable([])
 
     context = {'responseTable': response_table}
 
