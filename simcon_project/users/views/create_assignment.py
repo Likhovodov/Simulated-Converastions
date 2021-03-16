@@ -105,7 +105,7 @@ def add_assignment(request):
     assignment = Assignment()
     assignment.name = name
     assignment.date_assigned = sched_datetime
-    researcher = Researcher.objects.get(email=researcher)
+    researcher = Researcher.objects.filter(email=researcher).first()
     assignment.researcher = researcher
     assignment.response_attempts = response_attempts
     assignment.recording_attempts = record_attempts
@@ -119,22 +119,22 @@ def add_assignment(request):
     if stuIsNull and labelIsNull:
         success = 1
         errMsg = errMsg+'Either students or labels must not be empty.\n\n'
-    labelStudents = Student.objects.filter(labels__label_name__in=labels)
+    labelStudents = Student.objects.filter(labels__label_name__in=labels, labels__researcher=researcher)
     if stuIsNull and not labelIsNull:
         if stuIsNull and labelStudents.count() <= 0:
             success = 1
             errMsg = errMsg + 'The chosen label(s) does not contain any students.\n\n'
     if not stuIsNull:
         for stu in students:
-            stuTmp = Student.objects.get(email=stu)
+            stuTmp = Student.objects.filter(email=stu).first()
             assignment.students.add(stuTmp)
     if not labelIsNull:
         for students in labelStudents:
-            stuTmp = Student.objects.get(email=students.email)
+            stuTmp = Student.objects.filter(email=students.email).first()
             assignment.students.add(stuTmp)
         # Assign label information to assignment
         for label in labels:
-            labelTmp = SubjectLabel.objects.get(label_name=label,researcher=researcher)
+            labelTmp = SubjectLabel.objects.filter(label_name=label, researcher=researcher).first()
             assignment.subject_labels.add(labelTmp)
 
     # Assign template information to assignment

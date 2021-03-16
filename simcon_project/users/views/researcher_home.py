@@ -34,14 +34,12 @@ def is_admin(user):
 
 @ user_passes_test(is_researcher)
 def researcher_view(request):
-    responses = TemplateResponse.objects.filter(
-        template__researcher__email=request.user, archived=False)
+    responses = TemplateResponse.objects.filter(template__researcher__email=request.user, archived=False)
     filtered_responses = filter_search(request, responses)
 
     if filtered_responses:
         response_table = ResponseTable(filtered_responses)
-        RequestConfig(request, paginate={"per_page": 10}).configure(
-            response_table)
+        RequestConfig(request, paginate={"per_page": 10}).configure(response_table)
     else:
         response_table = None
 
