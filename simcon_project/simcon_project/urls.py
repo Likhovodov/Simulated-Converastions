@@ -57,7 +57,9 @@ urlpatterns = [
     path('researcher/students/delete/<int:pk>/', StudentDeleteView.as_view(), name="delete-student"),
     path('researcher/students/remove/<int:pk>/', student_remove_view, name="remove-student"),
     path('researcher/labels/delete/<uuid:pk>/', delete_label_view, name="delete-label"),
-    path('researcher/create/', StudentCreateView.as_view(), name="create-student"),
+    path('researcher/create-students/', create_students_modal, name="create-students"),
+    path('researcher/create-students/validate/', validate_student_email, name="validate-student-email"),
+    path('researcher/create-students/final/', register_students, name="register-students"),
 
     # Stuff researcher who is an admin can see
     path('admin/researchers/researcher-management/', researcher_management, name="researcher-management"),

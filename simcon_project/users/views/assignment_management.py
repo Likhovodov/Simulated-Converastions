@@ -114,7 +114,7 @@ def view_settings(request, pk):
     View for assignments details modal. Shows the settings for an assignment.
     """
     assignment = Assignment.objects.filter(pk=pk).first()
-    if assignment.count() <= 0:
+    if assignment is None:
         assignment_details = []
     else:
         if assignment.allow_typed_response is True:

@@ -1,43 +1,140 @@
-<form method="post">
-    {% csrf_token %}
+<form method="post" action="">
+  {% csrf_token %}
+    <div class="dim" id="dim-dialog" title="Event"></div>
+
     <div class="modal-header">
-        <h5 class="modal-title">Register Student</h5>
+        <h4 class="modal-title">Register Students</h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
 
-    <div class="modal-body">
-        <div class="form-group{% if form.student_email.errors %} invalid{% endif %}">
-            <label for="{{ form.student_email.id_for_label }}">{{ form.student_email.label }}</label>
-            {{ form.student_email }}
-        </div>
-        {% if form.errors %}
-            {% for field in form %}
-                {% for error in field.errors %}
-                    <div class="alert alert-danger alert-dismissible">
-                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                        <strong>{{ error|escape }}</strong>
-                    </div>
-                {% endfor %}
-            {% endfor %}
-        {% endif %}
-    </div>
+    <div class="modal-body w-100">
+            <p>Enter the emails for the students you'd like to register. Registration emails will only be sent to
+            student who do not currently have an account.</p>
+            <div class="input-group mb-3" style="max-width: 100%">
+                <input class="form-control" id="email" type="text" placeholder="Student Email Address">
+                <div class="input-group-append">
+                    <input id="add-researcher"
+                           type="button"
+                           class="btn btn-outline-secondary"
+                           value="Add Student"
+                           onclick="add_student(email.value)">
+                </div>
+            </div>
 
+
+        <div id="alert" class="alert alert-danger alert-dismissible" hidden>
+              <span type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></span>
+            <strong id="alert-text">Invalid student email</strong>
+        </div>
+        <div class="researcher-table mt-3">
+            <table class="table table-bordered table-hover col-lg">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody id="student-table-body"></tbody>
+            </table>
+        </div>
+    </div>
 
     <div class="modal-footer">
-        <button type="button" class="submit-btn btn btn-outline-secondary">Send Invitation</button>
+        <input type="button"
+                class="btn btn-secondary"
+                onclick="register_students()"
+                value="Send Invitations"/>
     </div>
+</form>
 
-    <script>
-        $(document).on("keypress", 'form', function (e) {
-            var code = e.keyCode || e.which;
-            if (code == 13) {
-                e.preventDefault();
-                return false;
+<script>
+var addedStudents = [];
+function add_student(email) {
+    $.ajaxSetup({
+        data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
+    });
+    if (addedStudents.includes(email)) {
+        return;
+    }
+    if (email == "") {
+        document.getElementById("alert").hidden = false;
+        document.getElementById("alert-text").innerHTML = "Enter an email address.";
+        return;
+    }
+    $.ajax({
+        url:"{% url 'validate-student-email' %}",
+        type:'POST',
+        data: {
+            'email': email,
+        },
+        dataType:'json',
+        success: function(data){
+            if(data.success == 0){
+                document.getElementById("email").value = "";
+                document.getElementById("alert").hidden = true;
+                addedStudents.push(email)
+                let rowToAdd = `
+                <tr id="${email}">
+                      <td>${email}</td>
+                </tr>`
+                document.getElementById("student-table-body").insertAdjacentHTML('beforeend', rowToAdd)
             }
-        });
-    </script>
+            else if (data.success == 1) {
+                 document.getElementById("alert").hidden = false;
+                document.getElementById("alert-text").innerHTML = "Invalid student email";
+            }
+            else {
+                document.getElementById("alert").hidden = false;
+                document.getElementById("alert-text").innerHTML = "Student already added";
+            }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            document.getElementById('dim-dialog').style.display = 'none'
+            alert("Error: " + errorThrown);
+        }
+    })
+}
+
+function register_students() {
+    document.getElementById('dim-dialog').style.display = 'block'
+    studentsJSON=JSON.stringify(addedStudents);
+    $.ajaxSetup({
+        data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
+    });
+    $.ajax({
+        url:"{% url 'register-students' %}",
+        type:'POST',
+        data: {
+            'students': studentsJSON,
+        },
+        dataType:'json',
+        success: function(data){
+            if(data.success==0){
+                document.getElementById('dim-dialog').style.display = 'none'
+                alert("All students registered!");
+                window.location.replace("{% url 'student-management' %}")
+            }
+            else{
+                document.getElementById('dim-dialog').style.display = 'none'
+                var msgTmp=data.message;
+                window.alert(msgTmp);
+            }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+            document.getElementById('dim-dialog').style.display = 'none'
+            alert("Error: " + errorThrown);
+        }
+    })
+}
+$(document).on("keypress", 'form', function (e) {
+    var code = e.keyCode || e.which;
+    if (code == 13) {
+        e.preventDefault();
+        return false;
+    }
+});
+</script>
 
 </form>
 
