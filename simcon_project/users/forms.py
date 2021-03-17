@@ -41,16 +41,6 @@ class StudentTable(tables.Table):
         model = Student
 
 
-class AddStudentForm(ModelForm):
-    class Meta:
-        model = Student
-        fields = ('email',)
-
-        widgets = {
-            'email': EmailInput(attrs={'placeholder': 'Student Email', 'size': '30'}),
-        }
-
-
 class PassReset(forms.Form):
     email = forms.EmailField(max_length=254, required=True)
 

@@ -1,10 +1,11 @@
-from users.forms import NewLabel, AddToLabel, AddStudentForm
+from users.forms import NewLabel, AddToLabel
 from django.contrib.sites.shortcuts import get_current_site
 from django.shortcuts import render, redirect
 from django.utils.encoding import force_bytes
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.http import urlsafe_base64_encode
-from users.models import Student, Researcher, SubjectLabel
+from users.models import Student, Researcher, SubjectLabel, Assignment
+from conversation_templates.models import TemplateResponse
 from django.core.mail import send_mail
 import django_tables2 as tables
 from django.contrib import messages
@@ -12,8 +13,6 @@ from django.contrib.auth.decorators import user_passes_test
 from users.views.researcher_home import is_researcher
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django_tables2 import RequestConfig
-from bootstrap_modal_forms.generic import BSModalDeleteView
-from django.urls import reverse_lazy
 import json
 
 
@@ -120,7 +119,8 @@ def create_students_modal(request):
 @ensure_csrf_cookie
 def validate_student_email(request):
     """
-    Confirm email does not belong to researcher account and has not already been added by this researcher
+    Confirm email does not belong to researcher account and that email doesn't belong to a registered student who
+    the researcher has added before
     """
     success = 0
     email_address = request.POST.get("email")
@@ -128,7 +128,7 @@ def validate_student_email(request):
     student = Student.objects.filter(email=email_address, added_by=request.user).first()
     if researcher is not None:
         success = 1
-    if student is not None:
+    if student is not None and student.registered is True:
         success = 2
 
     return HttpResponse(json.dumps({
@@ -159,7 +159,7 @@ def register_students(request):
             if student is None:
                 student = Student.objects.create(email=student_email, first_name='N/A', last_name='N/A',
                                                  is_researcher=False)
-                student.added_by.add(request.user.id)
+            if student.registered is False:
                 student.set_unusable_password()
                 uid = urlsafe_base64_encode(force_bytes(student.pk))
                 message = message + uid + '\n'
@@ -187,12 +187,24 @@ def decode(str):
     return listTmp
 
 
-class StudentDeleteView(BSModalDeleteView):
+def delete_students_modal(request, pk):
     """
-    Deletes a student. Confirmation modal pops up to make sure
-    the user wants to delete that student.
+    Confirmation modal to confirm researcher wants to remove them. If student has only been added by one researcher,
+    the student is deleted. Otherwise, the researcher is removed from the added_by list and the student's
+    responses to that researcher's templates are deleted.
     """
-    model = Student
-    template_name = 'student_delete_modal.html'
-    success_message = None  # Don't delete this. BSModalDeleteView needs success message for some reason
-    success_url = reverse_lazy('student-management')
+    if request.POST:
+        student = Student.objects.filter(pk=pk).first()
+        if student is not None:
+            added_by_count = Student.objects.filter(email=student).first().added_by.count()
+            if added_by_count > 1:
+                student.added_by.remove(request.user.id)
+                for label in SubjectLabel.objects.filter(researcher=request.user.id):
+                    label.students.remove(student)
+                for assignment in Assignment.objects.filter(researcher=request.user.id, students=student):
+                    assignment.students.remove(student)
+                TemplateResponse.objects.filter(student=student, template__researcher=request.user).delete()
+            else:
+                student.delete()
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    return render(request, 'student_delete_modal.html')
