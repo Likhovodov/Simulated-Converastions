@@ -11,7 +11,7 @@ import operator
 class ResponseTable(tables.Table):
     name = tables.columns.Column(
         accessor="student.get_full_name", order_by="student.last_name")
-    altered_rating = tables.Column(verbose_name= 'Student Self Rating', accessor= 'self_rating_to_string', order_by='self_rating')
+    altered_rating = tables.Column(verbose_name='Student Self Rating', accessor= 'self_rating_to_string', order_by='self_rating')
     response = tables.TemplateColumn(verbose_name='', template_name='view_response_button.html')
     delete = tables.TemplateColumn(
         '''<button class="bs-modal btn btn-outline-secondary btn-sm" type="button" name="button" data-form-url="{% url 'delete-response' record.id %}" >Delete</button>''', verbose_name='')

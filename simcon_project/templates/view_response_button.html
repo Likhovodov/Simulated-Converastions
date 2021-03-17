@@ -1,1 +1,5 @@
-<a class="btn btn btn-outline-primary btn-sm" href="{% url 'view-response' record.id %}" > View</a>
+{% if record.response_read %}
+    <a class="btn btn btn-outline-secondary btn-sm" href="{% url 'view-response' record.id %}" > View</a>
+{% else %}
+    <a class="btn btn btn-outline-primary btn-sm" href="{% url 'view-response' record.id %}" > View</a>
+{% endif %}
