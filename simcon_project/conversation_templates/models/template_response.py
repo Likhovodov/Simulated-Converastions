@@ -25,6 +25,7 @@ class TemplateResponse(models.Model):
     self_rating = models.PositiveSmallIntegerField(default=0, null=True)
     archived = models.BooleanField(default=False)
     feedback_read = models.BooleanField(default=True)
+    response_read = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.student.email}: {self.template.name}, {self.template.researcher} ({self.completion_date})"

@@ -14,6 +14,8 @@ def view_response(request, pk):
     response = get_object_or_404(TemplateResponse, pk=pk)
 
     user = get_user_model()
+    response.response_read = True
+    response.save()
 
     if request.method == 'POST':
         if 'update-overall-feedback' in request.POST:
