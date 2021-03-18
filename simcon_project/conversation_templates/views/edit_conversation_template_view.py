@@ -13,7 +13,7 @@ from users.models import Researcher
 def edit_conversation_template(request, pk):
 
     try:
-        conversation_template = ConversationTemplate.objects.get(id = pk)
+        conversation_template = ConversationTemplate.objects.get(id=pk)
         if conversation_template.researcher != Researcher.objects.get(email=request.user.email):
             return HttpResponse(status=401)
 

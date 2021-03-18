@@ -40,7 +40,7 @@ class LabelList(tables.Table):  # collects the table names
 @user_passes_test(is_researcher)
 def student_management(request, name="All Students"):
     # gets current researcher for use later
-    researcher = Researcher.objects.filter(email=request.user).first()
+    researcher = Researcher.objects.filter(email=request.user.id).first()
 
     # if the label with label_name = name is not found load default of All Students
     if not SubjectLabel.objects.filter(label_name=name, researcher=researcher):
@@ -126,9 +126,9 @@ def validate_student_email(request):
     email_address = request.POST.get("email")
     researcher = Researcher.objects.filter(email=email_address).first()
     student = Student.objects.filter(email=email_address, added_by=request.user).first()
-    if researcher is not None:
+    if researcher:
         success = 1
-    if student is not None and student.registered is True:
+    if student and student.registered is True:
         success = 2
 
     return HttpResponse(json.dumps({
@@ -195,15 +195,15 @@ def delete_students_modal(request, pk):
     """
     if request.POST:
         student = Student.objects.filter(pk=pk).first()
-        if student is not None:
-            added_by_count = Student.objects.filter(email=student).first().added_by.count()
+        if student:
+            added_by_count = Student.objects.filter(email=student.email).first().added_by.count()
             if added_by_count > 1:
                 student.added_by.remove(request.user.id)
                 for label in SubjectLabel.objects.filter(researcher=request.user.id):
                     label.students.remove(student)
                 for assignment in Assignment.objects.filter(researcher=request.user.id, students=student):
                     assignment.students.remove(student)
-                TemplateResponse.objects.filter(student=student, template__researcher=request.user).delete()
+                TemplateResponse.objects.filter(student=student, template__researcher=request.user.id).delete()
             else:
                 student.delete()
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
