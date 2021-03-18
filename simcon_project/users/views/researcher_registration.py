@@ -18,19 +18,18 @@ def researcher_registration(request, uidb64):
         if form.is_valid():
             email = form.cleaned_data.get('email')
 
-            # find the students account
+            # find the researcher account
             user = Researcher.objects.get(email=email, registered=False)
 
             # if the uid from the email matches the students uid, then edit user with input
             if uidb64 == urlsafe_base64_encode(force_bytes(user.pk)):
-                user = Researcher.objects.get(email=email, registered=False)
                 user.set_password(form.cleaned_data.get('password1'))
                 user.first_name = form.cleaned_data.get('first_name')
                 user.last_name = form.cleaned_data.get('last_name')
                 user.registered = True
                 user.save()
                 login(request, user)
-                return redirect('researcher-view')  # sends to the student view after completion
+                return redirect('researcher-view')  # sends to the researcher view after completion
             else:
                 messages.error(request, 'Please use link provided in email, and make sure to enter that email in'
                                         ' confirm email', fail_silently=False)

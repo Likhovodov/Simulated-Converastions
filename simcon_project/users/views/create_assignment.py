@@ -73,7 +73,7 @@ def add_assignment(request):
     name = data.get('name')
     assign_now = data.get('assign_now')
     date = data.get('date')
-    researcher = request.user
+    researcher = request.user.id
     students = data.get('stuData')
     templates = data.get('tempData')
     labels = data.get('labelData')

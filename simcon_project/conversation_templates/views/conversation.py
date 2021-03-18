@@ -70,7 +70,7 @@ def conversation_start(request, ct_id, assign_id):
     # Check if user has retries
     assignment = Assignment.objects.get(id=assign_id)
     ct = ConversationTemplate.objects.get(id=ct_id)
-    student = Student.objects.get(email=request.user)
+    student = Student.objects.get(email=request.user.email)
     student_attempts = TemplateResponse.objects.filter(student=student, template=ct, assignment=assignment).count()
     if student_attempts >= assignment.response_attempts:
         return HttpResponseNotFound('<h1>Sorry, maximum number of attempts reached for this conversation.</h1>')
@@ -163,7 +163,7 @@ def conversation_step(request, ct_node_id):
     # Check for page refresh
     if ct_node.start and request.session.get('ct_response_id') is None:
         ct_response = TemplateResponse.objects.create(
-            student=Student.objects.get(email=request.user),
+            student=Student.objects.get(email=request.user.email),
             template=ct,
             assignment=Assignment.objects.get(id=request.session.get('assign_id')),
         )

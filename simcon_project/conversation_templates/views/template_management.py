@@ -144,9 +144,9 @@ def main_view_helper(request, all_templates, current_folder):
         'folderTable': folder_table,
         'current_folder': current_folder,
         'show_archived': request.COOKIES.get('show_archived'),
-        'all_folders': TemplateFolder.objects.filter(researcher=request.user),
+        'all_folders': TemplateFolder.objects.filter(researcher=request.user.id),
         'templates': templates.order_by('name'),
-        'folder_creation_form': FolderCreationForm(request=request.user),
+        'folder_creation_form': FolderCreationForm(request=request.user.id),
         'add_templates_form': AddTemplatesForm(),
         'all_templates': template_list,
     }

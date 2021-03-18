@@ -32,12 +32,10 @@ def view_response(request, pk):
             return HttpResponseRedirect(reverse('view-response', kwargs={'pk': pk}))
 
     nodes = []
-    num_nodes = TemplateNodeResponse.objects.filter(
-        parent_template_response=response).count()
+    num_nodes = TemplateNodeResponse.objects.filter(parent_template_response=response).count()
     for i in range(1, num_nodes+1):
         if TemplateNodeResponse.objects.get(parent_template_response=response, position_in_sequence=i):
-            nodes.append(TemplateNodeResponse.objects.get(parent_template_response=response,
-                                                          position_in_sequence=i))
+            nodes.append(TemplateNodeResponse.objects.get(parent_template_response=response, position_in_sequence=i))
         else:
             break
 
