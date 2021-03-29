@@ -12,6 +12,7 @@ from conversation_templates.forms import FolderCreationForm, FolderEditForm, Add
 from users.models import Researcher
 from bootstrap_modal_forms.generic import BSModalUpdateView, BSModalDeleteView
 from django_tables2 import TemplateColumn, tables, RequestConfig, A, SingleTableView
+from copy import copy
 import re
 import json
 
@@ -256,21 +257,24 @@ def share_template_finalize(request):
     # for each researcher, clone template, all it's nodes and each node's choices.
     if success == 0:
         for researcher_email in researchers:
-            template_clone = template
-            nodes = TemplateNode.objects.filter(parent_template=template)
-            template_clone.pk = None
-            template_clone.researcher = Researcher.objects.filter(email=researcher_email).first()
-            template_clone.save()
-            for node in nodes:
-                node_clone = node
-                node_choices = TemplateNodeChoice.objects.filter(parent_template_node=node)
+            template_nodes = TemplateNode.objects.filter(parent_template=template)
+            template.pk = None
+            template.researcher = Researcher.objects.filter(email=researcher_email).first()
+            template.save()
+            original_to_clone_map = {}
+            for template_node in template_nodes:
+                node_clone = copy(template_node)
                 node_clone.pk = None
-                node_clone.parent_template = template_clone
+                node_clone.parent_template = template
                 node_clone.save()
-                for node_choice in node_choices:
+                original_to_clone_map[template_node.pk] = node_clone.pk
+            for template_node in template_nodes:
+                for node_choice in TemplateNodeChoice.objects.filter(parent_template_node=template_node):
                     choice_clone = node_choice
                     choice_clone.pk = None
-                    choice_clone.parent_template_node = node
+                    choice_clone.parent_template_node = TemplateNode.objects.filter(pk=original_to_clone_map.get(template_node.pk)).first()
+                    if not template_node.terminal:
+                        choice_clone.destination_node = TemplateNode.objects.filter(pk=original_to_clone_map.get(node_choice.destination_node.pk)).first()
                     choice_clone.save()
 
     sender = Researcher.objects.filter(id=request.user.id)
@@ -294,6 +298,7 @@ def decode(str):
     temp = str[1:-1]
     temp = temp.split(',')
     listTmp = []
+
     for t in temp:
         t = t[1:-1]
         listTmp.append(t)

@@ -11,6 +11,8 @@ import operator
 class ResponseTable(tables.Table):
     name = tables.columns.Column(
         accessor="student.get_full_name", order_by="student.last_name")
+    assignment = tables.columns.Column(
+        accessor="assignment.get_name", order_by="assignment.name")
     altered_rating = tables.Column(verbose_name= 'Student Self Rating', accessor= 'self_rating_to_string', order_by='self_rating')
     response = tables.TemplateColumn(
         ''' <a class="btn btn btn-outline-secondary btn-sm" href="{% url 'view-response' record.id %}" >View</a>''', verbose_name='')
@@ -21,7 +23,7 @@ class ResponseTable(tables.Table):
     class Meta:
         attrs = {'class': 'table table-sm', 'id': 'response-table'}
         model = TemplateResponse
-        fields = ['template', 'name', 'completion_date', 'altered_rating', 'custom_end']
+        fields = ['assignment', 'template', 'name', 'completion_date', 'altered_rating', 'custom_end']
 
 
 def is_researcher(user):
@@ -54,11 +56,13 @@ def filter_search(request, responses):
         if param == "":
             filter_fields = Q(student__first_name__contains=param) | Q(student__last_name__contains=param) | \
             Q(template__name__contains=param) | \
-            Q(assignment__subject_labels__label_name__contains=param)
+            Q(assignment__subject_labels__label_name__contains=param) | \
+            Q(assignment__name__contains=param)
         else:
             params = param.split()
             filter_fields = functools.reduce(operator.and_, (Q(student__first_name__icontains=param) | Q(student__last_name__icontains=param) | \
             Q(template__name__icontains=param) | \
+            Q(assignment__name__contains=param) | \
             Q(assignment__subject_labels__label_name__icontains=param) for param in params))
         responses = responses.filter(filter_fields)
 

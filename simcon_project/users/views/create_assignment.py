@@ -3,7 +3,7 @@ from users.models import SubjectLabel, Assignment, Student, Researcher, Email
 from conversation_templates.models import ConversationTemplate
 from django.core import serializers
 from django.http import HttpResponse
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.views.decorators.csrf import ensure_csrf_cookie
 from tzlocal import get_localzone
 from django.contrib.auth.decorators import user_passes_test
@@ -46,8 +46,7 @@ def decode(str):
 
 
 def sendMail(subject, msg, recipient, email_address):
-    send_mail(subject, msg, email_address, recipient, fail_silently=False)
-
+    EmailMessage(subject, msg, email_address, [], recipient).send()
 
 # Determine if data is empty.
 def isNull(data):
@@ -105,7 +104,7 @@ def add_assignment(request):
     assignment = Assignment()
     assignment.name = name
     assignment.date_assigned = sched_datetime
-    researcher = Researcher.objects.filter(email=researcher).first()
+    researcher = Researcher.objects.filter(id=researcher).first()
     assignment.researcher = researcher
     assignment.response_attempts = response_attempts
     assignment.recording_attempts = record_attempts

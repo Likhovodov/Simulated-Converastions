@@ -40,7 +40,7 @@ class LabelList(tables.Table):  # collects the table names
 @user_passes_test(is_researcher)
 def student_management(request, name="All Students"):
     # gets current researcher for use later
-    researcher = Researcher.objects.filter(email=request.user.id).first()
+    researcher = Researcher.objects.filter(email=request.user.email).first()
 
     # if the label with label_name = name is not found load default of All Students
     if not SubjectLabel.objects.filter(label_name=name, researcher=researcher):
