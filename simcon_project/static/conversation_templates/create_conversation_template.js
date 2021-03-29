@@ -25,11 +25,11 @@ let currentNodeInFocus = null   // Used to keep track of what node is currently 
 class StepNode {
     constructor() {
         // Items used only for manipulations on the client side
-        this.index = 0                      // Used to keep track of node's index in the nodes map (redundant but convenient)
         this.nodeName = ""                  // Node's name
         this.lastChoiceIndex = 0            // Used to keep track of the last choice index used (used as key in responseChoices map below)
 
         // Items to be propagated to the backend
+        this.index = 0                      // Used to keep track of node's index in the nodes map (updated to a sequence 1-n once posted to server)
         this.responseChoices = new Map()    // Array of choices for this node
         this.videoUrl = ""                  // Stores non-embeddable video url (url as user provides it)
         this.nodeDescription = ""           // Node's description
@@ -41,6 +41,7 @@ class StepNode {
     toJSON() {
         return {
             name: this.nodeName,
+            index: this.index,
             videoURL: this.videoUrl,
             description: this.nodeDescription,
             isFirst: this.isFirst,
@@ -93,6 +94,11 @@ function submit() {
                     break
                 }
             }
+        }
+
+        let counter = 0
+        for(const node of nodes){
+           node.index = counter++
         }
 
         const postBody = JSON.stringify({
@@ -152,7 +158,7 @@ function loadState() {
     $(document).ready(() => {
 
         if(modelObject) {
-            modelObject.nodes.reverse() //Reverse the order of the template nodes so they are rendered in the same order as they did when the template was created
+            modelObject.nodes.sort((left, right) => left.index > right.index)
             templateDescription = modelObject.description
             templateName = modelObject.name
             exampleConversation = modelObject.example_conversation
