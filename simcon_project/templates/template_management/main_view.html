@@ -91,15 +91,7 @@
                     </form>
                 {% endif %}
 
-                {%  if templateTable %}
                     {% render_table templateTable %}
-                {% else %}
-                    {% if current_folder %}
-                        <div>There are no templates in this folder</div>
-                    {% else %}
-                        <div>There are no templates to show at the moment</div>
-                    {%  endif %}
-                {% endif %}
 
             </div>
             <div class="col-5 mt-3">
