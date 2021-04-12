@@ -36,7 +36,7 @@ def is_admin(user):
 
 @ user_passes_test(is_researcher)
 def researcher_view(request):
-    responses = TemplateResponse.objects.filter(template__researcher__email=request.user.email, archived=False)
+    responses = TemplateResponse.objects.filter(template__researcher__email=request.user.email, archived=False, hidden=False)
     filtered_responses = filter_search(request, responses)
 
     if filtered_responses:

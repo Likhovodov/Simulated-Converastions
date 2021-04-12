@@ -47,7 +47,30 @@
                                             <div class="form-group">
                                                 <textarea class="form-control" name="overall-feedback-input">{{ response.feedback }}</textarea>
                                             </div>
-                                            <button class="btn btn-secondary" type="submit" name="update-overall-feedback">Update Feedback</button>
+                                            <div class="row">
+                                                <div class="col">
+                                                    <button class="btn btn-secondary" type="submit" name="update-overall-feedback">Update Feedback</button>
+                                                </div>
+                                                <div class="col" style="text-align: right">
+                                                    <button class="btn btn-secondary" id="update-transcriptions" type="button">
+                                                        {% if response.transcription_student_editable %}
+                                                            <svg id="unlocked" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-unlock" viewBox="0 0 16 16">
+                                                                <path d="M11 1a2 2 0 0 0-2 2v4a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h5V3a3 3 0 0 1 6 0v4a.5.5 0 0 1-1 0V3a2 2 0 0 0-2-2zM3 8a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H3z"/>
+                                                            </svg>
+                                                            <svg style="display: none" id="locked" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock" viewBox="0 0 16 16">
+                                                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM5 8h6a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/>
+                                                            </svg>
+                                                        {% else %}
+                                                            <svg style="display: none" id="unlocked" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-unlock" viewBox="0 0 16 16">
+                                                                <path d="M11 1a2 2 0 0 0-2 2v4a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h5V3a3 3 0 0 1 6 0v4a.5.5 0 0 1-1 0V3a2 2 0 0 0-2-2zM3 8a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H3z"/>
+                                                            </svg>
+                                                            <svg id="locked" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock" viewBox="0 0 16 16">
+                                                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM5 8h6a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/>
+                                                            </svg>
+                                                        {% endif %}
+                                                        Update Transcriptions</button>
+                                                </div>
+                                            </div>
                                         </form>
                                     </div>
                                 </div>
@@ -75,17 +98,10 @@
                                             <audio src="{% get_media_prefix %}{{ node.audio_response }}" controls></audio>
                                         </div>
                                         <div class="col">
-                                            <form method="post">
-                                                {% csrf_token %}
-                                                <input type="hidden" value="{{ node.id }}" name="template-node-response-id"/>
-                                                <p><strong>Transcription: </strong> </p>
-                                                <div class="form-group">
-                                                    <textarea class="form-control" name="node-transcription-input">{{ node.transcription }}</textarea>
-                                                </div>
-                                                <div style="text-align: center">
-                                                    <button class="btn btn-sm btn-secondary" type="submit" name="update-node-transcription">Update Transcription</button>
-                                                </div>
-                                            </form>
+                                            <p><strong>Transcription: </strong> </p>
+                                            <div class="form-group">
+                                                <textarea class="form-control" name="node-transcription-input" id="{{ node.id }}">{{ node.transcription }}</textarea>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -96,22 +112,68 @@
             {% endfor %}
 
         </div>
+    </div>
 
-        <div class="modal" tabindex="-1" role="dialog" id="modal">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content"></div>
-            </div>
+    <div class="modal" tabindex="-1" role="dialog" id="modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content"></div>
         </div>
+    </div>
 
-        <script type="text/javascript">
-            $(document).ready(function() {
-                $(".bs-modal").each(function () {
-                    $(this).modalForm({
-                        formURL: $(this).data('form-url')
-                    });
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $(".bs-modal").each(function () {
+                $(this).modalForm({
+                    formURL: $(this).data('form-url')
                 });
             });
-        </script>
+
+
+            $(document).on("click", "#update-transcriptions", function () {
+                let csrftoken = null
+                const cookieName = "csrftoken"
+                if (document.cookie && document.cookie !== "") {
+                    const cookies = document.cookie.split(";")
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim()
+                        if (cookie.substring(0, cookieName.length + 1) === (cookieName + "=")) {
+                            csrftoken = decodeURIComponent(cookie.substring(cookieName.length + 1))
+                            break
+                        }
+                    }
+                }
+
+                let transcriptions = Object.create(null)
+                for (const transcription of document.getElementsByName('node-transcription-input')) {
+                    transcriptions[transcription.id] = transcription.value
+                }
+
+                const postBody = JSON.stringify({
+                    transcriptions: transcriptions
+                })
+
+                fetch(window.location.href, {
+                    method: "POST",
+                    credentials: "include",
+                    mode: "same-origin",
+                    body: postBody,
+                    headers: new Headers({
+                        "X-CSRFToken": csrftoken,
+                        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                        "X-Requested-With": "XMLHttpRequest",
+                    })
+                }).then(function(response) {
+                    if(response.ok) {
+                        document.getElementById("locked").style.display = "inline"
+                        document.getElementById("unlocked").style.display = "none"
+                        alert("Transcriptions Updated")
+                    } else throw new Error(response.status)
+                }).catch(function (error) {
+                    alert("Something went wrong while submitting the form\n" + error)
+                })
+            })
+        });
+    </script>
 
     </div>
     </body>

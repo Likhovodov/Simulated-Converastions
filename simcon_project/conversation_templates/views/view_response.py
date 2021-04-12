@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, get_object_or_404, redirect
 from users.views.redirect_from_login import is_authenticated
 from django.http import HttpResponseRedirect
@@ -12,7 +13,6 @@ from django.core.mail import send_mail
 @user_passes_test(is_authenticated)
 def view_response(request, pk):
     response = get_object_or_404(TemplateResponse, pk=pk)
-
     user = get_user_model()
 
     if request.method == 'POST':
@@ -21,15 +21,16 @@ def view_response(request, pk):
             response.feedback_read = False
             response.save()
             return HttpResponseRedirect(reverse('view-response', kwargs={'pk': pk}))
-        if 'update-node-transcription' in request.POST:
-            nodeId = request.POST.get('template-node-response-id')
-            currentNode = get_object_or_404(TemplateNodeResponse, pk=nodeId)
-            currentNode.transcription = request.POST.get('node-transcription-input')
+        else:
+            transcriptions = json.loads(request.body.decode('utf-8'))["transcriptions"]
+            for node_id in transcriptions:
+                current_node = get_object_or_404(TemplateNodeResponse, pk=node_id)
+                if transcriptions[node_id] != "":
+                    current_node.transcription = transcriptions[node_id]
+                    current_node.save()
             if user.get_is_researcher(request.user):
-                currentNode.transcription_student_editable = False
-
-            currentNode.save()
-            return HttpResponseRedirect(reverse('view-response', kwargs={'pk': pk}))
+                response.transcription_student_editable = False
+                response.save()
 
     nodes = []
     num_nodes = TemplateNodeResponse.objects.filter(parent_template_response=response).count()
@@ -78,5 +79,8 @@ class ResponseDeleteView(BSModalDeleteView):
             subject = 'New Re-Assigned Template for Simulated Conversations: '+ template_name
             message = 'Please check your Portal to complete: '+ template_name
             send_mail(subject, message, 'smtp.gmail.com', [student_email], fail_silently=False)
-        this_response.delete()
+            this_response.delete()
+        else:
+            this_response.hidden = True
+            this_response.save()
         return redirect(reverse('researcher-view'))
