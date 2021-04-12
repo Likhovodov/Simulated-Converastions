@@ -13,9 +13,10 @@ class ResponseTable(tables.Table):
         accessor="student.get_full_name", order_by="student.last_name")
     assignment = tables.columns.Column(
         accessor="assignment.get_name", order_by="assignment.name")
-    altered_rating = tables.Column(verbose_name= 'Student Self Rating', accessor= 'self_rating_to_string', order_by='self_rating')
+    altered_rating = tables.Column(verbose_name='Student Self Rating', accessor= 'self_rating_to_string', order_by='self_rating')
     response = tables.TemplateColumn(
         ''' <a class="btn btn btn-outline-secondary btn-sm" href="{% url 'view-response' record.id %}" >View</a>''', verbose_name='')
+    response = tables.TemplateColumn(verbose_name='', template_name='view_response_button.html')
     delete = tables.TemplateColumn(
         '''<button class="bs-modal btn btn-outline-secondary btn-sm" type="button" name="button" data-form-url="{% url 'delete-response' record.id %}" >Delete</button>''', verbose_name='')
     custom_end = tables.BooleanColumn(accessor="ends_with_custom", orderable=False)
@@ -43,7 +44,7 @@ def researcher_view(request):
         response_table = ResponseTable(filtered_responses)
         RequestConfig(request, paginate={"per_page": 10}).configure(response_table)
     else:
-        response_table = None
+        response_table = ResponseTable([])
 
     context = {'responseTable': response_table}
 

@@ -124,7 +124,7 @@ def main_view_helper(request, all_templates, current_folder):
 
         RequestConfig(request, paginate={"per_page": 10}).configure(template_table)
     else:
-        template_table = None
+        template_table = FolderTemplateTable([])
 
     folders = filter_folder(request)
     if folders:
@@ -132,7 +132,7 @@ def main_view_helper(request, all_templates, current_folder):
         folder_table = FolderTable(folders, prefix="2-")
         RequestConfig(request, paginate={"per_page": 10}).configure(folder_table)
     else:
-        folder_table = None
+        folder_table = FolderTable([])
 
     template_list = None
     if current_folder:

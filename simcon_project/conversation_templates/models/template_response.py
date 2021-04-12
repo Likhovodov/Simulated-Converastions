@@ -27,6 +27,7 @@ class TemplateResponse(models.Model):
     feedback_read = models.BooleanField(default=True)
     hidden = models.BooleanField(default=False)
     transcription_student_editable = models.BooleanField(default=True)
+    response_read = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.student.email}: {self.template.name}, {self.template.researcher} ({self.completion_date})"
