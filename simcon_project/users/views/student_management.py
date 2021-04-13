@@ -40,7 +40,7 @@ class LabelList(tables.Table):  # collects the table names
 @user_passes_test(is_researcher)
 def student_management(request, name="All Students"):
     # gets current researcher for use later
-    researcher = Researcher.objects.filter(email=request.user.email).first()
+    researcher = Researcher.objects.get(email=request.user.email)
 
     # if the label with label_name = name is not found load default of All Students
     if not SubjectLabel.objects.filter(label_name=name, researcher=researcher):
@@ -162,11 +162,11 @@ def register_students(request):
             if student.registered is False:
                 student.set_unusable_password()
                 uid = urlsafe_base64_encode(force_bytes(student.pk))
-                message = message + uid + '\n'
-                send_mail(subject, message, 'simcon.dev@gmail.com', [student_email], fail_silently=False)
+                final_message = message + uid + '\n'
+                send_mail(subject, final_message, 'simcon.dev@gmail.com', [student_email], fail_silently=False)
             student.added_by.add(request.user.id)
-            all_students_label = SubjectLabel.objects.filter(label_name='All Students',
-                                                             researcher=request.user.id).first()
+            all_students_label = SubjectLabel.objects.get(label_name='All Students',
+                                                             researcher=request.user.id)
             all_students_label.students.add(student)
     return HttpResponse(json.dumps({
         'success': success,
@@ -196,7 +196,7 @@ def delete_students_modal(request, pk):
     if request.POST:
         student = Student.objects.filter(pk=pk).first()
         if student:
-            added_by_count = Student.objects.filter(email=student.email).first().added_by.count()
+            added_by_count = Student.objects.get(email=student.email).added_by.count()
             if added_by_count > 1:
                 student.added_by.remove(request.user.id)
                 for label in SubjectLabel.objects.filter(researcher=request.user.id):

@@ -104,7 +104,7 @@ def add_assignment(request):
     assignment = Assignment()
     assignment.name = name
     assignment.date_assigned = sched_datetime
-    researcher = Researcher.objects.filter(id=researcher).first()
+    researcher = Researcher.objects.get(id=researcher)
     assignment.researcher = researcher
     assignment.response_attempts = response_attempts
     assignment.recording_attempts = record_attempts
@@ -125,15 +125,15 @@ def add_assignment(request):
             errMsg = errMsg + 'The chosen label(s) does not contain any students.\n\n'
     if not stuIsNull:
         for stu in students:
-            stuTmp = Student.objects.filter(email=stu).first()
+            stuTmp = Student.objects.get(email=stu)
             assignment.students.add(stuTmp)
     if not labelIsNull:
         for students in labelStudents:
-            stuTmp = Student.objects.filter(email=students.email).first()
+            stuTmp = Student.objects.get(email=students.email)
             assignment.students.add(stuTmp)
         # Assign label information to assignment
         for label in labels:
-            labelTmp = SubjectLabel.objects.filter(label_name=label, researcher=researcher).first()
+            labelTmp = SubjectLabel.objects.get(label_name=label, researcher=researcher)
             assignment.subject_labels.add(labelTmp)
 
     # Assign template information to assignment

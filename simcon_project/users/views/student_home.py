@@ -75,7 +75,7 @@ def student_view(request):
     incomplete_templates = []
     completed_templates = []
     # get the Student object matching logged in student
-    student = Student.objects.filter(id=request.user.id).first()
+    student = Student.objects.get(id=request.user.id)
     # get the assignments for that student
     now = datetime.datetime.now(get_localzone())
     assignments = Assignment.objects.filter(students=student, date_assigned__lte=now)
@@ -120,9 +120,9 @@ def student_view(request):
 
 
 def select_feedback_view(request, pk_assignment, pk_template):
-    student = Student.objects.filter(id=request.user.id).first()
-    assignment = Assignment.objects.filter(pk=pk_assignment).first()
-    template = ConversationTemplate.objects.filter(pk=pk_template, assignments=assignment).first()
+    student = Student.objects.get(id=request.user.id)
+    assignment = Assignment.objects.get(pk=pk_assignment)
+    template = ConversationTemplate.objects.get(pk=pk_template, assignments=assignment)
     responses = TemplateResponse.objects.filter(student=student, assignment=assignment, template=template)
     feedback_table = ModalFeedbackTable(responses)
     return render(request, 'feedback/view_feedback_modal.html', {'table': feedback_table})

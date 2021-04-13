@@ -80,7 +80,7 @@ class AssignmentDeleteView(BSModalDeleteView):
         will be removed as context to the template
         """
         super().get(request, *args, **kwargs)
-        assignment = Assignment.objects.filter(pk=self.kwargs['pk']).first()
+        assignment = Assignment.objects.get(pk=self.kwargs['pk'])
         context = {"assignment": assignment}
         return render(request, self.template_name, context)
 
@@ -92,7 +92,7 @@ def assignment_management_view(request):
     option to delete.
     """
     assignment_rows = []
-    researcher = Researcher.objects.filter(id=request.user.id).first()
+    researcher = Researcher.objects.get(id=request.user.id)
     assignments = Assignment.objects.filter(researcher=researcher)
 
     # build each row for table. one assignment per row
@@ -138,7 +138,7 @@ def view_templates(request, pk):
     """
     View for templates modal. Shows all templates in an assignment and links to excel page to see submissions.
     """
-    assignment = Assignment.objects.filter(pk=pk).first()
+    assignment = Assignment.objects.get(pk=pk)
     templates = ConversationTemplate.objects.filter(assignments=assignment)
     # get each template in assignment. limit description to 200 total characters
     # one template per row in table.
@@ -159,7 +159,7 @@ def view_students(request, pk):
     """
     student_rows = []
     total_completed_templates = 0
-    assignment = Assignment.objects.filter(pk=pk).first()
+    assignment = Assignment.objects.get(pk=pk)
     students = Student.objects.filter(assignments=assignment)
     templates = ConversationTemplate.objects.filter(assignments=assignment)
     assigned_template_count = ConversationTemplate.objects.filter(assignments=assignment).count()

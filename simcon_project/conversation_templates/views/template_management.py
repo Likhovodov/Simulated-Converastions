@@ -259,7 +259,7 @@ def share_template_finalize(request):
         for researcher_email in researchers:
             template_nodes = TemplateNode.objects.filter(parent_template=template)
             template.pk = None
-            template.researcher = Researcher.objects.filter(email=researcher_email).first()
+            template.researcher = Researcher.objects.get(email=researcher_email)
             template.save()
             original_to_clone_map = {}
             for template_node in template_nodes:
@@ -272,9 +272,9 @@ def share_template_finalize(request):
                 for node_choice in TemplateNodeChoice.objects.filter(parent_template_node=template_node):
                     choice_clone = node_choice
                     choice_clone.pk = None
-                    choice_clone.parent_template_node = TemplateNode.objects.filter(pk=original_to_clone_map.get(template_node.pk)).first()
+                    choice_clone.parent_template_node = TemplateNode.objects.get(pk=original_to_clone_map.get(template_node.pk))
                     if not template_node.terminal:
-                        choice_clone.destination_node = TemplateNode.objects.filter(pk=original_to_clone_map.get(node_choice.destination_node.pk)).first()
+                        choice_clone.destination_node = TemplateNode.objects.get(pk=original_to_clone_map.get(node_choice.destination_node.pk))
                     choice_clone.save()
 
     sender = Researcher.objects.filter(id=request.user.id)

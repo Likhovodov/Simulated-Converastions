@@ -76,7 +76,7 @@
                                                 </div>
                                             {% else %}
                                                 <p><strong>Transcription: </strong> </p>
-                                                <p>{{ node.transcription }}</p>
+                                                <p>{{ response_node.transcription }}</p>
                                             {% endif %}
                                         </div>
                                     </div>
@@ -86,14 +86,6 @@
                     </div>
                 </div>
             {% endfor %}
-
-            {% if response.transcription_student_editable == True %}
-                <div class="row">
-                    <div class="col">
-                        <button class="btn btn-secondary" id="update-transcriptions" type="button">Update Transcriptions</button>
-                    </div>
-                </div>
-            {% endif %}
         </div>
 
 

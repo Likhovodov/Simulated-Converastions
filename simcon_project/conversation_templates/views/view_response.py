@@ -14,8 +14,9 @@ from django.core.mail import send_mail
 def view_response(request, pk):
     response = get_object_or_404(TemplateResponse, pk=pk)
     user = get_user_model()
-    response.response_read = True
-    response.save()
+    if user.get_is_researcher(request.user):
+        response.response_read = True
+        response.save()
 
     if request.method == 'POST':
         if 'update-overall-feedback' in request.POST:
