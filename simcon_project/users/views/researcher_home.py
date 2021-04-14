@@ -10,9 +10,9 @@ import operator
 
 class ResponseTable(tables.Table):
     name = tables.columns.Column(
-        accessor="student.get_full_name", order_by="student.last_name")
+        accessor="student__get_full_name", order_by="student__last_name")
     assignment = tables.columns.Column(
-        accessor="assignment.get_name", order_by="assignment.name")
+        accessor="assignment__get_name", order_by="assignment__name")
     altered_rating = tables.Column(verbose_name='Student Self Rating', accessor= 'self_rating_to_string', order_by='self_rating')
     response = tables.TemplateColumn(
         ''' <a class="btn btn btn-outline-secondary btn-sm" href="{% url 'view-response' record.id %}" >View</a>''', verbose_name='')
