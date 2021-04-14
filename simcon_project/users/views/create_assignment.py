@@ -3,7 +3,7 @@ from users.models import SubjectLabel, Assignment, Student, Researcher, Email
 from conversation_templates.models import ConversationTemplate
 from django.core import serializers
 from django.http import HttpResponse
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.views.decorators.csrf import ensure_csrf_cookie
 from tzlocal import get_localzone
 from django.contrib.auth.decorators import user_passes_test
@@ -46,8 +46,7 @@ def decode(str):
 
 
 def sendMail(subject, msg, recipient, email_address):
-    send_mail(subject, msg, email_address, recipient, fail_silently=False)
-
+    EmailMessage(subject, msg, email_address, [], recipient).send()
 
 # Determine if data is empty.
 def isNull(data):
@@ -73,7 +72,7 @@ def add_assignment(request):
     name = data.get('name')
     assign_now = data.get('assign_now')
     date = data.get('date')
-    researcher = request.user
+    researcher = request.user.id
     students = data.get('stuData')
     templates = data.get('tempData')
     labels = data.get('labelData')
@@ -105,7 +104,7 @@ def add_assignment(request):
     assignment = Assignment()
     assignment.name = name
     assignment.date_assigned = sched_datetime
-    researcher = Researcher.objects.get(email=researcher)
+    researcher = Researcher.objects.get(id=researcher)
     assignment.researcher = researcher
     assignment.response_attempts = response_attempts
     assignment.recording_attempts = record_attempts
@@ -119,7 +118,7 @@ def add_assignment(request):
     if stuIsNull and labelIsNull:
         success = 1
         errMsg = errMsg+'Either students or labels must not be empty.\n\n'
-    labelStudents = Student.objects.filter(labels__label_name__in=labels)
+    labelStudents = Student.objects.filter(labels__label_name__in=labels, labels__researcher=researcher)
     if stuIsNull and not labelIsNull:
         if stuIsNull and labelStudents.count() <= 0:
             success = 1
@@ -134,7 +133,7 @@ def add_assignment(request):
             assignment.students.add(stuTmp)
         # Assign label information to assignment
         for label in labels:
-            labelTmp = SubjectLabel.objects.get(label_name=label,researcher=researcher)
+            labelTmp = SubjectLabel.objects.get(label_name=label, researcher=researcher)
             assignment.subject_labels.add(labelTmp)
 
     # Assign template information to assignment

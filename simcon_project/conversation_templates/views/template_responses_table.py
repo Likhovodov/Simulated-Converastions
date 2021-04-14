@@ -5,8 +5,6 @@ from django_tables2 import tables, RequestConfig, SingleTableView
 from django_tables2.export.views import TableExport
 from conversation_templates.models import ConversationTemplate, TemplateResponse
 from conversation_templates.forms import SelectTemplateForm
-from tzlocal import get_localzone
-import datetime
 
 
 class ResponseTable(tables.Table):
@@ -15,7 +13,7 @@ class ResponseTable(tables.Table):
     class Meta:
         attrs = {'id': 'excel-table'}
         model = TemplateResponse
-        fields = ['name', 'completion_date']
+        fields = ['assignment', 'student_name', 'completion_date']
 
 
 class TemplateResponsesView(UserPassesTestMixin, LoginRequiredMixin, SingleTableView):
@@ -38,7 +36,7 @@ class TemplateResponsesView(UserPassesTestMixin, LoginRequiredMixin, SingleTable
         extra_columns = []  # List of tuples of description and column object to pass to table
         table_data = []  # List of dictionaries to populate table. 1 dictionary = 1 column
 
-        for idx, node in enumerate(template.template_nodes.all()):
+        for idx, node in enumerate(template.template_nodes.all().order_by('position_in_sequence')):
             if node.terminal:
                 extra_columns.append((node.description, tables.columns.Column(
                     orderable=False, attrs={'th': {'class': 'data-column'}},
@@ -56,11 +54,12 @@ class TemplateResponsesView(UserPassesTestMixin, LoginRequiredMixin, SingleTable
         completed_responses = template.template_responses.exclude(completion_date__isnull=True)
         for response in completed_responses.order_by('-completion_date'):
             column_data = {
-                "name": f"{response.student.last_name} {response.student.first_name}",
+                "assignment": response.assignment.name,
+                "student_name": f"{response.student.last_name} {response.student.first_name}",
                 "completion_date": response.completion_date,
             }
 
-            for node in response.node_responses.all():
+            for node in response.node_responses.all().order_by('position_in_sequence'):
                 if node.custom_response:
                     column_data.update({node.template_node.description: node.transcription + ' (Custom Response)'})
                     column_data.update({"custom_response": True})

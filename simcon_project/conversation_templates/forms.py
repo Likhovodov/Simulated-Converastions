@@ -21,7 +21,7 @@ class FolderCreationForm(forms.Form):
         data = self.cleaned_data
         name = data['folder_name']
 
-        if TemplateFolder.objects.filter(name=name, researcher=self.request.user):
+        if TemplateFolder.objects.filter(name=name, researcher=self.request.user.id):
             # self.add_error is still needed because of unique constraint
             self.add_error('folder_name', f'Cannot create Folder. {name} already exists.')
             messages.error(self.request, f'Cannot create Folder. {name} already exists.')

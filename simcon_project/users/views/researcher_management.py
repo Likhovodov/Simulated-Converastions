@@ -79,14 +79,13 @@ def get_current_researchers(request):
     :return:
     """
     researchers = Researcher.objects.exclude(id=request.user.id)
-    if researchers.count() > 0:
-        researchers_table = ResearcherTable(researchers)
-        RequestConfig(request, paginate={"per_page": 10}).configure(
-            researchers_table)
+    if researchers.count() <= 0:
+        researchers = []
+    researchers_table = ResearcherTable(researchers)
+    RequestConfig(request, paginate={"per_page": 10}).configure(
+        researchers_table)
 
-        return researchers_table
-    else:
-        return None
+    return researchers_table
 
 
 @user_passes_test(is_admin)
@@ -97,8 +96,6 @@ def add_researcher(request):
         for the user to register their account.
         First and last names for brand new researchers will both be "N/A". These are overwritten once the researcher
         has completed account creation by following the link sent to them.
-    :param request:
-    :return: the form to add new researchers.
     """
     if request.method == 'POST':
         add_researcher_form = AddResearcherForm(request.POST)

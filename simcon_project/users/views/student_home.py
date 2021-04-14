@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import user_passes_test
-from django.db.models import Max, Min
+from django.db.models import Max
 from users.models import *
 from conversation_templates.models import *
 import django_tables2 as tables
@@ -75,16 +75,16 @@ def student_view(request):
     incomplete_templates = []
     completed_templates = []
     # get the Student object matching logged in student
-    student = Student.objects.filter(id=request.user.id)
+    student = Student.objects.get(id=request.user.id)
     # get the assignments for that student
     now = datetime.datetime.now(get_localzone())
-    assignments = Assignment.objects.filter(students=student.first()).filter(date_assigned__lte=now)
+    assignments = Assignment.objects.filter(students=student, date_assigned__lte=now)
     # for each assignment, get all templates contained. Get most recent response by the student for each template
     for assignment in assignments:
         templates_in_assignment = ConversationTemplate.objects.filter(assignments=assignment, archived=False)
         for template in templates_in_assignment:
             responses = TemplateResponse.objects.filter(assignment=assignment, template=template,
-                                                            student=student.first())
+                                                            student=student)
             last_response = responses.aggregate(Max('completion_date'))
             attempts_left = assignment.response_attempts - len(responses)
             new_feedback = False
@@ -120,10 +120,9 @@ def student_view(request):
 
 
 def select_feedback_view(request, pk_assignment, pk_template):
-    student = Student.objects.filter(id=request.user.id)
-    assignment = Assignment.objects.filter(pk=pk_assignment)
-    template = ConversationTemplate.objects.filter(pk=pk_template, assignments=assignment.first())
-    responses = TemplateResponse.objects.filter(student=student.first(), assignment=assignment.first(),
-                                                template=template.first())
+    student = Student.objects.get(id=request.user.id)
+    assignment = Assignment.objects.get(pk=pk_assignment)
+    template = ConversationTemplate.objects.get(pk=pk_template, assignments=assignment)
+    responses = TemplateResponse.objects.filter(student=student, assignment=assignment, template=template)
     feedback_table = ModalFeedbackTable(responses)
     return render(request, 'feedback/view_feedback_modal.html', {'table': feedback_table})
