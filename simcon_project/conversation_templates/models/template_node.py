@@ -1,6 +1,6 @@
 from django.db import models
 from embed_video.fields import EmbedVideoField
-from django.urls import reverse
+from urllib.parse import urlparse
 import uuid
 
 
@@ -17,6 +17,8 @@ class TemplateNode(models.Model):
     parent_template: ConversationTemplate object that a TemplateNode belongs to
     """
     id = models.UUIDField(unique=True, editable=False, primary_key=True, default=uuid.uuid4)
+    position_in_sequence = models.IntegerField(default=0, null=False)
+    name = models.CharField(max_length=100, null=True, blank=True)
     description = models.CharField(max_length=4000)
     video_url = EmbedVideoField()
     start = models.BooleanField(default=False)
@@ -25,3 +27,14 @@ class TemplateNode(models.Model):
 
     def __str__(self):
         return f"{self.parent_template}: {self.description}"
+
+    def get_no_cookie_url(self):
+        """
+        Adds nocookie to url to ignore if user is signed in to Google account.
+        :return:
+        """
+        parsed_url = urlparse(str(self.video_url))
+        if parsed_url[4] != "":
+            return "https://www.youtube-nocookie.com/embed/" + parsed_url[4][2:]
+        else:
+            return "https://www.youtube-nocookie.com/embed/" + parsed_url[2][1:]

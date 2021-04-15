@@ -27,8 +27,13 @@
 
                     <li class="list-group-item" style="text-align: center">
                         <div class="row justify-content-center mb-3">
-                            <div id="videoPlayer">
-                                {% video ct_node.video_url%}
+                            <div class="embed-responsive embed-responsive-16by9" id="video-player">
+                                <iframe width="480" height="360"
+                                        src="{{ ct_node.get_no_cookie_url }}?rel=0&modestbranding=1&wmode=opaque"
+                                        loading="lazy"
+                                        frameborder="0"
+                                        allowfullscreen="">
+                                </iframe>
                             </div>
                         </div>
                     </li>
@@ -36,16 +41,16 @@
                     <li class="list-group-item">
                         <div class="row justify-content-center mb-3">
                             <div id="controls">
-                                <button id="recordButton" class="btn btn-primary btn-sm">Record</button>
-                                <button id="stopButton" class="btn btn-primary btn-sm pr-3 pl-3" disabled>Stop</button>
+                                <button id="record-button" type="button" class="btn btn-outline-dark btn-sm ">Record</button>
+                                <button id="stop-button" type="button" class="btn btn-outline-dark btn-sm pr-3 pl-3" disabled>Stop</button>
                             </div>
                         </div>
                         <div class="row justify-content-center">
-                            <audio id="audioPlayer" controls>
+                            <audio id="audio-player" controls>
                                 {% if ct_node_response %}
-                                    <source id="audioResponse" src="{{ ct_node_response.audio_response.url }}">
+                                    <source id="audio-response" src="{{ ct_node_response.audio_response.url }}">
                                 {% else %}
-                                    <source id="audioResponse" src="">
+                                    <source id="audio-response" src="">
                                 {% endif %}
                             </audio>
                         </div>
@@ -71,8 +76,6 @@
                                 <p>Exit</p>
                             </div>
                             {% if ct_node.terminal %}
-{#                                <button type="submit" class="btn btn-primary btn-sm">End Conversation</button>#}
-
                                 <div class="col" style="text-align: center">
                                     <br>
                                     <label>
@@ -84,7 +87,6 @@
                                     <p>End Conversation</p>
                                 </div>
                             {% else %}
-{#                                <button type="submit" class="btn btn-primary btn-sm" onclick="clearPageSession()">Next Scene</button> #}
                                 <div class="col" style="text-align: center">
                                     <br>
                                     <label>
@@ -104,29 +106,14 @@
                     <li class="list-group-item" id="record-nav" style="display: none">
                         <div class="row">
                             <div class="col" style="text-align: center">
-                                <br>
-                                    <label>
-                                        <button data-form-url="{% url 'exit-conversation' %}" class="bs-modal" type="button" name="image" value="one" style="display: none"></button>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" fill="currentColor" class="bi bi-arrow-left-square-fill pointer-on-hover" viewBox="0 0 16 16" >
-                                            <path d="M16 14a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12zm-4.5-6.5H5.707l2.147-2.146a.5.5 0 1 0-.708-.708l-3 3a.5.5 0 0 0 0 .708l3 3a.5.5 0 0 0 .708-.708L5.707 8.5H11.5a.5.5 0 0 0 0-1z"/>
-                                        </svg>
-                                    </label>
-                                    <p>Exit</p>
-                            </div>
-                            <div class="col" style="text-align: center">
-                                <br>
                                 <label>
-                                    <input type="submit" name="image" value="one" style="display: none" onclick="toChoices()">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" fill="currentColor" class="bi bi-arrow-right-square-fill pointer-on-hover" viewBox="0 0 16 16">
-                                        <path d="M0 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2v12zm4.5-6.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5a.5.5 0 0 1 0-1z"/>
-                                    </svg>
+                                    <button type="button" class="btn btn-outline-dark btn-sm" onclick="toChoices()">Accept Recording</button>
                                 </label>
-                                <p>Next scene</p>
                             </div>
                         </div>
                     </li>
-
                 </ul>
+
             </div>
         </div>
     </div>
@@ -147,7 +134,7 @@
     <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
     <script src="{% static 'conversation_templates/recorder.js' %}"></script>
     <script>
-        const videoPlayer = document.getElementById("videoPlayer");
+        const videoPlayer = document.getElementById("video-player");
         const audioControls = document.getElementById("controls");
         const recordNav = document.getElementById("record-nav");
         const choiceForm = document.getElementById("choice-form");
@@ -155,12 +142,9 @@
         $(document).ready(function() {
             // Check which part of page user should be on, if page refresh
             if (sessionStorage.getItem("toChoices") === "true") {
-                choiceForm.style.display = "block";
-                recordNav.style.display = "none";
                 choicePage();
             } else {
-                choiceForm.style.display = "none";
-                recordNav.style.display = "block";
+                videoPage();
             }
 
             // Persist record attempts
@@ -235,6 +219,11 @@
             recordNav.style.display = "none";
             choiceForm.style.display = "block";
             info.style.display = "none";
+        }
+
+        function videoPage() {
+            choiceForm.style.display = "none";
+            recordNav.style.display = "block";
         }
 
         function clearPageSession() {

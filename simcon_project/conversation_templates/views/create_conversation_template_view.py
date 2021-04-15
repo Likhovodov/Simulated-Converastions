@@ -20,9 +20,14 @@ def create_conversation_template_view(request):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
 
+        example_conversation = body['exampleConversation']
+        if example_conversation == "":
+            example_conversation = None
+
         conv_template = ConversationTemplate(
             name=body['templateName'],
             description=body['templateDescription'],
+            example_conversation=example_conversation,
             researcher=Researcher.objects.get(email=request.user.email))
         conv_template.save()
 
@@ -30,6 +35,8 @@ def create_conversation_template_view(request):
         for received_node in body['nodes']:
             received_node_body = received_node[1]
             new_node = TemplateNode(
+                name=received_node_body['name'],
+                position_in_sequence=received_node_body['index'],
                 description=received_node_body['description'],
                 video_url=received_node_body['videoURL'],
                 start=received_node_body['isFirst'],

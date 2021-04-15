@@ -37,7 +37,7 @@
                                 <input type="checkbox" id="assign_now" onchange="checkbox()" checked>
                                 <label for="assign_now">Assign Now</label>
                                 <div id="datetime_fields" style="display: none">
-                                    <div class="input-group date" id="datetimepicker1" data-target-input="nearest" style="width: 0%">
+                                    <div class="input-group date" id="datetimepicker1" data-target-input="nearest" style="width: 70%">
                                         <input type="text" class="form-control datetimepicker-input" data-target="#datetimepicker1"
                                                id="assign_datetime" placeholder="Please select an assignment start date."/>
                                         <div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
@@ -255,7 +255,7 @@
                 const student = students.find(student => student.email == studentEmail)
                 let rowToAdd = `
                 <tr id="${studentEmail}">
-                      <td>${student.first_name} ${student.first_name}</td>
+                      <td>${student.first_name} ${student.last_name}</td>
                       <td>${studentEmail}</td>
                       <td><a href="javascript:remove_student('${studentEmail}')">Delete</a></td>
                 </tr>`

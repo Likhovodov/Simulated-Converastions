@@ -90,8 +90,6 @@ def assignment_management_view(request):
     """
     Main view for assignment management. Has table of researcher's assignments with modals for more info and
     option to delete.
-    :param request:
-    :return:
     """
     assignment_rows = []
     researcher = Researcher.objects.get(id=request.user.id)
@@ -114,23 +112,23 @@ def assignment_management_view(request):
 def view_settings(request, pk):
     """
     View for assignments details modal. Shows the settings for an assignment.
-    :param request:
-    :param pk:
-    :return:
     """
-    assignment = Assignment.objects.get(pk=pk)
-    if assignment.allow_typed_response is True:
-        typed_response = "Yes"
+    assignment = Assignment.objects.filter(pk=pk).first()
+    if assignment is None:
+        assignment_details = []
     else:
-        typed_response = "No"
-    if assignment.allow_self_rating is True:
-        self_rating = "Yes"
-    else:
-        self_rating = "No"
-    assignment_details = [{"response_attempts": assignment.response_attempts,
-                          "recording_attempts": assignment.recording_attempts,
-                          "allow_typed_response": typed_response,
-                          "allow_self_rating": self_rating}]
+        if assignment.allow_typed_response is True:
+            typed_response = "Yes"
+        else:
+            typed_response = "No"
+        if assignment.allow_self_rating is True:
+            self_rating = "Yes"
+        else:
+            self_rating = "No"
+        assignment_details = [{"response_attempts": assignment.response_attempts,
+                              "recording_attempts": assignment.recording_attempts,
+                              "allow_typed_response": typed_response,
+                              "allow_self_rating": self_rating}]
     assignment_details_table = AssignmentDetailsTable(assignment_details)
     return render(request, 'assignment_management/view_settings_modal.html', {'table': assignment_details_table})
 
@@ -139,9 +137,6 @@ def view_settings(request, pk):
 def view_templates(request, pk):
     """
     View for templates modal. Shows all templates in an assignment and links to excel page to see submissions.
-    :param request:
-    :param pk:
-    :return:
     """
     assignment = Assignment.objects.get(pk=pk)
     templates = ConversationTemplate.objects.filter(assignments=assignment)
@@ -150,6 +145,8 @@ def view_templates(request, pk):
     for template in templates:
         if len(template.description) >= 200:
             template.description = template.description[:197] + '...'
+    if templates.count() <= 0:
+        templates = []
     templates_contained_table = TemplatesContainedTable(templates)
     return render(request, 'assignment_management/view_templates_modal.html', {'table': templates_contained_table})
 
@@ -159,9 +156,6 @@ def view_students(request, pk):
     """
     View for students modal. Shows students that were given assignment. Number of templates completed
     out of total assigned is shown per student and overall completion is shown.
-    :param request:
-    :param pk:
-    :return:
     """
     student_rows = []
     total_completed_templates = 0

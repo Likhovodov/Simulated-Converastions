@@ -19,7 +19,6 @@ def student_registration(request, uidb64):
 
             # if the uid from the email matches the students uid, then edit user with input
             if uidb64 == urlsafe_base64_encode(force_bytes(user.pk)):
-                user = Student.objects.get(email=email, registered=False)
                 user.set_password(form.cleaned_data.get('password1'))
                 user.first_name = form.cleaned_data.get('first_name')
                 user.last_name = form.cleaned_data.get('last_name')

@@ -1,8 +1,10 @@
 // Character count max values from models
 let CHOICE_DESCRIPTION_CHAR_MAX = 500
 let TEMPLATE_NAME_CHAR_MAX = 100
+let TEMPLATE_NODE_NAME_CHAR_MAX = 100
 let TEMPLATE_DESCRIPTION_CHAR_MAX = 4000
 let TEMPLATE_NODE_DESCRIPTION_CHAR_MAX = 4000
+let EXAMPLE_CONVERSATION_CHAR_MAX = 4000
 
 // Error message(s) used in multiple places
 let NO_DESTINATION_FOR_CHOICE_ERROR = "No destination selected"
@@ -10,6 +12,7 @@ let NO_DESTINATION_FOR_CHOICE_ERROR = "No destination selected"
 // Variables used to keep track of state that will eventually get sent to the backend
 let templateName = ""           // Holds template's name
 let templateDescription = ""    // Holds template's description
+let exampleConversation = ""    // Holds example conversation that a user can provide
 let nodes = new Map()           // Map from counter to node. Used to keep track of all the created nodes
 let formSubmitted = false       // Used to indicate if a form was submitted successfully
 
@@ -22,11 +25,11 @@ let currentNodeInFocus = null   // Used to keep track of what node is currently 
 class StepNode {
     constructor() {
         // Items used only for manipulations on the client side
-        this.index = 0                      // Used to keep track of node's index in the nodes map (redundant but convenient)
         this.nodeName = ""                  // Node's name
         this.lastChoiceIndex = 0            // Used to keep track of the last choice index used (used as key in responseChoices map below)
 
         // Items to be propagated to the backend
+        this.index = 0                      // Used to keep track of node's index in the nodes map (updated to a sequence 1-n once posted to server)
         this.responseChoices = new Map()    // Array of choices for this node
         this.videoUrl = ""                  // Stores non-embeddable video url (url as user provides it)
         this.nodeDescription = ""           // Node's description
@@ -37,6 +40,8 @@ class StepNode {
     // Used when submitting to the backend (when JSON.stringify() is called)
     toJSON() {
         return {
+            name: this.nodeName,
+            index: this.index,
             videoURL: this.videoUrl,
             description: this.nodeDescription,
             isFirst: this.isFirst,
@@ -63,14 +68,18 @@ function submit() {
     // Checks that everything is valid before submission
     let everythingIsValid = true
     let foundFirst = false
-    nodes.forEach((node) => {
-        if(!nodeIsValid(node)){
-            everythingIsValid = false
-        }
-        if(node.isFirst) {
-            foundFirst = true
-        }
-    })
+    if(validateTemplateNameInput() && validateTemplateDescriptionInput() && validateExampleConversationInput()){
+        nodes.forEach((node) => {
+            if(!nodeIsValid(node)){
+                everythingIsValid = false
+            }
+            if(node.isFirst) {
+                foundFirst = true
+            }
+        })
+    } else {
+        everythingIsValid = false
+    }
 
     if(everythingIsValid && foundFirst) {
         // Retrieves csrftoken
@@ -87,10 +96,16 @@ function submit() {
             }
         }
 
+        let counter = 0
+        for(const node of nodes){
+           node.index = counter++
+        }
+
         const postBody = JSON.stringify({
             nodes: Array.from(nodes),
             templateName: templateName,
-            templateDescription: templateDescription
+            templateDescription: templateDescription,
+            exampleConversation: exampleConversation
         })
 
         // Determines the post url without direct hard coding.
@@ -143,8 +158,10 @@ function loadState() {
     $(document).ready(() => {
 
         if(modelObject) {
+            modelObject.nodes.sort((left, right) => left.index > right.index)
             templateDescription = modelObject.description
             templateName = modelObject.name
+            exampleConversation = modelObject.example_conversation
 
             let nodeIdToIndexMap = new Map()
             for(const serverNode of modelObject.nodes) {
@@ -168,6 +185,14 @@ function loadState() {
                     clientNode.lastChoiceIndex++
                 }
                 clientNode.videoUrl = serverNode.video_url
+                clientNode.nodeName = serverNode.name
+                if(serverNode.name === null) {
+                    clientNode.name = ""
+                    $("#step-" + clientNode.index + " .card-title").text("")
+                } else {
+                    clientNode.name = serverNode.name
+                    $("#step-" + clientNode.index + " .card-title").text(serverNode.name)
+                }
                 clientNode.nodeDescription = serverNode.description
                 clientNode.isFirst = serverNode.start
                 clientNode.isTerminal = serverNode.terminal
@@ -176,6 +201,7 @@ function loadState() {
             updateNodeInFocus(1)
             getTemplateNameInput().value = templateName
             getTemplateDescriptionInput().value = templateDescription
+            getExampleConversationInput().value = exampleConversation
         } else {
             addStepNode()
             updateNodeInFocus(1)
@@ -222,6 +248,9 @@ function loadState() {
                     break
                 case "template-description-input":
                     handleTemplateDescriptionInput()
+                    break
+                case "template-example-conversation-input":
+                    handleExampleConversationInput()
                     break
                 case "validate-check-input":
                     handleValidateToggle()
@@ -461,7 +490,7 @@ function getEmbeddableUrl(url) {
     const match = url.match(REGEX)
     const regexedUrl = (match&&match[7].length==11)? match[7] : ""
     if(!(regexedUrl == "")) {
-        return "https://www.youtube.com/embed/" + regexedUrl
+        return "https://www.youtube-nocookie.com/embed/" + regexedUrl + "?rel=0&modestbranding=1&wmode=opaque"
     }
     return ""
 }
@@ -476,6 +505,7 @@ function handleNodeNameInput() {
     const input = getNodeNameInput().value.trim()
     $("#step-" + currentNodeInFocus.index + " .card-title").text(input)
     currentNodeInFocus.nodeName = input
+    if(validating) validateNodeNameInput()
 }
 
 function handleURLInput() {
@@ -531,6 +561,11 @@ function handleTemplateNameInput() {
 function handleTemplateDescriptionInput() {
     templateDescription = getTemplateDescriptionInput().value.trim()
     if(validating) validateTemplateDescriptionInput()
+}
+
+function handleExampleConversationInput() {
+    exampleConversation = getExampleConversationInput().value.trim()
+    if(validating) validateExampleConversationInput()
 }
 
 function handleChoiceDescriptionInput(choiceIndex) {
@@ -591,6 +626,7 @@ function setElementAsValid(element) {
  * Used to handle validity of a text input
  * @param element element who's validity is to be checked
  * @param charLimit max characters for this input
+ * @returns {boolean} indicating if the field is valid (ture if yes, false otherwise)
  */
 function validateRequiredTextField(element, input, charLimit) {
     if(input == "") {
@@ -599,6 +635,7 @@ function validateRequiredTextField(element, input, charLimit) {
         setElementAsInvalid(element, "Must be no longer than " + charLimit + " characters")
     } else {
         setElementAsValid(element)
+        return true
     }
 }
 
@@ -609,6 +646,7 @@ function validateRequiredTextField(element, input, charLimit) {
  */
 function nodeIsValid(node) {
     if(
+        node.nodeName.length > TEMPLATE_NODE_NAME_CHAR_MAX ||
         node.nodeDescription == "" ||
         node.nodeDescription.length > TEMPLATE_NODE_DESCRIPTION_CHAR_MAX ||
         node.videoUrl == "" ||
@@ -641,8 +679,10 @@ function nodeIsValid(node) {
 function validateAllVisibleFields() {
     validateURLInput()
     validateNodeDescriptionInput()
+    validateNodeNameInput()
     validateTemplateNameInput()
     validateTemplateDescriptionInput()
+    validateExampleConversationInput()
     validateResponseChoices()
     validateIsFirstNodeCheck()
 }
@@ -667,6 +707,17 @@ function updateValidityIndicatorOnAllStepNodes() {
     nodes.forEach((value) => {
         updateNodeValidityIndicator(value)
     })
+}
+
+function validateNodeNameInput() {
+    const element = getNodeNameInput()
+    if(element.value.trim().length > TEMPLATE_NODE_NAME_CHAR_MAX) {
+        setElementAsInvalid(element, "Must be no longer than " + TEMPLATE_NODE_NAME_CHAR_MAX + " characters")
+        return false
+    } else {
+        setElementAsValid(element)
+        return true
+    }
 }
 
 function validateURLInput() {
@@ -706,13 +757,24 @@ function validateIsFirstNodeCheck() {
 function validateTemplateNameInput() {
     const element = getTemplateNameInput()
     const input = element.value.trim()
-    validateRequiredTextField(element, input, TEMPLATE_NAME_CHAR_MAX)
+    return validateRequiredTextField(element, input, TEMPLATE_NAME_CHAR_MAX)
 }
 
 function validateTemplateDescriptionInput() {
     const element = getTemplateDescriptionInput()
     const input = element.value.trim()
-    validateRequiredTextField(element, input, TEMPLATE_DESCRIPTION_CHAR_MAX)
+    return validateRequiredTextField(element, input, TEMPLATE_DESCRIPTION_CHAR_MAX)
+}
+
+function validateExampleConversationInput() {
+    const element = getExampleConversationInput()
+    if(element.value.trim().length > EXAMPLE_CONVERSATION_CHAR_MAX) {
+        setElementAsInvalid(element, "Must be no longer than " + EXAMPLE_CONVERSATION_CHAR_MAX + " characters")
+        return false
+    } else {
+        setElementAsValid(element)
+        return true
+    }
 }
 
 function validateChoiceDescriptionInput(choiceIndex) {
@@ -755,6 +817,10 @@ function getTemplateNameInput() {
 
 function getTemplateDescriptionInput() {
     return document.getElementById("template-description-input")
+}
+
+function getExampleConversationInput() {
+    return document.getElementById("template-example-conversation-input")
 }
 
 function getNodeNameInput() {

@@ -1,41 +1,44 @@
+{% load render_table from django_tables2 %}
+{% load static %}
+{% block content %}
 <form method="post" action="">
   {% csrf_token %}
     <div class="dim" id="dim-dialog" title="Event"></div>
 
     <div class="modal-header">
-        <h4 class="modal-title">Register Students</h4>
+        <h4 class="modal-title">Share Template</h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
 
     <div class="modal-body w-100">
-            <p>Enter the emails for the students you'd like to register. Registration emails will only be sent to
-            student who do not currently have an account.</p>
+            <p>Who do you want to share '<strong>{{ template_name }}</strong>' with?</p>
             <div class="input-group mb-3" style="max-width: 100%">
-                <input class="form-control" id="email" type="text" placeholder="Student Email Address">
+                <input class="form-control" id="email" type="text" placeholder="Researcher Email Address">
                 <div class="input-group-append">
                     <input id="add-researcher"
                            type="button"
                            class="btn btn-outline-secondary"
-                           value="Add Student"
-                           onclick="add_student(email.value)">
+                           value="Add Researcher"
+                           onclick="add_researcher(email.value)">
                 </div>
             </div>
 
 
         <div id="alert" class="alert alert-danger alert-dismissible" hidden>
               <span type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></span>
-            <strong id="alert-text">Invalid student email</strong>
+            <strong id="alert-text">Researcher Not Found</strong>
         </div>
         <div class="researcher-table mt-3">
             <table class="table table-bordered table-hover col-lg">
                 <thead>
                     <tr>
+                        <th>Name</th>
                         <th>Email</th>
                     </tr>
                 </thead>
-                <tbody id="student-table-body"></tbody>
+                <tbody id="researcher-table-body"></tbody>
             </table>
         </div>
     </div>
@@ -43,18 +46,17 @@
     <div class="modal-footer">
         <input type="button"
                 class="btn btn-secondary"
-                onclick="register_students()"
-                value="Send Invitations"/>
+                onclick="share_template()"
+                value="Share Template"/>
     </div>
 </form>
-
-<script>
-var addedStudents = [];
-function add_student(email) {
+<script type="text/javascript">
+var addedResearchers = [];
+function add_researcher(email) {
     $.ajaxSetup({
         data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
     });
-    if (addedStudents.includes(email)) {
+    if (addedResearchers.includes(email)) {
         return;
     }
     if (email == "") {
@@ -63,30 +65,31 @@ function add_student(email) {
         return;
     }
     $.ajax({
-        url:"{% url 'validate-student-email' %}",
+        url:"{% url 'management:validate-share-email' %}",
         type:'POST',
         data: {
             'email': email,
         },
         dataType:'json',
         success: function(data){
-            if(data.success == 0){
+            if(data.success==0){
                 document.getElementById("email").value = "";
                 document.getElementById("alert").hidden = true;
-                addedStudents.push(email)
+                addedResearchers.push(email)
                 let rowToAdd = `
                 <tr id="${email}">
+                      <td>${data.name}</td>
                       <td>${email}</td>
                 </tr>`
-                document.getElementById("student-table-body").insertAdjacentHTML('beforeend', rowToAdd)
+                document.getElementById("researcher-table-body").insertAdjacentHTML('beforeend', rowToAdd)
             }
-            else if (data.success == 1) {
-                 document.getElementById("alert").hidden = false;
-                document.getElementById("alert-text").innerHTML = "Email belongs to a researcher";
+            else if (data.success==1) {
+                document.getElementById("alert").hidden = false;
+                document.getElementById("alert-text").innerHTML = "Researcher not found.";
             }
             else {
                 document.getElementById("alert").hidden = false;
-                document.getElementById("alert-text").innerHTML = "Student already registered";
+                document.getElementById("alert-text").innerHTML = "You cannot add yourself.";
             }
         },
         error: function(XMLHttpRequest, textStatus, errorThrown) {
@@ -96,24 +99,25 @@ function add_student(email) {
     })
 }
 
-function register_students() {
+function share_template() {
     document.getElementById('dim-dialog').style.display = 'block'
-    studentsJSON=JSON.stringify(addedStudents);
+    researchersJSON=JSON.stringify(addedResearchers);
     $.ajaxSetup({
         data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
     });
     $.ajax({
-        url:"{% url 'register-students' %}",
+        url:"{% url 'management:share-template-finalize' %}",
         type:'POST',
         data: {
-            'students': studentsJSON,
+            'pk': "{{ template_pk }}",
+            'researchers': researchersJSON,
         },
         dataType:'json',
         success: function(data){
             if(data.success==0){
                 document.getElementById('dim-dialog').style.display = 'none'
-                alert("All students registered!");
-                window.location.replace("{% url 'student-management' %}")
+                alert("Template shared successfully!");
+                window.location.replace("{% url 'management:main' %}")
             }
             else{
                 document.getElementById('dim-dialog').style.display = 'none'
@@ -127,6 +131,7 @@ function register_students() {
         }
     })
 }
+
 $(document).on("keypress", 'form', function (e) {
     var code = e.keyCode || e.which;
     if (code == 13) {
@@ -135,6 +140,4 @@ $(document).on("keypress", 'form', function (e) {
     }
 });
 </script>
-
-</form>
-
+{% endblock %}

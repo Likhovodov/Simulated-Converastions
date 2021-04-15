@@ -18,6 +18,7 @@ class ConversationTemplate(models.Model):
     id = models.UUIDField(unique=True, editable=False, primary_key=True, default=uuid.uuid4)
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=4000)
+    example_conversation = models.CharField(max_length=4000, null=True, blank=True)
     creation_date = models.DateTimeField(default=timezone.now)
     researcher = models.ForeignKey('users.Researcher', related_name='templates', default=0, on_delete=models.CASCADE)
     archived = models.BooleanField(default=False)

@@ -38,6 +38,13 @@
                                         </div>
                                     </div>
                                 </div>
+                                {% if response.transcription_student_editable == True %}
+                                    <div class="row">
+                                        <div class="col">
+                                            <button class="btn btn-secondary" id="update-transcriptions" type="button">Update Transcriptions</button>
+                                        </div>
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -45,7 +52,7 @@
             </div>
 
             <!-- Response nodes -->
-            {% for node in response_nodes %}
+            {% for response_node in response_nodes %}
                 <div class="row justify-content-center mt-4">
                     <div class="card w-50">
                         <div class="container" style="padding: 0 !important;">
@@ -53,21 +60,24 @@
                                 <div class="container">
                                     <div class="row">
                                         <div class="col">
-                                            <p><strong>Step description: </strong> {{ node.template_node.description }} </p>
-                                                {% if node.custom_response != Null %}
-                                                    <p class="mb-3"><strong>Custom Response: </strong> {{ node.custom_response }}
-                                                {% else %}
-                                                    <p class="mb-3"><strong>Selected choice: </strong> {{ node.selected_choice.choice_text }}
-                                                {% endif %}
-                                            <audio src="{% get_media_prefix %}{{ node.audio_response }}" controls></audio>
+                                            <p><strong>Step description: </strong> {{ response_node.template_node.description }} </p>
+                                            {% if response_node.custom_response != Null %}
+                                                <p class="mb-3"><strong>Custom Response: </strong> {{ response_node.custom_response }}</p>
+                                            {% else %}
+                                                <p class="mb-3"><strong>Selected choice: </strong> {{ response_node.selected_choice.choice_text }}</p>
+                                            {% endif %}
+                                            <audio src="{% get_media_prefix %}{{ response_node.audio_response }}" controls></audio>
                                         </div>
                                         <div class="col">
-                                            <form method="post">
-                                                {% csrf_token %}
-                                                <input type="hidden" value="{{ node.id }}" name="template-node-response-id"/>
+                                            {% if response.transcription_student_editable %}
                                                 <p><strong>Transcription: </strong> </p>
-                                                <p>{{ node.transcription }}</p>
-                                            </form>
+                                                <div class="form-group">
+                                                    <textarea class="form-control" name="node-transcription-input" id="{{ response_node.id }}">{{ response_node.transcription }}</textarea>
+                                                </div>
+                                            {% else %}
+                                                <p><strong>Transcription: </strong> </p>
+                                                <p>{{ response_node.transcription }}</p>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
@@ -77,6 +87,55 @@
                 </div>
             {% endfor %}
         </div>
+
+
+        {% if response.transcription_student_editable == True %}
+            <script type="text/javascript">
+                $(document).ready(function() {
+                    $(document).on("click", "#update-transcriptions", function () {
+                        let csrftoken = null
+                        const cookieName = "csrftoken"
+                        if (document.cookie && document.cookie !== "") {
+                            const cookies = document.cookie.split(";")
+                            for (let i = 0; i < cookies.length; i++) {
+                                const cookie = cookies[i].trim()
+                                if (cookie.substring(0, cookieName.length + 1) === (cookieName + "=")) {
+                                    csrftoken = decodeURIComponent(cookie.substring(cookieName.length + 1))
+                                    break
+                                }
+                            }
+                        }
+
+                        let transcriptions = Object.create(null)
+                        for (const transcription of document.getElementsByName('node-transcription-input')) {
+                            transcriptions[transcription.id] = transcription.value
+                        }
+
+                        const postBody = JSON.stringify({
+                            transcriptions: transcriptions
+                        })
+
+                        fetch(window.location.href, {
+                            method: "POST",
+                            credentials: "include",
+                            mode: "same-origin",
+                            body: postBody,
+                            headers: new Headers({
+                                "X-CSRFToken": csrftoken,
+                                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                                "X-Requested-With": "XMLHttpRequest",
+                            })
+                        }).then(function(response) {
+                            if(response.ok) {
+                                alert("Transcriptions Updated")
+                            } else throw new Error(response.status)
+                        }).catch(function (error) {
+                            alert("Something went wrong while submitting the form\n" + error)
+                        })
+                    })
+                });
+            </script>
+        {% endif %}
     </div>
     </body>
     </html>

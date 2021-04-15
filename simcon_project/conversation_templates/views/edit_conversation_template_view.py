@@ -13,7 +13,7 @@ from users.models import Researcher
 def edit_conversation_template(request, pk):
 
     try:
-        conversation_template = ConversationTemplate.objects.get(id = pk)
+        conversation_template = ConversationTemplate.objects.get(id=pk)
         if conversation_template.researcher != Researcher.objects.get(email=request.user.email):
             return HttpResponse(status=401)
 
@@ -21,9 +21,12 @@ def edit_conversation_template(request, pk):
         model_JSON = json.dumps({
             'name' : conversation_template.name,
             'description' : conversation_template.description,
+            'example_conversation' : conversation_template.example_conversation,
             'nodes' : [
                 {
                     'id' : node.id,
+                    'index' : node.position_in_sequence,
+                    'name' : node.name,
                     'description' : node.description,
                     'video_url' : node.video_url,
                     'start' : node.start,
