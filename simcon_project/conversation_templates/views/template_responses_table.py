@@ -8,7 +8,6 @@ from conversation_templates.forms import SelectTemplateForm
 
 
 class ResponseTable(tables.Table):
-    name = tables.columns.Column()
 
     class Meta:
         attrs = {'id': 'excel-table'}
@@ -38,11 +37,11 @@ class TemplateResponsesView(UserPassesTestMixin, LoginRequiredMixin, SingleTable
 
         for idx, node in enumerate(template.template_nodes.all().order_by('position_in_sequence')):
             if node.terminal:
-                extra_columns.append((node.description, tables.columns.Column(
+                extra_columns.append((str(node.id), tables.columns.Column(
                     orderable=False, attrs={'th': {'class': 'data-column'}},
                     verbose_name=f'{idx + 1}: {node.description} (Terminal)')))
             else:
-                extra_columns.append((node.description, tables.columns.Column(
+                extra_columns.append((str(node.id), tables.columns.Column(
                     orderable=False, attrs={'th': {'class': 'data-column'}},
                     verbose_name=f'{idx + 1}: {node.description}')))
 
@@ -61,15 +60,14 @@ class TemplateResponsesView(UserPassesTestMixin, LoginRequiredMixin, SingleTable
 
             for node in response.node_responses.all().order_by('position_in_sequence'):
                 if node.custom_response:
-                    column_data.update({node.template_node.description: node.transcription + ' (Custom Response)'})
+                    column_data.update({str(node.template_node.id): node.transcription + ' (Custom Response)'})
                     column_data.update({"custom_response": True})
                 else:
-                    column_data.update({node.template_node.description: node.transcription})
+                    column_data.update({str(node.template_node.id): node.transcription})
                     column_data.update({"custom_response": False})
 
             column_data.update({"rating": response.self_rating_to_string})
             table_data.append(column_data)
-
         if 'filter' in request.GET:
             table_data = filter_search(request, table_data)
 
